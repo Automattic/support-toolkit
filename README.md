@@ -6,7 +6,7 @@
 
 *Quality-of-life improvements for customer support workflows on Zendesk*
 
-[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white)](https://chrome.google.com/webstore)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/support-toolkit/gnjghfobmfiilldpoedmjfdfehkohefk)
 [![Version](https://img.shields.io/badge/version-2.5.0-blue.svg)](https://github.com/mauropereiira/support-toolkit)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Manifest](https://img.shields.io/badge/manifest-v3-orange.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
@@ -93,9 +93,12 @@ A floating toolbar that lives in your Zendesk workspace, giving you:
 
 ### From Chrome Web Store
 
-> **Coming Soon:** The extension will be available on the Chrome Web Store.
->
-> *[Link to be added once published]*
+**[Install from Chrome Web Store](https://chromewebstore.google.com/detail/support-toolkit/gnjghfobmfiilldpoedmjfdfehkohefk)**
+
+1. Click the link above
+2. Click "Add to Chrome"
+3. Confirm the permissions
+4. The extension will be installed and ready to use on Zendesk pages
 
 ### From Source (Development)
 
