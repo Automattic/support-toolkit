@@ -1,0 +1,1147 @@
+/* styles.css — Complete UI styling for Support Toolkit */
+
+/* Color tokens */
+:root {
+  /* 🎄 Christmas palette */
+  --zd-bg-light: #f5f5f5;           /* snow-white grey */
+  --zd-text-light: #1b1b1b;
+  --zd-accent: #8b1515;             /* darker cranberry red */
+  --zd-accent-green: #14532d;       /* deep evergreen */
+  --zd-bg-dark: #121212;            /* softer dark */
+  --zd-text-dark: #e0e0e0;
+  --zd-border: #333;
+  --zd-shadow: 0 3px 16px rgba(0,0,0,0.35);
+}
+
+/* ---------------- Toolbar ---------------- */
+
+.zd-toolbar {
+  position: relative;
+  background: linear-gradient(135deg, #fff7f7, #f0f7f0);
+  color: #1b1b1b;
+  border-radius: 10px;
+  padding: 6px 10px;
+  box-shadow: var(--zd-shadow);
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: default;
+  user-select: none;
+  border: 1px solid rgba(0,0,0,0.1);
+  transition: background 0.2s, color 0.2s;
+}
+
+.zd-theme-dark .zd-toolbar {
+  background: linear-gradient(135deg, #0f1910, #1b1b1b);
+  color: #f5f5f5;
+  box-shadow: 0 2px 10px rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Festive glow on mode button */
+.zd-mode-btn {
+  background: var(--zd-accent);
+  box-shadow: 0 0 10px rgba(198,40,40,0.4);
+}
+.zd-theme-dark .zd-mode-btn {
+  background: #c62828;
+  box-shadow: 0 0 12px rgba(255,64,64,0.4);
+}
+
+/* Left cluster = mode + stepper */
+.zd-left-cluster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Chats/Tickets pill */
+.zd-mode-btn {
+  background: var(--zd-accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+}
+.zd-mode-btn:hover {
+  opacity: 0.9;
+}
+
+/* - / + buttons */
+.zd-step-btn {
+  background: #f0f0f0;
+  color: #111;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 4px;
+  font-size: 14px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.zd-step-btn:hover {
+  background: #e2e2e2;
+}
+.zd-theme-dark .zd-step-btn {
+  background: #3a3a3a;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.zd-theme-dark .zd-step-btn:hover {
+  background: #4a4a4a;
+}
+
+/* live number */
+.zd-current-count-wrapper {
+  font-weight: bold;
+  font-size: 15px;
+  min-width: 24px;
+  text-align: center;
+}
+.zd-current-count {
+  display: inline-block;
+}
+
+/* toolbar icon buttons and separators */
+.zd-icon-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zd-ico-btn {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 5px;
+  color: inherit;
+  transition: opacity 0.15s;
+}
+.zd-ico-btn:hover {
+  opacity: 0.7;
+}
+
+/* visual pipe dividers in the bar */
+.zd-separator {
+  color: rgba(0,0,0,0.25);
+  font-weight: 300;
+}
+.zd-theme-dark .zd-separator {
+  color: rgba(255,255,255,0.2);
+}
+
+/* Timer section */
+.zd-timer-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  color: var(--zd-accent);
+}
+.zd-theme-dark .zd-timer-wrapper {
+  color: #1da1f2;
+}
+.zd-timer-icon {
+  font-size: 13px;
+}
+.zd-timer-text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.zd-timer-inactive {
+  opacity: 0.6;
+}
+
+/* Performance stats section */
+.zd-perf-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.zd-low {
+  color: #d63638 !important;
+  font-weight: 600;
+}
+
+.zd-avg-hr {
+  font-weight: 500;
+}
+
+/* drag handle at the end of the bar */
+.zd-drag-handle {
+  font-size: 15px;
+  cursor: grab;
+  opacity: 0.7;
+  user-select: none;
+  background: rgba(0,0,0,0.05);
+  border-radius: 4px;
+  padding: 2px 6px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+.zd-drag-handle:hover {
+  opacity: 1;
+}
+.zd-theme-dark .zd-drag-handle {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+}
+
+/* ---------------- Modals & Panels ---------------- */
+
+.zd-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  z-index: 9999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* note: dark theme is handled by children panels */
+}
+
+/* Shared panel base */
+.zd-settings-panel,
+.zd-log-panel,
+.zd-schedule-panel {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px 24px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--zd-shadow);
+  color: var(--zd-text-light);
+  border: 1px solid rgba(0,0,0,0.05);
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* panel widths */
+.zd-log-panel,
+.zd-schedule-panel {
+  width: 460px;
+}
+.zd-settings-panel {
+  width: 640px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 16px;
+}
+
+/* ---------------- Settings Modal ---------------- */
+
+.zd-settings-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--zd-text-light);
+}
+.zd-theme-dark .zd-settings-title {
+  color: var(--zd-text-dark);
+}
+
+.zd-settings-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 24px;
+  row-gap: 16px;
+}
+
+.zd-settings-col {
+  display: flex;
+  flex-direction: column;
+  row-gap: 16px;
+}
+
+.zd-settings-section {
+  border-top: 1px solid var(--zd-border);
+  padding-top: 10px;
+}
+.zd-theme-dark .zd-settings-section {
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.zd-settings-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--zd-accent);
+}
+.zd-theme-dark .zd-settings-section h3 {
+  color: #4fb1ff;
+}
+
+.zd-setting-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  margin: 4px 0;
+  color: var(--zd-text-light);
+}
+.zd-theme-dark .zd-setting-check {
+  color: var(--zd-text-dark);
+}
+
+.zd-settings-row {
+  display: flex;
+  flex-direction: column;
+  margin: 6px 0;
+  font-size: 13px;
+  color: var(--zd-text-light);
+}
+.zd-theme-dark .zd-settings-row {
+  color: var(--zd-text-dark);
+}
+
+.zd-settings-row label {
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: var(--zd-text-light);
+}
+.zd-theme-dark .zd-settings-row label {
+  color: var(--zd-text-dark);
+}
+
+.zd-settings-row input[type="text"],
+.zd-settings-row input[type="number"],
+.zd-settings-row select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #1d2327;
+  background: #fff;
+}
+.zd-theme-dark .zd-settings-row input[type="text"],
+.zd-theme-dark .zd-settings-row input[type="number"],
+.zd-theme-dark .zd-settings-row select {
+  background: #2c2c2c;
+  border: 1px solid #555;
+  color: #eee;
+}
+
+.zd-settings-hint-row {
+  font-size: 12px;
+  color: var(--zd-accent);
+  cursor: pointer;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+.zd-theme-dark .zd-settings-hint-row {
+  color: #4fb1ff;
+}
+
+.zd-settings-row-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.zd-settings-row-buttons button {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 13px;
+  background: var(--zd-accent);
+  color: #fff;
+}
+.zd-settings-row-buttons .zd-danger {
+  background: #d63638;
+}
+
+.zd-settings-footer {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px solid var(--zd-border);
+  padding-top: 12px;
+}
+.zd-theme-dark .zd-settings-footer {
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.zd-version-label {
+  font-size: 12px;
+  color: #666;
+  margin-right: auto;
+}
+.zd-theme-dark .zd-version-label {
+  color: #ccc;
+}
+
+.zd-settings-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.zd-settings-actions button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--zd-accent);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 13px;
+}
+.zd-settings-cancel-btn {
+  background: #ccc !important;
+  color: #111;
+}
+.zd-theme-dark .zd-settings-cancel-btn {
+  background: #555 !important;
+  color: #fff;
+}
+
+/* ---------------- Logs Modal ---------------- */
+
+.zd-log-title {
+  font-size: 18px;
+  margin: 0 0 10px;
+  color: var(--zd-text-light);
+  font-weight: 600;
+}
+.zd-theme-dark .zd-log-title {
+  color: var(--zd-text-dark);
+}
+
+.zd-log-content {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+  padding: 6px;
+  background: #fafafa;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #000;
+}
+.zd-theme-dark .zd-log-content {
+  background: #2c2c2c;
+  border: 1px solid #555;
+  color: #f1f1f1;
+}
+
+.zd-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.zd-log-table th,
+.zd-log-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 12px;
+  color: #111;
+}
+.zd-theme-dark .zd-log-table th,
+.zd-theme-dark .zd-log-table td {
+  border-bottom: 1px solid #555;
+  color: #f1f1f1;
+}
+
+.zd-log-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  gap: 8px;
+}
+.zd-log-footer button {
+  border: none;
+  border-radius: 6px;
+  background: var(--zd-accent);
+  color: #fff;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ---------------- Schedule Modal ---------------- */
+
+.zd-schedule-title {
+  font-size: 18px;
+  margin: 0 0 10px;
+  font-weight: 600;
+  color: var(--zd-text-light);
+}
+.zd-theme-dark .zd-schedule-title {
+  color: var(--zd-text-dark);
+}
+
+.zd-schedule-content {
+  max-height: 350px;
+  overflow-y: auto;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  background: #fafafa;
+  padding: 8px;
+  font-size: 13px;
+  color: #1d2327;
+}
+.zd-theme-dark .zd-schedule-content {
+  background: #2c2c2c;
+  border: 1px solid #555;
+  color: #f1f1f1;
+}
+
+.zd-schedule-empty {
+  font-size: 13px;
+  color: #444;
+  text-align: center;
+  padding: 10px;
+}
+.zd-theme-dark .zd-schedule-empty {
+  color: #ccc;
+}
+
+.zd-shift-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 6px 0;
+  border: 1px solid #ddd;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  color: #1d2327;
+}
+.zd-theme-dark .zd-shift-card {
+  background: #fff; /* keep cards bright in dark mode */
+  color: #1d2327;
+  border: 1px solid #00000033;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.4);
+}
+
+.zd-shift-time-top {
+  font-size: 12px;
+  color: #555;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+}
+.zd-shift-now {
+  background: var(--zd-accent);
+  color: #fff;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.zd-shift-card-main {
+  margin-top: 6px;
+}
+.zd-shift-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.zd-shift-chat .zd-shift-card-title {
+  color: var(--zd-accent);
+}
+.zd-shift-ticket .zd-shift-card-title {
+  color: var(--zd-accent-green);
+}
+
+/* schedule footer */
+.zd-schedule-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.zd-schedule-footer button {
+  border: none;
+  border-radius: 6px;
+  background: var(--zd-accent);
+  color: #fff;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* "Now" marker line that shows current time in schedule */
+.zd-now-marker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #c00;
+  padding: 4px 0;
+}
+.zd-now-marker-active-block {
+  margin-bottom: 6px;
+}
+.zd-now-dot {
+  width: 8px;
+  height: 8px;
+  background: #c00;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 4px rgba(204,0,0,0.6);
+}
+.zd-now-text {
+  color: #c00;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.zd-now-line {
+  flex: 1;
+  height: 1px;
+  background: #c00;
+  box-shadow: 0 0 4px rgba(204,0,0,0.6);
+}
+
+/* ---------------- Dark Theme overrides for panels ---------------- */
+
+.zd-theme-dark .zd-settings-panel,
+.zd-theme-dark .zd-log-panel,
+.zd-theme-dark .zd-schedule-panel {
+  background: #3a3a3a;
+  color: #f1f1f1;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.zd-theme-dark .zd-log-panel,
+.zd-theme-dark .zd-schedule-panel {
+  background: #3a3a3a;
+  color: #f1f1f1;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.zd-theme-dark .zd-now-marker,
+.zd-theme-dark .zd-now-text {
+  color: #ff5b5b;
+}
+.zd-theme-dark .zd-now-dot {
+  background: #ff5b5b;
+  box-shadow: 0 0 4px rgba(255,91,91,0.6);
+}
+.zd-theme-dark .zd-now-line {
+  background: #ff5b5b;
+  box-shadow: 0 0 4px rgba(255,91,91,0.6);
+}
+
+/* ---------------- Loading Spinner Overlay ---------------- */
+
+.zd-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+  z-index: 99999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-in;
+}
+
+.zd-loading-ball {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--zd-accent);
+  animation: pulseBall 0.8s infinite ease-in-out;
+}
+
+@keyframes pulseBall {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.4); opacity: 1; }
+}
+
+.fade-out {
+  animation: fadeOut 0.3s forwards;
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+
+/* second overlay definition (kept, as in your file) */
+.zd-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+  z-index: 99999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-in;
+  backdrop-filter: blur(2px);
+}
+
+.zd-loading-ball {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--zd-accent);
+  animation: pulseBall 0.8s infinite ease-in-out;
+  box-shadow: 0 0 10px rgba(0,115,170,0.4);
+}
+
+.zd-theme-dark .zd-loading-overlay {
+  background: rgba(0,0,0,0.5);
+}
+.zd-theme-dark .zd-loading-ball {
+  background: #4fb1ff;
+  box-shadow: 0 0 10px rgba(79,177,255,0.6);
+}
+
+/* Timer visual states */
+.zd-timer-text.zd-timer-live,
+.zd-timer-icon.zd-timer-live {
+  font-weight: 600;
+  color: #ff4d4d;
+}
+.zd-timer-text.zd-timer-wait,
+.zd-timer-icon.zd-timer-wait {
+  color: #999;
+}
+.zd-timer-text.zd-timer-done,
+.zd-timer-icon.zd-timer-done,
+.zd-timer-text.zd-timer-idle,
+.zd-timer-icon.zd-timer-idle {
+  color: #4caf50;
+}
+
+/* 🎄 Centered shift/reminder notification overlay – Christmas style */
+.zd-center-overlay {
+  position: fixed;
+  z-index: 9999999999;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+
+/* Shift card (light mode) */
+.zd-center-card {
+  background: #ffffff;
+  color: #2b2b2b;
+  min-width: 340px;
+  max-width: 460px;
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.5);
+  border: 2px solid rgba(139, 21, 21, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: zd-center-pop 0.18s ease-out;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.zd-theme-dark .zd-center-card {
+  background: radial-gradient(circle at top, #20252b, #111318);
+  color: #f7f7f7;
+  border: 2px solid rgba(144, 238, 144, 0.4);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.85);
+}
+
+@keyframes zd-center-pop {
+  0%   { transform: scale(0.9) translateY(10px); opacity: 0; }
+  100% { transform: scale(1.0) translateY(0);   opacity: 1; }
+}
+
+/* HEADER – red/green banner */
+.zd-center-card-header {
+  font-weight: 700;
+  font-size: 15px;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #0b7a3a, #0b4d28);
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.zd-center-card-header::before {
+  content: '🎄';
+  font-size: 16px;
+}
+.zd-center-card-header::after {
+  content: '✨';
+  font-size: 14px;
+}
+.zd-theme-dark .zd-center-card-header {
+  background: linear-gradient(135deg, #05402b, #021e16);
+  border-bottom-color: rgba(0,0,0,0.6);
+}
+
+/* BODY */
+.zd-center-card-body {
+  padding: 18px 18px 14px 18px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  color: #333;
+}
+.zd-theme-dark .zd-center-card-body {
+  color: #e9f5ee;
+}
+
+/* GIF / image – bigger */
+.zd-center-card-img {
+  max-width: 230px;
+  max-height: 230px;
+  border-radius: 12px;
+  display: block;
+  margin: 0 auto 16px auto;
+  object-fit: cover;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.75);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+}
+.zd-theme-dark .zd-center-card-img {
+  border-color: rgba(144, 238, 144, 0.8);
+}
+
+/* message text */
+.zd-center-card-text {
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  white-space: pre-wrap;
+  color: #333;
+}
+.zd-theme-dark .zd-center-card-text {
+  color: #f5fdf8;
+}
+
+/* Close button */
+.zd-center-close-btn {
+  appearance: none;
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,0.4);
+  background: #8b1515;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 16px;
+  text-align: center;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.zd-center-close-btn:hover {
+  background: #6f1010;
+}
+.zd-theme-dark .zd-center-close-btn {
+  background: #7a1212;
+  border-top-color: rgba(0,0,0,0.7);
+}
+.zd-theme-dark .zd-center-close-btn:hover {
+  background: #5c0d0d;
+}
+
+/* STATS MODAL PANEL */
+.zd-stats-panel {
+  background: linear-gradient(160deg, #143518, #0e1a0f);
+  color: #fff;
+  border-radius: 12px;
+  padding: 20px 20px 16px;
+  width: 420px;
+  max-width: 95%;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.8), 0 0 10px rgba(144,238,144,0.3);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  border: 2px solid rgba(144,238,144,0.3);
+}
+
+.zd-stats-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.zd-stats-title {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  text-shadow: 0 0 6px rgba(255,255,255,0.5);
+}
+
+/* bigger gif block */
+.zd-stats-gif-slot {
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 0 12px rgba(0,0,0,0.6);
+}
+.zd-stats-gif-slot .zd-stats-gif {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+}
+
+/* generic sections */
+.zd-stats-section {
+  margin-bottom: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.zd-stats-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f1f8e9;
+  text-shadow: 0 0 4px rgba(255,255,255,0.3);
+  margin-bottom: 8px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* TODAY CARD */
+.zd-stats-today-card {
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+.zd-stats-today-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.zd-stats-today-row span {
+  color: rgba(255,255,255,0.8);
+}
+.zd-stats-today-row strong {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: #fff;
+}
+.zd-stats-today-total {
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 6px;
+  margin-top: 6px;
+}
+.zd-stats-today-meta {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(255,255,255,0.8);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* WEEK TABLE */
+.zd-stats-week-wrapper {
+  font-size: 12px;
+  line-height: 1.4;
+}
+.zd-week-header,
+.zd-week-row {
+  display: grid;
+  grid-template-columns: 1fr 0.7fr 0.8fr 0.8fr;
+  column-gap: 8px;
+  padding: 4px 0;
+}
+.zd-week-header {
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.9);
+}
+.zd-week-row {
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.zd-week-row div {
+  font-variant-numeric: tabular-nums;
+  color: rgba(255,255,255,0.9);
+}
+.zd-week-row div:first-child {
+  font-weight: 500;
+}
+.zd-week-row div:last-child {
+  font-weight: 600;
+}
+.zd-week-row-today {
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+}
+
+.zd-stats-week-summary {
+  margin-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  padding-top: 8px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.9);
+}
+.zd-week-summary-line {
+  margin-bottom: 4px;
+}
+
+/* footer button */
+.zd-stats-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+.zd-stats-footer::before {
+  content: '🎄';
+  margin-right: 6px;
+}
+.zd-stats-close-btn {
+  background: #444;
+  color: #fff;
+  border: 1px solid #666;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.zd-stats-close-btn:hover {
+  background: #555;
+}
+
+/* side-by-side chats/tickets box at top */
+.zd-stats-dual {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.zd-stats-pair {
+  flex: 1;
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+}
+.zd-stats-label {
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+.zd-stats-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.zd-progressbar {
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.zd-progressfill {
+  height: 100%;
+  background: linear-gradient(to right, #4ade80, #16a34a);
+}
+
+/* total line under dual */
+.zd-stats-total-line {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  padding-top: 6px;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.zd-stats-total-line span {
+  color: rgba(255,255,255,0.8);
+}
+.zd-stats-total-line strong {
+  font-weight: 600;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Activity list in stats modal */
+.zd-activity-list {
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #111;
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #eee;
+}
+.zd-activity-row {
+  display: flex;
+  gap: 8px;
+  padding: 2px 0;
+  border-bottom: 1px solid #333;
+}
+.zd-activity-row:last-child {
+  border-bottom: none;
+}
+.zd-activity-time {
+  flex-shrink: 0;
+  color: #999;
+  min-width: 40px;
+  font-family: monospace;
+}
+.zd-activity-desc {
+  flex-grow: 1;
+  color: #fff;
+}
+.zd-activity-empty {
+  color: #888;
+  font-size: 11px;
+  text-align: center;
+  padding: 12px 0;
+}
+
+/* 🎄 Seasonal overrides */
+.zd-theme-dark {
+  --zd-accent: #c62828;
+  --zd-accent-green: #66bb6a;
+}
+.zd-theme-dark .zd-toolbar,
+.zd-theme-dark .zd-stats-panel {
+  border-color: rgba(255,255,255,0.1);
+  background-image: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+}
+.zd-theme-dark .zd-mode-btn {
+  background: #b71c1c;
+  color: #fff;
+}

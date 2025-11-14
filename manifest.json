@@ -1,0 +1,64 @@
+{
+  "manifest_version": 3,
+  "name": "Support Toolkit",
+  "description": "Productivity toolbar for support agents: live counters, shift timing, reminders, and lightweight stats.",
+  "version": "2.5.0",
+  "author": "Mauro Pereira",
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "permissions": [
+    "storage"
+  ],
+
+  "host_permissions": [
+    "https://schedule.happy.tools/*",
+    "https://lingva.ml/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.zendesk.com/*",
+        "https://*.zopim.com/*",
+        "https://*.zendesk-staging.com/*"
+      ],
+      "js": [
+        "error-handler.js",
+        "config.js",
+        "utils.js",
+        "constants.js",
+        "storage.js",
+        "notification-utils.js",
+        "notifications.js",
+        "timers.js",
+        "icons.js",
+        "content.js"
+      ],
+      "css": [
+        "styles.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "icons": {
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "images/*",
+        "sounds/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

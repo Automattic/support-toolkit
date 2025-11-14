@@ -1,0 +1,19 @@
+# shift-alert.mp3
+
+This file should be an MP3 audio file that plays when shift notifications appear.
+
+**File**: shift-alert.mp3
+**Location**: /Users/mauropereira/Desktop/app/sounds/
+**Purpose**: Plays when shift starts or ends (configurable in Settings)
+**Volume**: 0.4 (40%)
+**Trigger**: Shift start/end notifications (if "Play reminder sound" is enabled in Settings)
+
+**Usage in code**: notifications.js line 15
+```javascript
+const audioURL = chrome.runtime.getURL('sounds/shift-alert.mp3');
+const audioEl = new Audio(audioURL);
+audioEl.volume = 0.4;
+audioEl.play();
+```
+
+**Note**: If this file is missing, the extension will continue to work, but no sound will play for shift notifications. A warning will appear in the console if the sound cannot be played.

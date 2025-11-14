@@ -1,0 +1,691 @@
+/* 🎄 Support Toolkit - Premium Christmas Edition */
+/* Modern, festive, $100k-worthy design */
+
+/* ============================================
+   CHRISTMAS COLOR SYSTEM
+   ============================================ */
+:root {
+  /* Christmas Palette */
+  --christmas-red: #C41E3A;
+  --christmas-red-dark: #8B1538;
+  --christmas-green: #165B33;
+  --christmas-green-light: #2D8B57;
+  --christmas-gold: #FFD700;
+  --christmas-gold-dark: #DAA520;
+  --christmas-white: #FFFAFA;
+  --christmas-silver: #C0C0C0;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 250, 250, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  --glass-backdrop: blur(10px);
+
+  /* Premium Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.2);
+
+  /* Dark Mode */
+  --dark-bg: #0F1419;
+  --dark-surface: #1A1F2E;
+  --dark-border: rgba(255, 255, 255, 0.1);
+  --dark-text: #E8EAED;
+
+  /* Animation Timing */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+}
+
+/* ============================================
+   SNOW ANIMATION (Christmas Magic)
+   ============================================ */
+@keyframes snowfall {
+  0% {
+    transform: translateY(-10vh) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) translateX(100px);
+    opacity: 0;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3),
+                0 0 20px rgba(255, 215, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5),
+                0 0 30px rgba(255, 215, 0, 0.3),
+                0 0 40px rgba(255, 215, 0, 0.2);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Snowflakes */
+.zd-snowflake {
+  position: fixed;
+  top: -10vh;
+  color: var(--christmas-white);
+  font-size: 20px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 999998;
+  animation: snowfall linear infinite;
+  user-select: none;
+}
+
+/* ============================================
+   PREMIUM TOOLBAR
+   ============================================ */
+.zd-toolbar {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px 16px;
+
+  /* Glassmorphism */
+  background: linear-gradient(135deg,
+    rgba(196, 30, 58, 0.95) 0%,
+    rgba(22, 91, 51, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  /* Premium styling */
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-xl),
+              0 0 40px rgba(196, 30, 58, 0.2);
+
+  /* Typography */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--christmas-white);
+
+  /* Behavior */
+  user-select: none;
+  cursor: default;
+  z-index: 999999;
+
+  /* Animation */
+  transition: all var(--transition-base);
+}
+
+.zd-toolbar:hover {
+  box-shadow: var(--shadow-xl),
+              0 0 60px rgba(196, 30, 58, 0.3),
+              0 0 30px rgba(255, 215, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Christmas decoration line */
+.zd-toolbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    var(--christmas-red) 0%,
+    var(--christmas-gold) 25%,
+    var(--christmas-green) 50%,
+    var(--christmas-gold) 75%,
+    var(--christmas-red) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+  border-radius: 16px 16px 0 0;
+}
+
+/* ============================================
+   TOOLBAR COMPONENTS
+   ============================================ */
+
+/* Mode Button (Chats/Tickets) */
+.zd-mode-btn {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, var(--christmas-gold), var(--christmas-gold-dark));
+  color: var(--dark-bg);
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.zd-mode-btn::before {
+  content: '✨';
+  position: absolute;
+  left: 8px;
+  opacity: 0;
+  transition: all var(--transition-fast);
+}
+
+.zd-mode-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.zd-mode-btn:hover::before {
+  opacity: 1;
+  left: 6px;
+}
+
+.zd-mode-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Counter Display */
+.zd-current-count-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+  height: 36px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.zd-current-count {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--christmas-white);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Step Buttons (+/-) */
+.zd-step-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: var(--christmas-white);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.zd-step-btn:hover {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+.zd-step-btn:active {
+  transform: scale(0.95);
+}
+
+/* Icon Buttons */
+.zd-ico-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  color: var(--christmas-white);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.zd-ico-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px) rotate(5deg);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.25);
+}
+
+.zd-ico-btn:active {
+  transform: translateY(0) rotate(0deg) scale(0.95);
+}
+
+/* Timer Display */
+.zd-timer-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.zd-timer-icon {
+  font-size: 16px;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.zd-timer-text {
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 60px;
+  text-align: center;
+}
+
+.zd-timer-live {
+  color: var(--christmas-gold);
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Performance Metrics */
+.zd-perf-wrapper {
+  display: flex;
+  gap: var(--space-sm);
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.zd-tickets-pct,
+.zd-chats-pct,
+.zd-avg-hr {
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* Separator */
+.zd-separator {
+  width: 1px;
+  height: 24px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%);
+}
+
+/* Drag Handle */
+.zd-drag-handle {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: move;
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  transition: all var(--transition-fast);
+}
+
+.zd-drag-handle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--christmas-white);
+}
+
+/* ============================================
+   PREMIUM MODALS
+   ============================================ */
+.zd-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 20, 25, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000000;
+  animation: fadeIn var(--transition-base);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   SETTINGS PANEL (Premium Design)
+   ============================================ */
+.zd-settings-panel {
+  width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(250, 245, 245, 0.95) 100%);
+  border-radius: 24px;
+  border: 2px solid var(--glass-border);
+  box-shadow: var(--shadow-xl),
+              0 0 100px rgba(196, 30, 58, 0.2);
+  padding: var(--space-xl);
+  animation: slideUp var(--transition-slow);
+  position: relative;
+}
+
+/* Christmas header decoration */
+.zd-settings-panel::before {
+  content: '🎄';
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 32px;
+  opacity: 0.3;
+  animation: sparkle 3s ease-in-out infinite;
+}
+
+.zd-settings-panel h2 {
+  margin: 0 0 var(--space-lg) 0;
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg,
+    var(--christmas-red),
+    var(--christmas-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Settings Grid */
+.zd-settings-grid {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.zd-setting-group {
+  background: rgba(255, 255, 255, 0.6);
+  padding: var(--space-md);
+  border-radius: 16px;
+  border: 1px solid rgba(196, 30, 58, 0.1);
+  transition: all var(--transition-base);
+}
+
+.zd-setting-group:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(196, 30, 58, 0.3);
+  transform: translateX(4px);
+}
+
+.zd-setting-group label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-weight: 600;
+  color: var(--dark-bg);
+  cursor: pointer;
+}
+
+/* Premium Inputs */
+input[type="text"],
+input[type="number"],
+input[type="url"],
+select {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid rgba(196, 30, 58, 0.2);
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--christmas-red);
+  box-shadow: 0 0 0 4px rgba(196, 30, 58, 0.1);
+}
+
+/* Premium Checkboxes */
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--christmas-red);
+}
+
+/* Premium Buttons */
+.zd-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.zd-btn-primary {
+  background: linear-gradient(135deg,
+    var(--christmas-red),
+    var(--christmas-red-dark));
+  color: white;
+  box-shadow: 0 4px 16px rgba(196, 30, 58, 0.3);
+}
+
+.zd-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(196, 30, 58, 0.4);
+}
+
+.zd-btn-secondary {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--dark-bg);
+}
+
+.zd-btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Action Buttons Row */
+.zd-modal-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+  justify-content: flex-end;
+}
+
+/* ============================================
+   NOTIFICATIONS (Toast)
+   ============================================ */
+.zd-notification-card {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(250, 250, 250, 0.98) 100%);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-md);
+  min-width: 300px;
+  animation: slideIn var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.zd-notification-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg,
+    var(--christmas-red),
+    var(--christmas-green));
+}
+
+/* ============================================
+   DARK MODE
+   ============================================ */
+.zd-theme-dark .zd-toolbar {
+  background: linear-gradient(135deg,
+    rgba(139, 21, 56, 0.95) 0%,
+    rgba(22, 91, 51, 0.95) 100%);
+  box-shadow: var(--shadow-xl),
+              0 0 40px rgba(139, 21, 56, 0.3);
+}
+
+.zd-theme-dark .zd-settings-panel {
+  background: linear-gradient(135deg,
+    rgba(26, 31, 46, 0.98) 0%,
+    rgba(15, 20, 25, 0.98) 100%);
+  color: var(--dark-text);
+}
+
+.zd-theme-dark .zd-setting-group {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.zd-theme-dark .zd-setting-group:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.zd-theme-dark input,
+.zd-theme-dark select {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--dark-text);
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg,
+    var(--christmas-red),
+    var(--christmas-green));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--christmas-red);
+}
+
+/* ============================================
+   LOADING STATES
+   ============================================ */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.zd-loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--christmas-gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+.zd-fade-in {
+  animation: fadeIn var(--transition-base);
+}
+
+.zd-slide-up {
+  animation: slideUp var(--transition-base);
+}
+
+.zd-glow {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
