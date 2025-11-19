@@ -7,7 +7,7 @@
 *Quality-of-life improvements for customer support workflows on Zendesk*
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/support-toolkit/gnjghfobmfiilldpoedmjfdfehkohefk)
-[![Version](https://img.shields.io/badge/version-2.5.1-blue.svg)](https://github.com/mauropereiira/support-toolkit)
+[![Version](https://img.shields.io/badge/version-2.5.1-blue.svg)](https://github.com/Automattic/support-toolkit)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Manifest](https://img.shields.io/badge/manifest-v3-orange.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 
