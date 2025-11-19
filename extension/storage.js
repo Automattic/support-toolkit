@@ -6,6 +6,16 @@
     const { withErrorHandling, sanitizeInput, logError, ErrorLevel, ErrorCategory } = window.ZDErrorHandler || {};
     const { LIMITS, SCHEMAS } = window.ZDConfig || {};
 
+    // Config cache to reduce storage reads
+    let configCache = null;
+    let configCacheTime = 0;
+    const CONFIG_CACHE_TTL = 5000; // 5 seconds
+
+    // Counts cache to reduce storage reads
+    let countsCache = null;
+    let countsCacheTime = 0;
+    const COUNTS_CACHE_TTL = 1000; // 1 second (shorter for frequently changing data)
+
     // Chrome storage wrappers with error handling and retry
 
     function getSync(key) {
@@ -97,6 +107,12 @@
 
     async function getConfig() {
         try {
+            // Check cache first
+            const now = Date.now();
+            if (configCache && (now - configCacheTime) < CONFIG_CACHE_TTL) {
+                return configCache;
+            }
+
             const cfg = await getSync(STORAGE_KEYS.CONFIG);
             const merged = Object.assign({}, DEFAULT_CONFIG, cfg || {});
 
@@ -126,6 +142,10 @@
                 });
             }
 
+            // Update cache
+            configCache = merged;
+            configCacheTime = now;
+
             return merged;
         } catch (error) {
             if (logError) {
@@ -151,6 +171,11 @@
             }
 
             await setSync(STORAGE_KEYS.CONFIG, updated);
+
+            // Update cache with new config
+            configCache = updated;
+            configCacheTime = Date.now();
+
             return updated;
         } catch (error) {
             if (logError) {
@@ -168,6 +193,12 @@
 
     async function getCounts() {
         try {
+            // Check cache first
+            const now = Date.now();
+            if (countsCache && (now - countsCacheTime) < COUNTS_CACHE_TTL) {
+                return countsCache;
+            }
+
             const [chatCount, ticketCount] = await Promise.all([
                 getSync(STORAGE_KEYS.CHAT_COUNT),
                 getSync(STORAGE_KEYS.TICKET_COUNT)
@@ -191,6 +222,10 @@
             if (SCHEMAS?.isValidCounts && !SCHEMAS.isValidCounts(counts)) {
                 throw new Error('Invalid counts structure');
             }
+
+            // Update cache
+            countsCache = counts;
+            countsCacheTime = now;
 
             return counts;
         } catch (error) {
@@ -217,6 +252,11 @@
 
             const key = type === 'chats' ? STORAGE_KEYS.CHAT_COUNT : STORAGE_KEYS.TICKET_COUNT;
             await setSync(key, sanitizedValue);
+
+            // Invalidate counts cache
+            countsCache = null;
+            countsCacheTime = 0;
+
             await _mirrorCountsAggregate();
         } catch (error) {
             if (logError) {
@@ -253,6 +293,19 @@
             ticketId: meta.ticketId || null
         });
         await _mirrorCountsAggregate();
+
+        // Sync today's counts to dailyHistory so stats table shows live data
+        const todayKey = getLocalDayKey(new Date());
+        const hist = await getDailyHistory();
+        if (!hist[todayKey]) {
+            hist[todayKey] = { chats: 0, tickets: 0, chatHours: 0, ticketHours: 0 };
+        }
+        hist[todayKey].chats = counts.chats || 0;
+        hist[todayKey].tickets = counts.tickets || 0;
+        await new Promise((resolve) => {
+            chrome.storage.sync.set({ dailyHistory: hist }, resolve);
+        });
+
         return counts[type];
     }
 
@@ -260,6 +313,10 @@
     async function resetCounts() {
         await setSync(STORAGE_KEYS.CHAT_COUNT, 0);
         await setSync(STORAGE_KEYS.TICKET_COUNT, 0);
+
+        // Invalidate counts cache
+        countsCache = null;
+        countsCacheTime = 0;
 
         await new Promise((resolve) => {
             chrome.storage.sync.set(
@@ -352,12 +409,16 @@
 
     // Clear all data (dev/debug only)
     async function clearAll() {
-    await Promise.all([
-        resetCounts(),
-        clearLogs(),
-        setSync(STORAGE_KEYS.CONFIG, DEFAULT_CONFIG),
-        setLocal(STORAGE_KEYS.ACTIVITY_LOG, {})
-    ]);
+        await Promise.all([
+            resetCounts(),
+            clearLogs(),
+            setSync(STORAGE_KEYS.CONFIG, DEFAULT_CONFIG),
+            setLocal(STORAGE_KEYS.ACTIVITY_LOG, {}),
+            // Also clear dailyHistory so weekly stats reset
+            new Promise((resolve) => {
+                chrome.storage.sync.set({ dailyHistory: {} }, resolve);
+            })
+        ]);
     }
 
 

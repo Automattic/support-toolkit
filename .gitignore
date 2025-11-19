@@ -57,8 +57,8 @@ tmp/
 temp/
 *.tmp
 
-# Claude Code (keep settings.local.json, ignore everything else personal)
-.claude/settings.local.json
+# Claude Code (keep private - contains development agents and local settings)
+.claude/
 
 # Node modules (if ever added)
 node_modules/

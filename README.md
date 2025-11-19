@@ -17,6 +17,23 @@
 
 ---
 
+## Screenshots
+
+<div align="center">
+
+### Toolbar
+![Toolbar](1.jpg)
+
+### Settings Panel
+![Settings](2.jpg)
+
+### Weekly Stats
+![Stats](3.jpg)
+
+</div>
+
+---
+
 ## Overview
 
 **Support Toolkit** is a productivity-enhancing Chrome extension originally built as an interaction tracker for Happiness Engineers at Automattic, now evolved into a comprehensive support tool. It integrates seamlessly with Zendesk to provide real-time tracking, AI assistance, shift management, and analytics—all in a delightful, non-intrusive interface.
@@ -112,8 +129,18 @@ A floating toolbar that lives in your Zendesk workspace, giving you:
    - Open Chrome and navigate to `chrome://extensions/`
    - Enable **Developer mode** (toggle in top-right corner)
    - Click **Load unpacked**
-   - Select the project directory
+   - Select the **`extension`** folder (not the root directory)
    - The Support Toolkit icon should appear in your toolbar
+
+### For Team Members (Direct Install)
+
+1. **Download the ZIP:** Get the latest `Support-Toolkit-v2.5.0-team.zip` from your team's distribution channel
+2. **Extract:** Unzip to a permanent location on your computer
+3. **Load in Chrome:**
+   - Open `chrome://extensions/`
+   - Enable **Developer mode**
+   - Click **Load unpacked**
+   - Select the extracted `extension` folder
 
 3. **Verify installation:**
    - Navigate to any Zendesk page (e.g., `*.zendesk.com`)
@@ -213,30 +240,50 @@ A floating toolbar that lives in your Zendesk workspace, giving you:
 
 ```
 support-toolkit/
-├── manifest.json              # Extension configuration (Manifest V3)
-├── background.js              # Service worker for AI API calls
-├── content.js                 # Main UI logic (3,606 lines)
-├── storage.js                 # Chrome Storage abstraction
-├── timers.js                  # ICS parsing & shift detection
-├── notifications.js           # Notification orchestration
-├── notification-utils.js      # Toast UI components
-├── error-handler.js           # Centralized error handling
-├── config.js                  # Feature flags & performance tuning
-├── constants.js               # Global constants
-├── utils.js                   # Helper functions
-├── icons.js                   # Dynamic SVG rendering
-├── styles.css                 # Main stylesheet (3,191 lines)
-├── styles-christmas.css       # Seasonal theme variant
-├── styles-backup.css          # Original styles backup
-├── icons/                     # Extension icons (48px, 128px)
-├── images/                    # UI assets
-│   ├── christmas/             # Seasonal SVG decorations
-│   ├── error.svg
-│   ├── info.svg
-│   ├── warning.svg
-│   └── loader.gif
-└── sounds/                    # Audio files
-    └── shift-alert.mp3
+├── extension/                     # Chrome extension files
+│   ├── manifest.json              # Extension configuration (Manifest V3)
+│   ├── background.js              # Service worker for AI API calls
+│   ├── content.js                 # Main UI logic
+│   │
+│   │   # Core modules
+│   ├── storage.js                 # Chrome Storage abstraction with caching
+│   ├── events.js                  # Event bus for decoupled communication
+│   ├── state.js                   # Centralized state management
+│   ├── timer-manager.js           # Unified timer for all recurring tasks
+│   │
+│   │   # Feature modules
+│   ├── schedule.js                # Calendar parsing & shift calculations
+│   ├── theme.js                   # Theme management & toolbar positioning
+│   ├── notes.js                   # Notes system
+│   ├── translator.js              # Translation service
+│   ├── ai-panel.js                # AI Copilot panel
+│   ├── auto-count.js              # Auto-increment on ticket resolution
+│   │
+│   │   # Infrastructure
+│   ├── timers.js                  # ICS parsing & shift detection
+│   ├── notifications.js           # Notification orchestration
+│   ├── notification-utils.js      # Toast UI components
+│   ├── error-handler.js           # Centralized error handling
+│   ├── config.js                  # Feature flags & limits
+│   ├── constants.js               # Global constants
+│   ├── utils.js                   # Helper functions
+│   ├── icons.js                   # Dynamic SVG rendering
+│   ├── ui-helpers.js              # UI utility functions
+│   │
+│   │   # Styles
+│   ├── styles.css                 # Main stylesheet
+│   │
+│   │   # Assets
+│   ├── icons/                     # Extension icons (48px, 128px)
+│   ├── images/                    # UI assets
+│   └── sounds/                    # Audio files
+│
+├── .claude/                       # Development agents (not in extension)
+│   └── commands/                  # Custom Claude commands
+│
+├── README.md                      # This file
+├── 1.jpg, 2.jpg, 3.jpg           # Screenshots
+└── .gitignore                     # Git ignore rules
 ```
 
 ### Architecture
@@ -250,7 +297,16 @@ support-toolkit/
 **Module Pattern:**
 - Uses IIFE (Immediately Invoked Function Expression)
 - Global namespaces: `window.ZD*`
-  - `ZDStorage` - Data layer
+  - `ZDStorage` - Data layer with caching
+  - `ZDEvents` - Event bus
+  - `ZDState` - Centralized state
+  - `ZDTimerManager` - Unified timer
+  - `ZDSchedule` - Calendar/shift logic
+  - `ZDTheme` - Theme management
+  - `ZDNotes` - Notes system
+  - `ZDTranslator` - Translation
+  - `ZDAIPanel` - AI Copilot
+  - `ZDAutoCount` - Auto-increment
   - `ZDTimers` - Shift timing
   - `ZDNotifications` - Alerts
   - `ZDUtils` - Helpers
@@ -258,17 +314,27 @@ support-toolkit/
   - `ZDErrorHandler` - Error handling
   - `ZDConstants` - Constants
 
-**File Load Order** (Critical):
+**File Load Order** (Critical - defined in manifest.json):
 1. `error-handler.js` - Must be first
 2. `config.js` - Configuration
 3. `utils.js` - Utilities
 4. `constants.js` - Constants
 5. `storage.js` - Storage layer
-6. `notification-utils.js` - Toast UI
-7. `notifications.js` - Notification system
-8. `timers.js` - Timing engine
-9. `icons.js` - Icon rendering
-10. `content.js` - Main app (must be last)
+6. `events.js` - Event bus
+7. `state.js` - State management
+8. `notification-utils.js` - Toast UI
+9. `notifications.js` - Notification system
+10. `timers.js` - Timing engine
+11. `icons.js` - Icon rendering
+12. `ui-helpers.js` - UI utilities
+13. `theme.js` - Theme management
+14. `schedule.js` - Calendar logic
+15. `notes.js` - Notes system
+16. `translator.js` - Translation
+17. `ai-panel.js` - AI Copilot
+18. `auto-count.js` - Auto-increment
+19. `timer-manager.js` - Unified timer
+20. `content.js` - Main app (must be last)
 
 ### Local Development
 
@@ -486,12 +552,15 @@ The extension requires these Chrome permissions:
 See [CHANGELOG.md](CHANGELOG.md) for a detailed version history.
 
 **Current Version: 2.5.0**
-- Christmas theme enhancements
-- Glassmorphism UI design
+- Architecture refactoring with modular design (9 new modules)
+- Event bus pattern for decoupled communication
+- Centralized state management
+- Unified timer manager (consolidates 8 intervals into 1)
+- Config/counts caching for better performance
+- Security fixes (XSS prevention)
+- Bug fixes (weekly stats, clear button)
+- Christmas theme with glassmorphism UI
 - Sound system with 7 sound types
-- Snowfall animations
-- Enhanced settings modal
-- Performance optimizations
 
 ---
 

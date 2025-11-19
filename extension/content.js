@@ -1374,11 +1374,24 @@ async function checkForVersionUpdate() {
                 input.addEventListener('change', async () => {
                     if (!input.files || !input.files[0]) return;
                     const text = await input.files[0].text();
-                    const data = JSON.parse(text);
-                    await ZDStorage.restoreBackup(data);
-                    await refreshScheduleCache(true);
-                    fastRefreshToolbarNoNetwork();
-                    alert('Data restored.');
+                    try {
+                        const data = JSON.parse(text);
+                        await ZDStorage.restoreBackup(data);
+                        await refreshScheduleCache(true);
+                        fastRefreshToolbarNoNetwork();
+                        if (window.ZDNotifyUtils?.info) {
+                            ZDNotifyUtils.info('Success', 'Data restored successfully.');
+                        } else {
+                            alert('Data restored.');
+                        }
+                    } catch (err) {
+                        console.error('[Restore] JSON parse failed:', err);
+                        if (window.ZDNotifyUtils?.warn) {
+                            ZDNotifyUtils.warn('Invalid backup file', 'The file format is not valid. Please check your backup file.');
+                        } else {
+                            alert('Invalid backup file. Please check the file format.');
+                        }
+                    }
                 });
                 input.click();
             });
@@ -2013,13 +2026,13 @@ async function checkForVersionUpdate() {
         const requiredChats   = Math.round((cfg.goalChatsPerHour   ?? 5) * (cachedChatHours   || 0));
         const requiredTickets = Math.round((cfg.goalTicketsPerHour ?? 5) * (cachedTicketHours || 0));
 
-        const chatsProgressPct = (cachedChatHours || 0) === 0
-            ? 100
-            : Math.min(100, Math.round((todayChats / requiredChats) * 100 || 0));
+        const chatsProgressPct = (cachedChatHours || 0) === 0 || requiredChats === 0
+            ? 0
+            : Math.min(100, Math.round((todayChats / requiredChats) * 100) || 0);
 
-        const ticketsProgressPct = (cachedTicketHours || 0) === 0
-            ? 100
-            : Math.min(100, Math.round((todayTickets / requiredTickets) * 100 || 0));
+        const ticketsProgressPct = (cachedTicketHours || 0) === 0 || requiredTickets === 0
+            ? 0
+            : Math.min(100, Math.round((todayTickets / requiredTickets) * 100) || 0);
 
         const avgText = avgPerHour(todayTotal, cachedTotalHours);
 
@@ -2157,7 +2170,7 @@ async function checkForVersionUpdate() {
             return bt - at;
         });
 
-        const activityRowsHtml = activitySorted.map(entry => {
+        let activityRowsHtml = activitySorted.map(entry => {
             const pretty = formatActivityEntryForDisplay(entry);
             return `
                 <div class="zd-activity-row">
@@ -2288,7 +2301,11 @@ async function checkForVersionUpdate() {
 
         if (!rows.length) {
             if (query) {
-                listEl.innerHTML = `<div class="zd-activity-empty">🔍 No activity matching "${query}".</div>`;
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'zd-activity-empty';
+                emptyDiv.textContent = `🔍 No activity matching "${query}".`;
+                listEl.innerHTML = '';
+                listEl.appendChild(emptyDiv);
             } else {
                 const activityMemes = [
                     {
@@ -2748,9 +2765,20 @@ async function checkForVersionUpdate() {
         }
     }
 
-    // Initialize notes system - check reminders every minute
-    setInterval(checkEndOfDayNotesReminder, 60000);
-    setInterval(checkEndOfWeekReminder, 60000);
+    // Initialize notes system - register reminders with timer manager
+    // (They will be started once ZDTimerManager.start() is called in init)
+    if (window.ZDTimerManager) {
+        ZDTimerManager.register({
+            id: 'notes-day-reminder',
+            intervalMs: 60_000,
+            fn: checkEndOfDayNotesReminder
+        });
+        ZDTimerManager.register({
+            id: 'notes-week-reminder',
+            intervalMs: 60_000,
+            fn: checkEndOfWeekReminder
+        });
+    }
 
     // ------------------------------------------------------------
     // 14. TRANSLATION SYSTEM
@@ -2909,6 +2937,12 @@ async function checkForVersionUpdate() {
             if (translation && translation.trim()) {
                 navigator.clipboard.writeText(translation).then(() => {
                     statusEl.textContent = 'Translation copied!';
+                    setTimeout(() => {
+                        statusEl.textContent = 'Ready to translate';
+                    }, 2000);
+                }).catch((err) => {
+                    console.error('[Clipboard] Copy failed:', err);
+                    statusEl.textContent = 'Copy failed - try again';
                     setTimeout(() => {
                         statusEl.textContent = 'Ready to translate';
                     }, 2000);
@@ -3143,6 +3177,12 @@ async function checkForVersionUpdate() {
                         setTimeout(() => {
                             copyBtn.textContent = 'Copy';
                         }, 2000);
+                    }).catch((err) => {
+                        console.error('[Clipboard] Copy failed:', err);
+                        copyBtn.textContent = 'Failed';
+                        setTimeout(() => {
+                            copyBtn.textContent = 'Copy';
+                        }, 2000);
                     });
                 });
             }
@@ -3251,23 +3291,20 @@ async function checkForVersionUpdate() {
         let offsetX = 0;
         let offsetY = 0;
 
-        handle.addEventListener('mousedown', (e) => {
-            dragging = true;
-            const rect = bar.getBoundingClientRect();
-            offsetX = e.clientX - rect.left;
-            offsetY = e.clientY - rect.top;
-            e.preventDefault();
-        });
-
-        document.addEventListener('mousemove', (e) => {
+        // Define handlers so they can be removed
+        const onMouseMove = (e) => {
             if (!dragging) return;
             bar.style.left = `${e.clientX - offsetX}px`;
             bar.style.top = `${e.clientY - offsetY}px`;
-        });
+        };
 
-        document.addEventListener('mouseup', async () => {
+        const onMouseUp = async () => {
             if (!dragging) return;
             dragging = false;
+
+            // Remove listeners when drag ends to prevent memory leak
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
 
             // where user actually dropped it
             const rawPos = {
@@ -3287,6 +3324,18 @@ async function checkForVersionUpdate() {
 
             // save the user's chosen preferred position (even if we clamped visually)
             await ZDStorage.setBarPosition(preferredBarPos);
+        };
+
+        handle.addEventListener('mousedown', (e) => {
+            dragging = true;
+            const rect = bar.getBoundingClientRect();
+            offsetX = e.clientX - rect.left;
+            offsetY = e.clientY - rect.top;
+            e.preventDefault();
+
+            // Only attach listeners during drag
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
         });
     }
 
@@ -3517,6 +3566,8 @@ async function checkForVersionUpdate() {
                     currentMode = intended;
                     fastRefreshToolbarNoNetwork();
                 }
+            }).catch((err) => {
+                console.warn('[ZDCounter] getIntendedModeFromSchedule failed:', err);
             });
         }
 
@@ -3537,24 +3588,37 @@ async function checkForVersionUpdate() {
         // 11.2. now that timer is initialized, draw the initial timer state safely
         refreshToolbarTimerFromSchedule();
 
-        // 12. Background refresh:
-        //     - every 60s, refresh schedule cache & repaint toolbar + ⏰ fallback
-        setInterval(async () => {
-            await refreshScheduleCache(false);
-            fastRefreshToolbarNoNetwork();
-            refreshToolbarTimerFromSchedule();
-        }, 60_000);
+        // 12. Initialize Timer Manager with all recurring tasks
+        if (window.ZDTimerManager) {
+            // Schedule cache refresh - every 60s
+            ZDTimerManager.register({
+                id: 'schedule-refresh',
+                intervalMs: 60_000,
+                fn: async () => {
+                    await refreshScheduleCache(false);
+                    fastRefreshToolbarNoNetwork();
+                    refreshToolbarTimerFromSchedule();
+                }
+            });
 
-        // 13. Auto-mode enforcer:
-        //     - every 5s, gently snap you back to scheduled mode if grace expired
-        setInterval(() => {
-            enforceAutoModeFromSchedule();
-        }, 5_000);
+            // Auto-mode enforcer - every 5s
+            ZDTimerManager.register({
+                id: 'auto-mode-enforcer',
+                intervalMs: 5_000,
+                fn: () => {
+                    enforceAutoModeFromSchedule();
+                }
+            });
 
-        // 14. Fallback timer repaint every 30s (if somehow no ZDTimerUpdate)
-        setInterval(() => {
-            refreshToolbarTimerFromSchedule();
-        }, 30_000);
+            // Fallback timer repaint - every 30s
+            ZDTimerManager.register({
+                id: 'timer-repaint',
+                intervalMs: 30_000,
+                fn: () => {
+                    refreshToolbarTimerFromSchedule();
+                }
+            });
+        }
 
         // 15. Keep toolbar in viewport if window resizes
         window.addEventListener('resize', () => {
@@ -3575,25 +3639,37 @@ async function checkForVersionUpdate() {
             }, 100)
         );
 
-        // 17. Safety repaint every 5s just to never look stale (belt + suspenders)
-        setInterval(() => {
-            fastRefreshToolbarNoNetwork();
-            refreshToolbarTimerFromSchedule();
-        }, 5_000);
-
-        // 18. Midnight UTC watcher:
-        //     If the UTC day flips while Zendesk stays open,
-        //     let rollDailyIfNeeded() archive and reset safely.
-        setInterval(async () => {
-            if (window.ZDStorage && ZDStorage.rollDailyIfNeeded) {
-                await ZDStorage.rollDailyIfNeeded();
-                fastRefreshToolbarNoNetwork();
-                refreshToolbarTimerFromSchedule();
-                if (statsOverlayEl && statsOverlayEl.style.display === 'flex') {
-                    await renderStatsOverlay();
+        // 17. Register remaining tasks with Timer Manager
+        if (window.ZDTimerManager) {
+            // Safety repaint every 5s just to never look stale
+            ZDTimerManager.register({
+                id: 'safety-repaint',
+                intervalMs: 5_000,
+                fn: () => {
+                    fastRefreshToolbarNoNetwork();
+                    refreshToolbarTimerFromSchedule();
                 }
-            }
-        }, 60_000);
+            });
+
+            // Midnight UTC watcher - every 60s
+            ZDTimerManager.register({
+                id: 'midnight-watcher',
+                intervalMs: 60_000,
+                fn: async () => {
+                    if (window.ZDStorage && ZDStorage.rollDailyIfNeeded) {
+                        await ZDStorage.rollDailyIfNeeded();
+                        fastRefreshToolbarNoNetwork();
+                        refreshToolbarTimerFromSchedule();
+                        if (statsOverlayEl && statsOverlayEl.style.display === 'flex') {
+                            await renderStatsOverlay();
+                        }
+                    }
+                }
+            });
+
+            // Start the timer manager
+            ZDTimerManager.start();
+        }
 
     }
 

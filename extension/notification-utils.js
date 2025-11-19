@@ -45,7 +45,7 @@
         titleEl.textContent = title;
 
         const msgEl = document.createElement('div');
-        msgEl.innerHTML = message;
+        msgEl.textContent = message;
 
         if (options.gifURL) {
             const gif = document.createElement('img');
