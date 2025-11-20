@@ -26,7 +26,7 @@
 
     function versionUpdate(newVersion) {
         const title = 'Toolkit updated';
-        const message = `✨ You’re now on <strong>${newVersion}</strong>.<br>Enjoy the latest fixes and features.`;
+        const message = `You're now on <strong>${newVersion}</strong>.<br>Enjoy the latest fixes and features.`;
         info(title, message, { timeout: 12000 });
     }
 
@@ -34,7 +34,7 @@
     function firstTimeUserAlert() {
         const title = 'New Contact Detected';
         const message =
-            "🆕 This looks like your <strong>first interaction</strong> with this user today — make it a good one!";
+            "This looks like your <strong>first interaction</strong> with this user today — make it a good one!";
         showNotification(title, message, { timeout: 8000 });
     }
 

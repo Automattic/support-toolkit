@@ -32,7 +32,7 @@
 
         const msgEl = document.createElement('div');
         msgEl.className = 'zd-notification-message';
-        msgEl.textContent = message;
+        msgEl.innerHTML = message;
 
         if (options.gifURL) {
             const gif = document.createElement('img');
