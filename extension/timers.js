@@ -3,7 +3,7 @@
 (function () {
 
     const { formatMMSS } = window.ZDUtils;
-    const { showShiftNotification } = window.ZDNotifications;
+    // Don't destructure at module load - call directly to avoid race conditions
     const { withRetry, logError, ErrorLevel, ErrorCategory } = window.ZDErrorHandler || {};
     const { PERFORMANCE, CALENDAR, LIMITS } = window.ZDConfig || {};
 
@@ -254,7 +254,9 @@
                 minsUntil === warnMin &&
                 lastStartAlertShiftKey !== shiftKey
             ) {
-                window.ZDNotifications.showShiftNotification('start', shiftType);
+                if (window.ZDNotifications?.showShiftNotification) {
+                    window.ZDNotifications.showShiftNotification('start', shiftType);
+                }
                 lastStartAlertShiftKey = shiftKey;
             }
 
@@ -265,7 +267,9 @@
                 diffSinceStart < 10 * 60 * 1000 &&
                 lastStartAlertShiftKey !== shiftKey
             ) {
-                window.ZDNotifications.showShiftNotification('start', shiftType);
+                if (window.ZDNotifications?.showShiftNotification) {
+                    window.ZDNotifications.showShiftNotification('start', shiftType);
+                }
                 lastStartAlertShiftKey = shiftKey;
             }
         }
@@ -282,7 +286,9 @@
                 minsLeft === warnMin &&
                 lastEndAlertShiftKey !== shiftKey
             ) {
-                window.ZDNotifications.showShiftNotification('end', shiftType);
+                if (window.ZDNotifications?.showShiftNotification) {
+                    window.ZDNotifications.showShiftNotification('end', shiftType);
+                }
                 lastEndAlertShiftKey = shiftKey;
             }
         }

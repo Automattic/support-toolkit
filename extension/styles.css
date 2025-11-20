@@ -789,27 +789,24 @@
   font-family: inherit;
 }
 
-/* Shift card (light mode) */
+/* Shift card - 25% bigger and themed */
 .zd-center-card {
-  background: #ffffff;
-  color: #2b2b2b;
-  min-width: 340px;
-  max-width: 460px;
+  background: var(--zd-modal-bg);
+  color: var(--zd-text);
+  min-width: 425px;
+  max-width: 575px;
   border-radius: 14px;
   box-shadow: 0 18px 40px rgba(0,0,0,0.5);
-  border: 2px solid rgba(139, 21, 21, 0.5);
+  border: 2px solid var(--zd-primary);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   animation: zd-center-pop 0.18s ease-out;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
 }
 
 .zd-theme-dark .zd-center-card {
-  background: radial-gradient(circle at top, #20252b, #111318);
-  color: #f7f7f7;
-  border: 2px solid rgba(144, 238, 144, 0.4);
   box-shadow: 0 18px 40px rgba(0,0,0,0.85);
 }
 
@@ -818,99 +815,77 @@
   100% { transform: scale(1.0) translateY(0);   opacity: 1; }
 }
 
-/* HEADER – red/green banner */
+/* HEADER – themed banner */
 .zd-center-card-header {
   font-weight: 700;
-  font-size: 15px;
-  padding: 12px 18px;
-  background: linear-gradient(135deg, #0b7a3a, #0b4d28);
+  font-size: 18px;
+  padding: 15px 22px;
+  background: linear-gradient(135deg, var(--zd-primary), var(--zd-secondary));
   color: #fff;
   border-bottom: 1px solid rgba(255,255,255,0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
-.zd-center-card-header::before {
-  content: '🎄';
-  font-size: 16px;
-}
-.zd-center-card-header::after {
-  content: '✨';
-  font-size: 14px;
-}
 .zd-theme-dark .zd-center-card-header {
-  background: linear-gradient(135deg, #05402b, #021e16);
   border-bottom-color: rgba(0,0,0,0.6);
 }
 
 /* BODY */
 .zd-center-card-body {
-  padding: 18px 18px 14px 18px;
+  padding: 22px 22px 18px 22px;
   white-space: pre-wrap;
   word-break: break-word;
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.5;
   text-align: center;
-  color: #333;
-}
-.zd-theme-dark .zd-center-card-body {
-  color: #e9f5ee;
+  color: var(--zd-text);
 }
 
-/* GIF / image – bigger */
+/* GIF / image – 25% bigger */
 .zd-center-card-img {
-  max-width: 230px;
-  max-height: 230px;
+  max-width: 287px;
+  max-height: 287px;
   border-radius: 12px;
   display: block;
-  margin: 0 auto 16px auto;
+  margin: 0 auto 20px auto;
   object-fit: cover;
   box-shadow: 0 10px 26px rgba(0,0,0,0.75);
-  border: 2px solid rgba(255, 255, 255, 0.9);
-}
-.zd-theme-dark .zd-center-card-img {
-  border-color: rgba(144, 238, 144, 0.8);
+  border: 2px solid var(--zd-primary);
 }
 
 /* message text */
 .zd-center-card-text {
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.5;
   text-align: center;
   white-space: pre-wrap;
-  color: #333;
-}
-.zd-theme-dark .zd-center-card-text {
-  color: #f5fdf8;
+  color: var(--zd-text);
 }
 
-/* Close button */
+/* Close button - themed */
 .zd-center-close-btn {
   appearance: none;
   border: 0;
-  border-top: 1px solid rgba(255,255,255,0.4);
-  background: #8b1515;
+  border-top: 1px solid var(--zd-border);
+  background: var(--zd-primary);
   color: #fff;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
-  padding: 10px 16px;
+  padding: 12px 20px;
   text-align: center;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  transition: all 0.2s ease;
 }
 .zd-center-close-btn:hover {
-  background: #6f1010;
-}
-.zd-theme-dark .zd-center-close-btn {
-  background: #7a1212;
-  border-top-color: rgba(0,0,0,0.7);
-}
-.zd-theme-dark .zd-center-close-btn:hover {
-  background: #5c0d0d;
+  background: var(--zd-secondary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* STATS MODAL PANEL */
@@ -2539,8 +2514,8 @@ button:focus {
 }
 
 .zd-notes-textarea::placeholder {
-  color: var(--zd-text-light);
-  opacity: 0.4;
+  color: var(--zd-text-secondary);
+  opacity: 0.6;
 }
 
 .zd-notes-footer {
@@ -2758,8 +2733,8 @@ button:focus {
 
 .zd-translate-source::placeholder,
 .zd-translate-target::placeholder {
-  color: var(--zd-text-light);
-  opacity: 0.4;
+  color: var(--zd-text-secondary);
+  opacity: 0.6;
 }
 
 .zd-translate-target {
@@ -3079,8 +3054,8 @@ button:focus {
 }
 
 .zd-ai-input::placeholder {
-  color: var(--zd-text-light);
-  opacity: 0.4;
+  color: var(--zd-text-secondary);
+  opacity: 0.6;
 }
 
 .zd-ai-send-btn {
@@ -3187,5 +3162,1371 @@ button:focus {
 .zd-theme-dark .zd-ai-copy-btn:hover {
   background: var(--zd-accent);
   opacity: 1;
+}
+
+
+
+/* ============================================
+   Mobile & Touch-Friendly Responsiveness
+   ============================================ */
+
+/* Tablet and below (768px) */
+@media (max-width: 768px) {
+    .zd-toolbar {
+        max-width: 95vw !important;
+        font-size: 14px;
+    }
+
+    .zd-left-cluster {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .zd-mode-btn {
+        font-size: 12px;
+        padding: 6px 10px;
+        min-width: 70px;
+    }
+
+    .zd-step-btn {
+        min-width: 36px;
+        min-height: 36px;
+        font-size: 18px;
+    }
+
+    .zd-current-count {
+        font-size: 18px;
+        min-width: 40px;
+    }
+
+    .zd-ico-btn {
+        min-width: 40px;
+        min-height: 40px;
+        padding: 8px;
+    }
+
+    /* Settings modal on mobile */
+    .zd-settings-panel {
+        max-width: 95vw !important;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .zd-settings-three-col {
+        grid-template-columns: 1fr !important;
+    }
+
+    .zd-settings-columns {
+        gap: 16px;
+    }
+
+    /* Stats modal */
+    .zd-stats-panel {
+        max-width: 95vw !important;
+        padding: 16px !important;
+    }
+
+}
+
+/* Mobile phones (480px) */
+@media (max-width: 480px) {
+    .zd-toolbar {
+        font-size: 13px;
+        padding: 8px;
+    }
+
+    .zd-mode-btn {
+        font-size: 11px;
+        padding: 5px 8px;
+        min-width: 60px;
+    }
+
+    .zd-step-btn {
+        min-width: 32px;
+        min-height: 32px;
+        font-size: 16px;
+    }
+
+    .zd-current-count {
+        font-size: 16px;
+        min-width: 35px;
+    }
+
+    .zd-icon-group {
+        gap: 4px;
+    }
+
+    .zd-ico-btn {
+        min-width: 36px;
+        min-height: 36px;
+        padding: 6px;
+    }
+
+    /* Hide less critical buttons on very small screens */
+    .zd-ico-btn[data-feature-id="translator"],
+    .zd-ico-btn[data-feature-id="theme"] {
+        display: none !important;
+    }
+
+    /* Modal headers */
+    .zd-settings-header h2,
+    .zd-modal-header h2 {
+        font-size: 20px;
+    }
+
+    .zd-settings-subtitle {
+        font-size: 12px;
+    }
+
+    /* Buttons in modals */
+    .zd-btn-primary,
+    .zd-btn-secondary,
+    .zd-btn-danger {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    /* Settings rows */
+    .zd-settings-row {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 8px;
+    }
+
+    .zd-settings-row label {
+        width: 100%;
+    }
+
+    .zd-settings-row input,
+    .zd-settings-row select {
+        width: 100% !important;
+    }
+
+    /* Export modal date inputs */
+    .zd-export-section {
+        padding: 0;
+    }
+
+    .zd-export-section h3 {
+        font-size: 14px !important;
+    }
+
+    /* Quick range buttons wrap */
+    .zd-quick-range {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+}
+
+/* Touch-friendly improvements for all sizes */
+@media (hover: none) and (pointer: coarse) {
+    /* Increase touch targets */
+    button,
+    .zd-ico-btn,
+    .zd-step-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* Larger checkboxes */
+    input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Better tap feedback */
+    .zd-ico-btn:active,
+    .zd-step-btn:active,
+    .zd-mode-btn:active {
+        transform: scale(0.95);
+        opacity: 0.7;
+    }
+
+    /* Remove hover effects */
+    .zd-ico-btn:hover,
+    .zd-step-btn:hover {
+        transform: none;
+    }
+
+    /* Larger modals for easier touch */
+    .zd-modal-overlay {
+        padding: 10px;
+    }
+}
+
+/* Landscape mode on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .zd-toolbar {
+        font-size: 12px;
+        padding: 6px;
+    }
+
+    .zd-settings-panel {
+        max-height: 85vh;
+    }
+
+    .zd-modal-body {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .zd-toolbar {
+        border-width: 0.5px;
+    }
+
+    .zd-ico-btn svg,
+    .zd-mode-btn svg {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .zd-modal-overlay {
+        animation: none !important;
+    }
+}
+
+/* ============================================
+   Micro-Interactions & Animations
+   ============================================ */
+
+/* Button ripple effect */
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+.zd-btn-primary,
+.zd-btn-secondary,
+.zd-step-btn,
+.zd-ico-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.zd-btn-primary::after,
+.zd-btn-secondary::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+.zd-btn-primary:focus:not(:active)::after,
+.zd-btn-secondary:focus:not(:active)::after {
+    animation: ripple 0.6s ease-out;
+}
+
+/* Success pulse */
+@keyframes successPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+    }
+}
+
+.zd-success-pulse {
+    animation: successPulse 0.6s;
+}
+
+/* Shake animation for errors */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+    20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+.zd-error-shake {
+    animation: shake 0.5s;
+}
+
+/* Counter increment animation */
+@keyframes countUp {
+    0% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.zd-count-increment {
+    animation: countUp 0.3s ease-out;
+}
+
+/* Goal achievement celebration */
+@keyframes celebrate {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+    }
+    25% {
+        transform: scale(1.1) rotate(-5deg);
+    }
+    75% {
+        transform: scale(1.1) rotate(5deg);
+    }
+}
+
+.zd-goal-achieved {
+    animation: celebrate 0.5s ease-in-out;
+}
+
+/* Confetti for milestones */
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+.zd-confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    z-index: 999999999;
+    pointer-events: none;
+}
+
+.zd-confetti::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: currentColor;
+    animation: confetti-fall 3s linear forwards;
+}
+
+/* Loading spinner enhancement */
+@keyframes spin-smooth {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.zd-btn-loading::before {
+    content: '';
+    width: 14px;
+    height: 14px;
+    margin-right: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin-smooth 0.6s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Tooltip animations */
+@keyframes tooltip-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+[title]:hover::after {
+    animation: tooltip-appear 0.2s ease-out;
+}
+
+/* Progress bar fill animation */
+@keyframes fillProgress {
+    from {
+        transform: scaleX(0);
+        transform-origin: left;
+    }
+    to {
+        transform: scaleX(1);
+        transform-origin: left;
+    }
+}
+
+.zd-progress-fill {
+    animation: fillProgress 0.8s ease-out;
+}
+
+/* Icon bounce on hover */
+.zd-ico-btn:hover svg {
+    animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Smooth mode toggle */
+.zd-mode-btn {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.zd-mode-btn:active {
+    transform: scale(0.95);
+}
+
+/* Counter glow when active */
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+    }
+}
+
+.zd-current-count-wrapper.active {
+    animation: glow 2s infinite;
+}
+
+/* Toast slide in */
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.zd-toast {
+    animation: slideInRight 0.3s ease-out;
+}
+
+/* Settings panel slide in */
+@keyframes slideInUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.zd-settings-panel {
+    animation: slideInUp 0.3s ease-out;
+}
+
+/* Checkbox check animation */
+@keyframes checkmark {
+    0% {
+        transform: scale(0) rotate(45deg);
+    }
+    50% {
+        transform: scale(1.2) rotate(45deg);
+    }
+    100% {
+        transform: scale(1) rotate(45deg);
+    }
+}
+
+input[type="checkbox"]:checked + span::before {
+    animation: checkmark 0.3s ease-out;
+}
+
+/* Button press effect */
+.zd-step-btn:active,
+.zd-ico-btn:active {
+    transform: scale(0.92);
+    transition: transform 0.1s;
+}
+
+/* Hover lift effect for cards */
+.zd-settings-section:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+/* Focus ring animation */
+@keyframes focusRing {
+    0% {
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0);
+    }
+}
+
+button:focus-visible,
+input:focus-visible {
+    animation: focusRing 0.6s ease-out;
+}
+
+/* Stat number count up effect */
+@keyframes numberPop {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.zd-stat-value.updated {
+    animation: numberPop 0.4s ease-out;
+}
+
+/* Smooth color transitions */
+* {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+}
+
+/* Disable transitions for buttons being clicked */
+.zd-btn-loading,
+.zd-btn-loading * {
+    transition: none !important;
+}
+
+/* ============================================
+   Advanced Theme System with CSS Variables
+   ============================================ */
+
+:root {
+    --zd-primary: #667eea;
+    --zd-secondary: #764ba2;
+    --zd-background: rgba(255, 255, 255, 0.98);
+    --zd-text: #2d3748;
+    --zd-border: rgba(0, 0, 0, 0.1);
+    --zd-accent: #4299e1;
+    --zd-success: #48bb78;
+    --zd-warning: #ed8936;
+    --zd-error: #f56565;
+    --zd-font: system-ui, -apple-system, sans-serif;
+    --zd-border-radius: 12px;
+    --zd-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --zd-blur: 10px;
+    --zd-scale: 1.0;
+    --zd-font-size: 14px;
+    --zd-padding: 8px;
+    --zd-icon-size: 16px;
+}
+
+/* Import pixel font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Apply theme variables to toolbar */
+.zd-toolbar {
+    background: var(--zd-background) !important;
+    color: var(--zd-text) !important;
+    border-color: var(--zd-border) !important;
+    font-family: var(--zd-font) !important;
+    border-radius: var(--zd-border-radius) !important;
+    box-shadow: var(--zd-shadow) !important;
+    font-size: var(--zd-font-size) !important;
+    padding: var(--zd-padding) !important;
+    transform: scale(var(--zd-scale));
+    transform-origin: top left;
+}
+
+.zd-mode-btn {
+    background: linear-gradient(135deg, var(--zd-primary), var(--zd-secondary)) !important;
+    border-radius: calc(var(--zd-border-radius) * 0.5) !important;
+}
+
+.zd-ico-btn svg {
+    width: var(--zd-icon-size) !important;
+    height: var(--zd-icon-size) !important;
+}
+
+.zd-btn-primary {
+    background: var(--zd-primary) !important;
+    border-radius: calc(var(--zd-border-radius) * 0.6) !important;
+}
+
+.zd-btn-secondary {
+    border-radius: calc(var(--zd-border-radius) * 0.6) !important;
+}
+
+/* ============================================
+   Retro Pixel Theme Styles
+   ============================================ */
+
+/* Pixel theme base */
+.zd-theme-pixel .zd-toolbar,
+.zd-theme-pixel .zd-settings-panel,
+.zd-theme-pixel .zd-modal-overlay,
+.zd-theme-pixel button,
+.zd-theme-pixel input,
+.zd-theme-pixel select {
+    font-family: 'Press Start 2P', 'Courier New', monospace !important;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.zd-theme-pixel .zd-toolbar {
+    border: 3px solid var(--zd-border) !important;
+    border-radius: 0 !important;
+    box-shadow: 4px 4px 0px rgba(0, 228, 54, 0.5) !important;
+    image-rendering: pixelated;
+}
+
+.zd-theme-pixel .zd-mode-btn,
+.zd-theme-pixel .zd-step-btn,
+.zd-theme-pixel .zd-ico-btn,
+.zd-theme-pixel .zd-btn-primary,
+.zd-theme-pixel .zd-btn-secondary {
+    border: 2px solid var(--zd-text) !important;
+    border-radius: 0 !important;
+    box-shadow: 2px 2px 0px var(--zd-text) !important;
+    transition: none !important;
+    font-size: 10px !important;
+    line-height: 1.4 !important;
+}
+
+.zd-theme-pixel .zd-mode-btn:hover,
+.zd-theme-pixel .zd-step-btn:hover,
+.zd-theme-pixel .zd-ico-btn:hover {
+    transform: translate(1px, 1px) !important;
+    box-shadow: 1px 1px 0px var(--zd-text) !important;
+}
+
+.zd-theme-pixel .zd-current-count {
+    font-family: 'Press Start 2P', monospace !important;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+/* Pixel theme settings panel */
+.zd-theme-pixel .zd-settings-panel {
+    border: 4px solid var(--zd-border) !important;
+    border-radius: 0 !important;
+    box-shadow: 8px 8px 0px rgba(0, 228, 54, 0.3) !important;
+}
+
+.zd-theme-pixel .zd-settings-section {
+    border: 2px solid var(--zd-border) !important;
+    border-radius: 0 !important;
+}
+
+.zd-theme-pixel input,
+.zd-theme-pixel select,
+.zd-theme-pixel textarea {
+    border: 2px solid var(--zd-border) !important;
+    border-radius: 0 !important;
+    font-size: 10px !important;
+    padding: 6px !important;
+}
+
+/* Scanline CRT effect */
+.zd-theme-scanlines::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+    z-index: 999999998;
+    animation: scanlines 8s linear infinite;
+}
+
+@keyframes scanlines {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 0 100%;
+    }
+}
+
+/* CRT screen flicker effect (subtle) */
+.zd-theme-pixel .zd-toolbar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    opacity: 0;
+    animation: flicker 0.15s infinite;
+    pointer-events: none;
+    border-radius: inherit;
+}
+
+@keyframes flicker {
+    0% {
+        opacity: 0.05;
+    }
+    50% {
+        opacity: 0.1;
+    }
+    100% {
+        opacity: 0.05;
+    }
+}
+
+/* Game Boy theme specific */
+.zd-theme-gameboy .zd-toolbar {
+    border: 4px solid #0f380f !important;
+    border-radius: 0 !important;
+    box-shadow: 3px 3px 0px #0f380f, inset 0 0 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+.zd-theme-gameboy .zd-mode-btn,
+.zd-theme-gameboy .zd-btn-primary {
+    background: #8bac0f !important;
+    color: #0f380f !important;
+    border: 2px solid #0f380f !important;
+    box-shadow: 2px 2px 0px #0f380f !important;
+}
+
+.zd-theme-gameboy .zd-step-btn,
+.zd-theme-gameboy .zd-ico-btn {
+    background: #9bbc0f !important;
+    color: #0f380f !important;
+    border: 2px solid #0f380f !important;
+}
+
+/* ============================================
+   Theme Preview Cards
+   ============================================ */
+
+.zd-theme-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.zd-theme-preview {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    text-align: center;
+}
+
+.zd-theme-preview:hover {
+    transform: translateY(-4px);
+}
+
+.zd-theme-preview.active {
+    outline: 3px solid var(--zd-primary);
+    outline-offset: 2px;
+}
+
+.zd-theme-preview-colors {
+    width: 100%;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+}
+
+.zd-theme-preview:hover .zd-theme-preview-colors {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.zd-theme-preview-text {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.zd-theme-preview-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.zd-theme-preview-desc {
+    font-size: 11px;
+    color: #666;
+}
+
+/* Size adjustment controls */
+.zd-size-selector {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0;
+}
+
+.zd-size-option {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.zd-size-option:hover {
+    border-color: var(--zd-primary);
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.zd-size-option.active {
+    border-color: var(--zd-primary);
+    background: var(--zd-primary);
+    color: white;
+}
+
+.zd-size-option-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.zd-size-option-size {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+/* Pixel perfect adjustments */
+.zd-theme-pixel * {
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: grayscale;
+    font-smooth: never;
+}
+
+/* Retro loading animation */
+.zd-theme-pixel .zd-btn-loading::before {
+    content: '...';
+    animation: pixel-loading 1s steps(3) infinite;
+    margin-right: 8px;
+}
+
+@keyframes pixel-loading {
+    0% { content: '.'; }
+    33% { content: '..'; }
+    66% { content: '...'; }
+}
+
+/* Pixel theme toast notifications */
+.zd-theme-pixel .zd-toast {
+    border: 3px solid var(--zd-text) !important;
+    border-radius: 0 !important;
+    box-shadow: 4px 4px 0px var(--zd-text) !important;
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 10px !important;
+}
+
+/* ============================================
+   Apply Theme Colors to ALL UI Elements
+   ============================================ */
+
+/* Modals and panels */
+.zd-settings-panel,
+.zd-log-panel,
+.zd-stats-panel {
+    background: var(--zd-modal-bg) !important;
+    color: var(--zd-text) !important;
+}
+
+.zd-settings-section {
+    background: var(--zd-section-bg) !important;
+    border-color: var(--zd-border) !important;
+}
+
+.zd-section-desc,
+.zd-settings-subtitle {
+    color: var(--zd-text-secondary) !important;
+}
+
+/* Inputs and selects */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+    background: var(--zd-input-bg) !important;
+    color: var(--zd-text) !important;
+    border-color: var(--zd-border) !important;
+}
+
+input::placeholder {
+    color: var(--zd-text-secondary) !important;
+    opacity: 0.6;
+}
+
+/* Buttons */
+.zd-btn-secondary {
+    background: var(--zd-button-secondary-bg) !important;
+    color: var(--zd-text) !important;
+    border-color: var(--zd-border) !important;
+}
+
+.zd-btn-secondary:hover {
+    opacity: 0.9;
+}
+
+/* Checkboxes labels */
+.zd-setting-check span {
+    color: var(--zd-text) !important;
+}
+
+/* Settings rows */
+.zd-settings-row label {
+    color: var(--zd-text) !important;
+}
+
+/* Theme gallery improvements */
+.zd-theme-gallery {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.zd-theme-preview {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.zd-theme-preview:hover {
+    transform: translateY(-2px);
+}
+
+.zd-theme-preview.active::after {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--zd-primary);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.zd-theme-preview-colors {
+    width: 100%;
+    height: 70px;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    gap: 4px;
+    padding: 8px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.zd-theme-preview:hover .zd-theme-preview-colors {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.zd-theme-preview-swatch {
+    flex: 1;
+    border-radius: 4px;
+    transition: transform 0.2s ease;
+}
+
+.zd-theme-preview:hover .zd-theme-preview-swatch {
+    transform: scale(1.05);
+}
+
+.zd-theme-preview-name {
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--zd-text);
+}
+
+/* Size selector improvements */
+.zd-size-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 16px 0;
+}
+
+.zd-size-option {
+    padding: 12px 8px;
+    border: 2px solid var(--zd-border);
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--zd-input-bg);
+}
+
+.zd-size-option:hover {
+    border-color: var(--zd-primary);
+    background: var(--zd-section-bg);
+    transform: translateY(-2px);
+}
+
+.zd-size-option.active {
+    border-color: var(--zd-primary);
+    background: var(--zd-primary);
+    color: white;
+}
+
+.zd-size-option.active .zd-size-option-name,
+.zd-size-option.active .zd-size-option-size {
+    color: white !important;
+}
+
+.zd-size-option-name {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: var(--zd-text);
+}
+
+.zd-size-option-size {
+    font-size: 11px;
+    color: var(--zd-text-secondary);
+}
+
+/* Stats modal theming */
+.zd-stat-row {
+    color: var(--zd-text) !important;
+}
+
+.zd-stat-label {
+    color: var(--zd-text-secondary) !important;
+}
+
+/* Notes panel theming */
+.zd-notes-section {
+    background: var(--zd-section-bg) !important;
+    border-color: var(--zd-border) !important;
+}
+
+/* Toast notifications theming */
+.zd-toast {
+    background: var(--zd-modal-bg) !important;
+    color: var(--zd-text) !important;
+    border-color: var(--zd-border) !important;
+}
+
+/* Schedule panel theming */
+.zd-schedule-event {
+    background: var(--zd-section-bg) !important;
+    border-color: var(--zd-border) !important;
+    color: var(--zd-text) !important;
+}
+
+/* Export modal theming */
+.zd-export-section h3 {
+    color: var(--zd-text) !important;
+}
+
+/* Headers and titles */
+h2, h3, h4 {
+    color: var(--zd-text) !important;
+}
+
+/* Dev tools theming */
+.zd-dev-tools {
+    background: var(--zd-section-bg) !important;
+    border-color: var(--zd-border) !important;
+}
+
+.zd-dev-test-btn {
+    background: var(--zd-button-secondary-bg) !important;
+    color: var(--zd-text) !important;
+}
+
+/* Toolbar timer text */
+.zd-timer-text {
+    color: var(--zd-text) !important;
+}
+
+/* Percentage displays */
+.zd-pct {
+    color: var(--zd-text-secondary) !important;
+}
+
+/* ============================================
+   SETTINGS PAGE - CLEAN BOXY REDESIGN
+   ============================================ */
+
+/* Setting item container - clean label/input pairs */
+.zd-setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--zd-border);
+}
+
+.zd-setting-item:last-child {
+    border-bottom: none;
+}
+
+.zd-setting-item label {
+    flex-shrink: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--zd-text);
+    margin: 0;
+}
+
+/* Clean select dropdown styling */
+.zd-select,
+select.zd-select {
+    min-width: 200px;
+    padding: 8px 32px 8px 12px;
+    border: 1px solid var(--zd-border);
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    line-height: 1.5;
+    color: var(--zd-text);
+    background-color: var(--zd-input-bg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;charset=UTF-8,<svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L6 6L11 1" stroke="%23666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    height: auto;
+    vertical-align: middle;
+}
+
+.zd-select:hover,
+select.zd-select:hover {
+    border-color: var(--zd-primary);
+    background-color: var(--zd-section-bg);
+}
+
+.zd-select:focus,
+select.zd-select:focus {
+    outline: none;
+    border-color: var(--zd-primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Settings section improvements - cleaner boxes */
+.zd-settings-section {
+    background: var(--zd-section-bg) !important;
+    border: 1px solid var(--zd-border) !important;
+    border-radius: 8px !important;
+    padding: 20px !important;
+    margin-bottom: 20px !important;
+}
+
+.zd-settings-section:last-child {
+    margin-bottom: 0 !important;
+}
+
+.zd-section-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--zd-border);
+}
+
+.zd-section-header h3 {
+    margin: 0 0 4px 0 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: var(--zd-text) !important;
+}
+
+.zd-section-desc {
+    margin: 0 !important;
+    font-size: 13px !important;
+    color: var(--zd-text-secondary) !important;
+    opacity: 0.8;
+}
+
+/* Remove any decorative underlines */
+.zd-settings-section h3::after {
+    display: none !important;
+}
+
+/* Hide old theme gallery and size selector */
+.zd-theme-gallery,
+.zd-size-selector {
+    display: none !important;
+}
+
+/* Boxy aesthetic - ensure sharp corners and defined borders */
+.zd-settings-panel {
+    border-radius: 8px !important;
+}
+
+.zd-btn,
+button:not(.zd-icon-btn) {
+    border-radius: 4px !important;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="url"],
+textarea {
+    border-radius: 4px !important;
+}
+
+/* Clean checkbox styling */
+.zd-setting-check {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.zd-theme-dark .zd-setting-check {
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.zd-setting-check:last-child {
+    border-bottom: none;
+}
+
+/* Better spacing for settings rows */
+.zd-settings-row {
+    margin-bottom: 16px;
+}
+
+.zd-settings-row:last-child {
+    margin-bottom: 0;
+}
+
+.zd-settings-row label {
+    margin-bottom: 6px;
+    display: block;
+    font-weight: 500;
+}
+
+/* Remove hover transform effects on sections */
+.zd-settings-section:hover {
+    transform: none !important;
+}
+
+
+/* ============================================
+   TOAST NOTIFICATIONS - THEMED & 25% BIGGER
+   ============================================ */
+
+.zd-notification-card {
+    background: var(--zd-modal-bg);
+    color: var(--zd-text);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    padding: 15px 20px;
+    font-size: 15px;
+    line-height: 1.5;
+    max-width: 350px;
+    cursor: default;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease;
+    border-left: 4px solid var(--zd-primary);
+    position: relative;
+}
+
+.zd-notification-wrapper {
+    position: relative;
+}
+
+.zd-notification-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+    padding-right: 20px;
+    color: var(--zd-text);
+}
+
+.zd-notification-message {
+    color: var(--zd-text-secondary);
+    font-size: 14px;
+}
+
+.zd-notification-gif {
+    display: block;
+    margin-top: 10px;
+    width: 100%;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.zd-notification-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+    color: var(--zd-text-secondary);
+    padding: 2px 6px;
+}
+
+.zd-notification-close:hover {
+    opacity: 1;
+}
+
+/* Slide in animation for toast notifications */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 

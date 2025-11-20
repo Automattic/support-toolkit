@@ -212,10 +212,15 @@
             await openScheduleFast();
         });
         const themeBtn = await makeIconButton('🌓', 'theme', 'Toggle light/dark', async () => {
-            const cfg = await ZDStorage.getConfig();
-            const newTheme = cfg.theme === 'dark' ? 'light' : 'dark';
-            await ZDStorage.setConfig({ theme: newTheme });
-            await applyThemeToDOM();
+            if (window.ZDThemePresets?.toggleDarkMode) {
+                await window.ZDThemePresets.toggleDarkMode();
+            } else {
+                // Fallback to old method
+                const cfg = await ZDStorage.getConfig();
+                const newTheme = cfg.theme === 'dark' ? 'light' : 'dark';
+                await ZDStorage.setConfig({ theme: newTheme });
+                await applyThemeToDOM();
+            }
         });
         const statsBtn = await makeIconButton('📊', 'stats', 'Stats / History', async () => {
             await openStatsModal();
@@ -1264,6 +1269,33 @@ async function checkForVersionUpdate() {
 
                     <section class="zd-settings-section">
                         <div class="zd-section-header">
+                            <h3>Appearance & Themes</h3>
+                            <p class="zd-section-desc">Customize your look</p>
+                        </div>
+
+                        <div class="zd-setting-item">
+                            <label for="zd-theme-select">Theme</label>
+                            <select id="zd-theme-select" class="zd-select">
+                                <option value="default">Default</option>
+                                <option value="ocean">Ocean</option>
+                                <option value="forest">Forest</option>
+                                <option value="neon">Neon</option>
+                            </select>
+                        </div>
+
+                        <div class="zd-setting-item">
+                            <label for="zd-size-select">Size</label>
+                            <select id="zd-size-select" class="zd-select">
+                                <option value="compact">Compact</option>
+                                <option value="normal">Normal</option>
+                                <option value="large">Large</option>
+                                <option value="xlarge">Extra Large</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <section class="zd-settings-section">
+                        <div class="zd-section-header">
                             <h3>Developer Tools</h3>
                         </div>
 
@@ -1340,32 +1372,37 @@ async function checkForVersionUpdate() {
                 }
             });
 
-        // backup
+        // backup - opens enhanced export modal with CSV/JSON options
         panel.querySelector('.zd-backup-btn')
             .addEventListener('click', async (e) => {
-                const btn = e.target;
-                btn.classList.add('zd-btn-loading');
+                if (window.ZDExport?.showExportModal) {
+                    window.ZDExport.showExportModal();
+                } else {
+                    // Fallback to simple backup
+                    const btn = e.target;
+                    btn.classList.add('zd-btn-loading');
 
-                const data = await ZDStorage.backupAll();
-                const blob = new Blob([JSON.stringify(data, null, 2)], {
-                    type: 'application/json'
-                });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `support-toolkit-backup-${Date.now()}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
+                    const data = await ZDStorage.backupAll();
+                    const blob = new Blob([JSON.stringify(data, null, 2)], {
+                        type: 'application/json'
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `support-toolkit-backup-${Date.now()}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
 
-                btn.classList.remove('zd-btn-loading');
+                    btn.classList.remove('zd-btn-loading');
 
-                // Show success feedback
-                if (window.ZDNotifyUtils?.success) {
-                    ZDNotifyUtils.success('Backup created!', 'Your data has been exported successfully.');
+                    // Show success feedback
+                    if (window.ZDNotifyUtils?.success) {
+                        ZDNotifyUtils.success('Backup created!', 'Your data has been exported successfully.');
+                    }
                 }
             });
 
-        // restore
+        // restore - with validation
         panel.querySelector('.zd-restore-btn')
             .addEventListener('click', async () => {
                 const input = document.createElement('input');
@@ -1376,6 +1413,21 @@ async function checkForVersionUpdate() {
                     const text = await input.files[0].text();
                     try {
                         const data = JSON.parse(text);
+
+                        // Validate data if validator is available
+                        if (window.ZDExport?.validateImportData) {
+                            const validation = window.ZDExport.validateImportData(data, 'full');
+                            if (!validation.valid) {
+                                const errorMsg = 'Invalid backup file:\n' + validation.errors.join('\n');
+                                if (window.ZDNotifyUtils?.warn) {
+                                    ZDNotifyUtils.warn('Validation Failed', errorMsg);
+                                } else {
+                                    alert(errorMsg);
+                                }
+                                return;
+                            }
+                        }
+
                         await ZDStorage.restoreBackup(data);
                         await refreshScheduleCache(true);
                         fastRefreshToolbarNoNetwork();
@@ -1385,11 +1437,11 @@ async function checkForVersionUpdate() {
                             alert('Data restored.');
                         }
                     } catch (err) {
-                        console.error('[Restore] JSON parse failed:', err);
+                        console.error('[Restore] Failed:', err);
                         if (window.ZDNotifyUtils?.warn) {
-                            ZDNotifyUtils.warn('Invalid backup file', 'The file format is not valid. Please check your backup file.');
+                            ZDNotifyUtils.warn('Restore Failed', err.message || 'Invalid backup file format.');
                         } else {
-                            alert('Invalid backup file. Please check the file format.');
+                            alert('Restore failed: ' + (err.message || 'Invalid file format'));
                         }
                     }
                 });
@@ -1540,6 +1592,36 @@ async function checkForVersionUpdate() {
         // version label matches manifest version
         panel.querySelector('.cfg-version-val').textContent =
             chrome.runtime.getManifest().version;
+
+        // Populate theme and size selectors if available
+        if (window.ZDThemePresets) {
+            const themeSelect = panel.querySelector('#zd-theme-select');
+            const sizeSelect = panel.querySelector('#zd-size-select');
+
+            if (themeSelect) {
+                const currentThemeId = cfg.currentTheme || 'default';
+                themeSelect.value = currentThemeId;
+
+                themeSelect.addEventListener('change', async () => {
+                    const latestCfg = await ZDStorage.getConfig();
+                    const currentSize = latestCfg.currentSize || 'normal';
+                    const isDark = latestCfg.theme === 'dark';
+                    await window.ZDThemePresets.applyTheme(themeSelect.value, isDark, currentSize);
+                });
+            }
+
+            if (sizeSelect) {
+                const currentSize = cfg.currentSize || 'normal';
+                sizeSelect.value = currentSize;
+
+                sizeSelect.addEventListener('change', async () => {
+                    const latestCfg = await ZDStorage.getConfig();
+                    const currentTheme = latestCfg.currentTheme || 'default';
+                    const isDark = latestCfg.theme === 'dark';
+                    await window.ZDThemePresets.applyTheme(currentTheme, isDark, sizeSelect.value);
+                });
+            }
+        }
     }
 
     async function saveSettingsForm() {
@@ -2721,7 +2803,7 @@ async function checkForVersionUpdate() {
                     // Show notification
                     if (window.ZDNotifications && typeof window.ZDNotifications.showCenterNotification === 'function') {
                         window.ZDNotifications.showCenterNotification({
-                            title: '📝 Don\'t Forget Your Notes!',
+                            title: 'Don\'t Forget Your Notes!',
                             message: 'You have notes from today. Download them before midnight!',
                             actionText: 'Download Now',
                             actionCallback: async () => {
@@ -2753,7 +2835,7 @@ async function checkForVersionUpdate() {
                 // Show notification
                 if (window.ZDNotifications && typeof window.ZDNotifications.showCenterNotification === 'function') {
                     window.ZDNotifications.showCenterNotification({
-                        title: '📅 End of Week - Download Your Notes!',
+                        title: 'End of Week - Download Your Notes!',
                         message: 'It\'s Saturday evening! Download your week\'s notes before they reset on Sunday.',
                         actionText: 'Download Week Notes',
                         actionCallback: async () => {
@@ -3277,11 +3359,21 @@ async function checkForVersionUpdate() {
 
     async function applyThemeToDOM() {
         const cfg = await ZDStorage.getConfig();
-        const theme = cfg.theme || 'light';
-        if (theme === 'dark') {
-            document.body.classList.add('zd-theme-dark');
+
+        // Use new advanced theme system
+        if (window.ZDThemePresets) {
+            const currentTheme = cfg.currentTheme || 'default';
+            const currentSize = cfg.currentSize || 'normal';
+            const isDark = cfg.theme === 'dark';
+            await window.ZDThemePresets.applyTheme(currentTheme, isDark, currentSize);
         } else {
-            document.body.classList.remove('zd-theme-dark');
+            // Fallback to old simple dark/light theme
+            const theme = cfg.theme || 'light';
+            if (theme === 'dark') {
+                document.body.classList.add('zd-theme-dark');
+            } else {
+                document.body.classList.remove('zd-theme-dark');
+            }
         }
     }
 
@@ -3523,7 +3615,15 @@ async function checkForVersionUpdate() {
     // ------------------------------------------------------------
 
     async function init() {
-        // 0. Initialize storage (ensure dailyHistory, counts, lastActiveDayUTC exist)
+        // 0. Ensure mobile viewport meta tag exists
+        if (!document.querySelector('meta[name="viewport"]')) {
+            const viewport = document.createElement('meta');
+            viewport.name = 'viewport';
+            viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes';
+            document.head.appendChild(viewport);
+        }
+
+        // 1. Initialize storage (ensure dailyHistory, counts, lastActiveDayUTC exist)
         try {
             if (window.ZDStorage && ZDStorage.initializeStorage) {
                 await ZDStorage.initializeStorage();
