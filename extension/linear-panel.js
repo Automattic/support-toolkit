@@ -75,7 +75,7 @@
 
         // Get API key button
         overlay.querySelector('.zd-linear-setup-get-key-btn').addEventListener('click', () => {
-            window.open('https://linear.app/settings/api', '_blank');
+            window.open('https://linear.app/a8c/settings/account/security', '_blank');
         });
 
         // Open settings button

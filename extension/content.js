@@ -985,7 +985,7 @@
 
     function openLinearAPIKeyHelp() {
         // This opens Linear API settings where the agent can create an API key.
-        const helpURL = 'https://linear.app/settings/api';
+        const helpURL = 'https://linear.app/a8c/settings/account/security';
         window.ZDNotifyUtils.info(
             'Get your Linear API key',
             "We'll open Linear API settings in a new tab. Create a personal API key and paste it in Settings to enable Linear integration."
