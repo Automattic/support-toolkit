@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Support Toolkit",
   "description": "Productivity toolbar for support agents: live counters, shift timing, reminders, and lightweight stats.",
-  "version": "2.5.3",
+  "version": "2.6.0",
   "author": "Mauro Pereira",
 
   "background": {
@@ -16,7 +16,8 @@
   "host_permissions": [
     "https://schedule.happy.tools/*",
     "https://lingva.ml/*",
-    "https://generativelanguage.googleapis.com/*"
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.linear.app/*"
   ],
 
   "content_scripts": [
@@ -45,6 +46,8 @@
         "notes.js",
         "translator.js",
         "ai-panel.js",
+        "linear.js",
+        "linear-panel.js",
         "auto-count.js",
         "export.js",
         "timer-manager.js",

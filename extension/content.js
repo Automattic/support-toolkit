@@ -234,10 +234,16 @@
         const aiBtn = await makeIconButton('🤖', 'ai', 'AI Copilot', async () => {
             await openAIPanel();
         });
+        const linearBtn = await makeIconButton('⚡', 'linear', 'Search Linear Issues', async () => {
+            if (window.ZDLinearPanel && window.ZDLinearPanel.toggleLinearPanel) {
+                await window.ZDLinearPanel.toggleLinearPanel();
+            }
+        });
 
         // Store button references for toggling
         translateBtn.dataset.featureId = 'translator';
         aiBtn.dataset.featureId = 'ai';
+        linearBtn.dataset.featureId = 'linear';
         notesBtn.dataset.featureId = 'notes';
         statsBtn.dataset.featureId = 'stats';
         scheduleBtn.dataset.featureId = 'schedule';
@@ -251,6 +257,7 @@
         iconGroup.appendChild(notesBtn);
         iconGroup.appendChild(translateBtn);
         iconGroup.appendChild(aiBtn);
+        iconGroup.appendChild(linearBtn);
 
         // Timer cluster
         const timerWrapper = document.createElement('div');
@@ -418,6 +425,7 @@
                 // Check individual feature settings
                 if (featureId === 'translator' && !cfg.showTranslator) shouldShow = false;
                 if (featureId === 'ai' && !cfg.showAICopilot) shouldShow = false;
+                if (featureId === 'linear' && !cfg.showLinear) shouldShow = false;
                 if (featureId === 'notes' && !cfg.showNotes) shouldShow = false;
                 if (featureId === 'stats' && !cfg.showStats) shouldShow = false;
                 if (featureId === 'schedule' || featureId === 'theme') shouldShow = true; // Always show
@@ -975,6 +983,16 @@
         window.open(helpURL, '_blank', 'noopener');
     }
 
+    function openLinearAPIKeyHelp() {
+        // This opens Linear API settings where the agent can create an API key.
+        const helpURL = 'https://linear.app/settings/api';
+        window.ZDNotifyUtils.info(
+            'Get your Linear API key',
+            "We'll open Linear API settings in a new tab. Create a personal API key and paste it in Settings to enable Linear integration."
+        );
+        window.open(helpURL, '_blank', 'noopener');
+    }
+
     // First-run onboarding: prompt user for calendar URL if we don't have one
     async function maybePromptForCalendarURL() {
         if (calendarPromptShownThisSession) return;
@@ -1237,6 +1255,11 @@ async function checkForVersionUpdate() {
                             </label>
 
                             <label class="zd-setting-check">
+                                <input type="checkbox" class="cfg-showLinear" />
+                                <span>${window.ZDIcons ? window.ZDIcons.getIconHTML('linear', 14) : '⚡'} Linear</span>
+                            </label>
+
+                            <label class="zd-setting-check">
                                 <input type="checkbox" class="cfg-showNotes" />
                                 <span>${window.ZDIcons ? window.ZDIcons.getIconHTML('notes', 14) : '📝'} Notes</span>
                             </label>
@@ -1263,6 +1286,23 @@ async function checkForVersionUpdate() {
 
                             <div class="zd-settings-hint-row">
                                 <span class="zd-hint-link zd-hint-apikey">${window.ZDIcons ? window.ZDIcons.getIconHTML('ai', 14) : '🤖'} Get free API key</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="zd-settings-section">
+                        <div class="zd-section-header">
+                            <h3>Linear Integration</h3>
+                        </div>
+
+                        <div class="zd-setting-group">
+                            <div class="zd-settings-row">
+                                <label>Linear API Key</label>
+                                <input type="password" class="cfg-linearApiKey" placeholder="lin_api_..." />
+                            </div>
+
+                            <div class="zd-settings-hint-row">
+                                <span class="zd-hint-link zd-hint-linear-apikey">${window.ZDIcons ? window.ZDIcons.getIconHTML('linear', 14) : '⚡'} Get Linear API key</span>
                             </div>
                         </div>
                     </section>
@@ -1474,6 +1514,14 @@ async function checkForVersionUpdate() {
                 openAPIKeyHelp();
             });
 
+        // Linear API key help deep link
+        panel.querySelector('.zd-hint-linear-apikey')
+            .addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openLinearAPIKeyHelp();
+            });
+
         // dev mode toggle - show/hide dev tools
         panel.querySelector('.cfg-devMode')
             .addEventListener('change', (e) => {
@@ -1576,6 +1624,9 @@ async function checkForVersionUpdate() {
         panel.querySelector('.cfg-aiApiKey').value =
             cfg.aiApiKey || '';
 
+        panel.querySelector('.cfg-linearApiKey').value =
+            cfg.linearApiKey || '';
+
         const selectEl = panel.querySelector('.cfg-weekStartsOn');
         selectEl.value = cfg.weekStartsOn || 'Mon';
 
@@ -1584,6 +1635,8 @@ async function checkForVersionUpdate() {
             cfg.showTranslator === false ? false : true;
         panel.querySelector('.cfg-showAICopilot').checked =
             cfg.showAICopilot === false ? false : true;
+        panel.querySelector('.cfg-showLinear').checked =
+            cfg.showLinear === false ? false : true;
         panel.querySelector('.cfg-showNotes').checked =
             cfg.showNotes === false ? false : true;
         panel.querySelector('.cfg-showStats').checked =
@@ -1646,10 +1699,12 @@ async function checkForVersionUpdate() {
             weekStartsOn: panel.querySelector('.cfg-weekStartsOn').value || 'Mon',
             calendarURL: calVal,
             aiApiKey: panel.querySelector('.cfg-aiApiKey').value.trim(),
+            linearApiKey: panel.querySelector('.cfg-linearApiKey').value.trim(),
 
             // Toolbar customization
             showTranslator: panel.querySelector('.cfg-showTranslator').checked,
             showAICopilot: panel.querySelector('.cfg-showAICopilot').checked,
+            showLinear: panel.querySelector('.cfg-showLinear').checked,
             showNotes: panel.querySelector('.cfg-showNotes').checked,
             showStats: panel.querySelector('.cfg-showStats').checked,
 
@@ -3738,6 +3793,11 @@ async function checkForVersionUpdate() {
                 }
             }, 100)
         );
+
+        // Event listener for Linear panel to open settings
+        window.addEventListener('zd-open-settings', () => {
+            openSettings();
+        });
 
         // 17. Register remaining tasks with Timer Manager
         if (window.ZDTimerManager) {

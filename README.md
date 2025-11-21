@@ -467,7 +467,7 @@ This project adheres to a Code of Conduct. By participating, you are expected to
 
 ### Reporting Security Issues
 
-If you discover a security vulnerability, please do **NOT** open a public issue. Instead, email us directly at mauro.brito@hotmail.com or see [SECURITY.md](SECURITY.md) for details.
+If you discover a security vulnerability, please do **NOT** open a public issue. Instead, email us directly at mauro.pereira@automattic.com or see [SECURITY.md](SECURITY.md) for details.
 
 ### Security Features
 
@@ -585,7 +585,7 @@ Special thanks to:
 
 - **Issues**: [GitHub Issues](https://github.com/mauropereiira/support-toolkit/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/mauropereiira/support-toolkit/discussions)
-- **Email**: mauro.brito@hotmail.com
+- **Email**: mauro.pereira@automattic.com
 
 ---
 

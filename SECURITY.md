@@ -58,7 +58,7 @@ If you discover a security vulnerability, please follow responsible disclosure:
 
 ### How to Report
 
-1. **Email:** Send details to **mauro.brito@hotmail.com**
+1. **Email:** Send details to **mauro.pereira@automattic.com**
 2. **Subject Line:** Use "SECURITY: Support Toolkit - [Brief Description]"
 3. **Include:**
    - Description of the vulnerability
@@ -187,7 +187,7 @@ No security vulnerabilities have been reported or discovered as of this version.
 
 For security-related questions or concerns:
 
-- **Security Issues:** mauro.brito@hotmail.com
+- **Security Issues:** mauro.pereira@automattic.com
 - **General Questions:** Open a GitHub Discussion
 - **Non-Security Bugs:** Open a GitHub Issue
 

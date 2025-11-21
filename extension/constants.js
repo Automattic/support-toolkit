@@ -40,6 +40,7 @@
         // Toolbar customization
         showTranslator: true,
         showAICopilot: true,
+        showLinear: true,
         showNotes: true,
         showStats: true,
         toolbarCompactMode: false,
@@ -55,7 +56,10 @@
         theme: 'light',
 
         // AI Copilot (optional)
-        aiApiKey: ''
+        aiApiKey: '',
+
+        // Linear Integration (optional)
+        linearApiKey: ''
     };
 
     // UI color palette
