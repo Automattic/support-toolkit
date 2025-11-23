@@ -5129,3 +5129,117 @@ textarea {
     max-width: 300px;
 }
 
+/* AI Search Section */
+.zd-linear-ai-search-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.zd-linear-ai-search-btn {
+    width: 100%;
+    padding: 10px 16px;
+    background: var(--zd-accent);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, background 0.2s;
+}
+
+.zd-linear-ai-search-btn:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.zd-linear-ai-search-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.zd-theme-dark .zd-linear-ai-search-btn {
+    background: #1da1f2;
+}
+
+.zd-theme-dark .zd-linear-ai-search-btn:hover:not(:disabled) {
+    background: #1a8cd8;
+}
+
+.zd-linear-filters-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 16px 0;
+    color: #888;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.zd-linear-filters-divider::before,
+.zd-linear-filters-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.zd-theme-dark .zd-linear-filters-divider::before,
+.zd-theme-dark .zd-linear-filters-divider::after {
+    border-bottom-color: #333;
+}
+
+.zd-linear-filters-divider span {
+    padding: 0 12px;
+}
+
+/* AI Search Results Banner */
+.zd-linear-ai-banner {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 6px;
+}
+
+.zd-theme-dark .zd-linear-ai-banner {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+    border-color: rgba(139, 92, 246, 0.4);
+}
+
+.zd-linear-ai-banner-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.zd-linear-ai-banner-content {
+    flex: 1;
+}
+
+.zd-linear-ai-banner-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--zd-accent-purple);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.zd-theme-dark .zd-linear-ai-banner-title {
+    color: #a78bfa;
+}
+
+.zd-linear-ai-banner-query {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--zd-text);
+    margin-bottom: 4px;
+}
+
+.zd-linear-ai-banner-summary {
+    font-size: 12px;
+    color: var(--zd-text-secondary);
+    line-height: 1.4;
+}
+

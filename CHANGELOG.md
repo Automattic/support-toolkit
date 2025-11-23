@@ -13,6 +13,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Data export formats (JSON, CSV, Excel)
 - Unit tests and CI/CD pipeline
 
+## [2.6.1] - 2025-01-22
+
+### Added
+- AI-powered "Find Similar Issues" feature for Linear integration
+- Intelligent transcript extraction from Zendesk tickets
+- Context-aware keyword extraction with fallback support
+- Automatic search query generation using Gemini 2.5 Flash
+- Smart team dropdown with "All Teams" default selection
+
+### Changed
+- Linear panel now defaults to "All Teams" on open
+- Removed auto-focus on team input for better UX
+- Team input auto-selects text when clicked for easy filtering
+- Improved AI prompt for better feature name extraction
+- Increased token limits to handle Gemini's thinking overhead
+
+### Fixed
+- Linear panel no longer blocks interaction on open
+- Team dropdown shows properly when input is clicked
+- Transcript extraction works across different Zendesk layouts
+- Better error handling with graceful fallback to keyword extraction
+
+## [2.6.0] - 2025-11-21
+
+### Added
+- Linear integration for issue search and tracking
+- Linear API key configuration in settings
+- Linear panel UI with team filtering and status selection
+- Real-time Linear issue search across teams
+
 ## [2.5.0] - 2025-11-14
 
 ### Added

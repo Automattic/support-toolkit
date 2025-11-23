@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Support Toolkit",
   "description": "Productivity toolbar for support agents: live counters, shift timing, reminders, and lightweight stats.",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "author": "Mauro Pereira",
 
   "background": {
@@ -46,6 +46,7 @@
         "notes.js",
         "translator.js",
         "ai-panel.js",
+        "transcript.js",
         "linear.js",
         "linear-panel.js",
         "auto-count.js",

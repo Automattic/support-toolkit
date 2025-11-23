@@ -1,5 +1,36 @@
-// Linear search panel UI component
-// Right-side panel for searching Linear issues
+// LINEAR SEARCH PANEL UI COMPONENT
+// ===================================
+// This module provides a right-side panel for searching Linear issues directly from Zendesk.
+//
+// KEY FEATURES:
+// 1. **AI-Powered Search** - "Find Similar Issues" button that:
+//    - Extracts the current ticket conversation using transcript.js
+//    - Sends it to Google Gemini AI to understand the context
+//    - AI identifies the feature/component being discussed (e.g., "Cookie Consent")
+//    - Automatically searches Linear with smart terms
+//    - Shows results with AI context banner
+//
+// 2. **Manual Search** - Traditional search with:
+//    - Team filtering (or "All Teams" to search everything)
+//    - Status filtering (In Progress, Done, etc.)
+//    - Free-text search
+//
+// 3. **Autocomplete Team Dropdown** - Type to filter teams, shows team keys
+//
+// 4. **Click-to-Open** - Clicking any result opens the Linear issue in a new tab
+//
+// ARCHITECTURE:
+// - IIFE pattern for private scope
+// - Global exports on window.ZDLinearPanel
+// - Communicates with background.js for AI API calls (Manifest V3 requirement)
+// - Uses ZDTranscript module for ticket extraction
+// - Uses ZDLinear module for GraphQL API calls
+//
+// DEPENDENCIES:
+// - window.ZDStorage: Config management (API keys)
+// - window.ZDLinear: Linear GraphQL API wrapper
+// - window.ZDTranscript: Zendesk ticket extraction
+// - window.ZDIcons: Icon rendering (optional, falls back to emoji)
 
 (function () {
     'use strict';
@@ -118,6 +149,17 @@
             </div>
 
             <div class="zd-linear-filters">
+                <!-- AI Search Button -->
+                <div class="zd-linear-ai-search-section">
+                    <button id="zd-linear-ai-search-btn" class="zd-linear-ai-search-btn" title="Use AI to search for similar issues based on this ticket">
+                        Find Similar Issues
+                    </button>
+                </div>
+
+                <div class="zd-linear-filters-divider">
+                    <span>OR</span>
+                </div>
+
                 <!-- Team Selection with Autocomplete -->
                 <div class="zd-linear-filter-group">
                     <label class="zd-linear-filter-label">Product (Team)</label>
@@ -183,6 +225,7 @@
     function setupEventListeners() {
         if (!linearPanelEl) return;
 
+        const aiSearchBtn = linearPanelEl.querySelector('#zd-linear-ai-search-btn');
         const teamInput = linearPanelEl.querySelector('#zd-linear-team-input');
         const teamDropdown = linearPanelEl.querySelector('#zd-linear-team-dropdown');
         const statusSelect = linearPanelEl.querySelector('#zd-linear-status-select');
@@ -190,11 +233,17 @@
         const searchBtn = linearPanelEl.querySelector('#zd-linear-search-btn');
         const closeBtn = linearPanelEl.querySelector('.zd-linear-close-btn');
 
-        // Team input focus - show dropdown
+        // AI Search button
+        aiSearchBtn.addEventListener('click', performAISearch);
+
+        // Team input focus - show dropdown and select all text
         teamInput.addEventListener('focus', () => {
             if (allTeams.length > 0) {
                 showTeamDropdown = true;
-                updateTeamDropdown(teamInput.value);
+                // Select all text so user can immediately type to replace
+                teamInput.select();
+                // Show all teams in dropdown (ignore current value)
+                updateTeamDropdown('');
             }
         });
 
@@ -416,6 +465,199 @@
     }
 
     /**
+     * Perform AI-powered search based on current ticket
+     *
+     * This is the main function for the "Find Similar Issues" feature. It:
+     * 1. Extracts the full conversation from the current Zendesk ticket
+     * 2. Sends it to Google Gemini AI via background.js
+     * 3. AI analyzes the conversation and extracts feature names
+     * 4. Searches Linear with AI-generated terms
+     * 5. Displays results with AI context (what was searched and why)
+     *
+     * LOADING STATE MANAGEMENT:
+     * While the search is running, all controls are disabled to prevent
+     * user confusion (e.g., clicking "Search" while AI search is in progress).
+     * The button text changes to "Searching..." for clear feedback.
+     *
+     * ERROR HANDLING:
+     * All errors are caught and shown in the results area. Controls are
+     * re-enabled so the user can try again or use manual search.
+     *
+     * FALLBACK BEHAVIOR:
+     * If AI API key is not configured, the background script automatically
+     * falls back to simple keyword extraction (still better than nothing).
+     */
+    async function performAISearch() {
+        console.log('[Linear Panel] AI Search started');
+
+        // Get references to all UI controls
+        const aiSearchBtn = linearPanelEl.querySelector('#zd-linear-ai-search-btn');
+        const teamInput = linearPanelEl.querySelector('#zd-linear-team-input');
+        const statusSelect = linearPanelEl.querySelector('#zd-linear-status-select');
+        const searchInput = linearPanelEl.querySelector('#zd-linear-search-input');
+        const searchBtn = linearPanelEl.querySelector('#zd-linear-search-btn');
+
+        // Store original button text so we can restore it later
+        const originalButtonText = aiSearchBtn.textContent;
+        console.log('[Linear Panel] Original button text:', originalButtonText);
+
+        /**
+         * Re-enable all controls after search completes (success or error)
+         *
+         * This helper function is called in multiple places (success, error, etc.)
+         * to ensure controls are always re-enabled and the UI isn't left in a disabled state.
+         */
+        const enableControls = () => {
+            aiSearchBtn.disabled = false;
+            aiSearchBtn.textContent = originalButtonText;
+            teamInput.disabled = false;
+            searchInput.disabled = false;
+
+            // Only enable search button if teams are loaded
+            // (search button is disabled on initial load until we know what teams exist)
+            if (selectedTeam || allTeams.length > 0) {
+                searchBtn.disabled = false;
+            }
+
+            // Re-enable status dropdown only if workflow states are loaded for selected team
+            // (status dropdown is team-specific, so it's disabled when "All Teams" is selected)
+            if (workflowStates.length > 0) {
+                statusSelect.disabled = false;
+            }
+        };
+
+        try {
+            // STEP 1: DISABLE ALL CONTROLS
+            // Lock the UI to prevent user from clicking other buttons while AI search is running.
+            // This creates a clear loading state and prevents confusion.
+            aiSearchBtn.disabled = true;
+            aiSearchBtn.textContent = 'Searching...';  // Visual feedback
+            teamInput.disabled = true;
+            statusSelect.disabled = true;
+            searchInput.disabled = true;
+            searchBtn.disabled = true;
+
+            // STEP 2: CHECK DEPENDENCIES
+            // ZDTranscript module should be loaded via manifest.json, but we check
+            // to be safe. If it's missing, the extension might not have loaded correctly.
+            if (!window.ZDTranscript) {
+                showErrorState('Transcript extraction not available. Please refresh the page.');
+                enableControls();
+                return;
+            }
+
+            showLoadingState('Analyzing ticket...');
+
+            // STEP 3: EXTRACT CONVERSATION FROM ZENDESK TICKET
+            // This calls transcript.js to scrape the DOM and get all messages
+            // from bots, agents, and end-users in the current ticket.
+            console.log('[Linear Panel] Extracting transcript...');
+            const transcriptData = window.ZDTranscript.extractTranscript();
+            console.log('[Linear Panel] Transcript data:', transcriptData);
+
+            // Validate transcript extraction succeeded
+            if (!transcriptData.success) {
+                console.error('[Linear Panel] Transcript extraction failed:', transcriptData.error);
+                showErrorState(transcriptData.error || 'Failed to extract ticket transcript');
+                enableControls();
+                return;
+            }
+
+            const { title, transcript } = transcriptData;
+            console.log('[Linear Panel] Extracted title:', title);
+            console.log('[Linear Panel] Extracted transcript length:', transcript.length);
+
+            // STEP 4: GET API KEYS FROM CHROME STORAGE
+            // We need two keys:
+            // - linearApiKey: Required for searching Linear (if missing, we can't continue)
+            // - aiApiKey: Optional for Google Gemini (if missing, background.js falls back to keywords)
+            const cfg = await window.ZDStorage.getConfig();
+            const linearApiKey = cfg.linearApiKey || '';
+            const aiApiKey = cfg.aiApiKey || '';
+            console.log('[Linear Panel] Linear API key present:', !!linearApiKey);
+            console.log('[Linear Panel] AI API key present:', !!aiApiKey);
+
+            if (!linearApiKey) {
+                showErrorState('Linear API key not configured');
+                enableControls();
+                return;
+            }
+
+            // STEP 5: SEND TO BACKGROUND SCRIPT FOR AI ANALYSIS
+            // Why background script? Chrome Extension Manifest V3 requires that all
+            // external API calls (like Gemini) happen in the background service worker,
+            // not in content scripts. So we send a message to background.js.
+            //
+            // The background script will:
+            // 1. Send transcript to Google Gemini AI
+            // 2. AI extracts feature names (e.g., "Cookie Consent")
+            // 3. Returns { searchQuery: "...", summary: "..." }
+            // 4. OR falls back to keyword extraction if AI fails/not configured
+            showLoadingState('Analyzing conversation...');
+            console.log('[Linear Panel] Sending message to background script...');
+
+            // Send message using Chrome Extension message passing API
+            chrome.runtime.sendMessage({
+                type: 'AI_LINEAR_SEARCH',
+                title: title,
+                transcript: transcript,
+                apiKey: aiApiKey // Will use AI if available, otherwise falls back to keywords
+            }, async (response) => {
+                // STEP 6: HANDLE RESPONSE FROM BACKGROUND SCRIPT
+                // The background script has completed AI analysis and returned search terms
+                console.log('[Linear Panel] Received response from background:', response);
+
+                if (!response.success) {
+                    // AI analysis failed completely (e.g., network error, invalid API key)
+                    showErrorState(response.error || 'AI search failed');
+                    enableControls();
+                    return;
+                }
+
+                // Extract AI-generated search query and summary
+                const { searchQuery, summary } = response.searchTerms;
+                console.log('[Linear Panel] AI generated search query:', searchQuery);
+                console.log('[Linear Panel] AI summary:', summary);
+
+                // Update loading message to show what we're searching for
+                showLoadingState(`Searching Linear for: "${searchQuery}"`);
+
+                // STEP 7: SEARCH LINEAR WITH AI-GENERATED TERMS
+                // Now that AI has identified the feature/component, search Linear
+                try {
+                    // Search all teams (not limited to selected team)
+                    // This gives best chance of finding similar issues across the product
+                    const results = await window.ZDLinear.searchAllTeams({
+                        search: searchQuery,
+                        stateId: undefined  // Don't filter by status
+                    }, linearApiKey);
+
+                    // STEP 8: DISPLAY RESULTS WITH AI CONTEXT
+                    // Show results with a banner explaining what AI searched for and why
+                    // This transparency helps users understand the AI's reasoning
+                    displayResults(results, {
+                        isAISearch: true,
+                        searchQuery: searchQuery,
+                        summary: summary
+                    });
+
+                    // Re-enable controls so user can refine search if needed
+                    enableControls();
+                } catch (error) {
+                    console.error('[Linear Panel] AI search failed:', error);
+                    showErrorState(error.message);
+                    enableControls();
+                }
+            });
+
+        } catch (error) {
+            console.error('[Linear Panel] AI search failed:', error);
+            showErrorState(error.message);
+            enableControls();
+        }
+    }
+
+    /**
      * Show empty state
      */
     function showEmptyState(hint = 'Select a team to get started') {
@@ -434,14 +676,14 @@
     /**
      * Show loading state
      */
-    function showLoadingState() {
+    function showLoadingState(message = 'Searching...') {
         if (!linearPanelEl) return;
 
         const resultsContainer = linearPanelEl.querySelector('.zd-linear-results-container');
         resultsContainer.innerHTML = `
             <div class="zd-linear-loading">
                 <div class="zd-linear-loading-spinner"></div>
-                <div class="zd-linear-loading-text">Searching...</div>
+                <div class="zd-linear-loading-text">${message}</div>
             </div>
         `;
     }
@@ -464,18 +706,58 @@
 
     /**
      * Display search results
+     *
+     * This function renders the search results in the panel. It supports both
+     * manual search and AI search, with special handling for AI context.
+     *
+     * @param {Array} results - Array of Linear issues from ZDLinear.searchIssues()
+     * @param {Object} context - Optional context object:
+     *   - isAISearch: {boolean} Whether this was AI-generated search
+     *   - searchQuery: {string} What terms were searched
+     *   - summary: {string} AI's explanation of what the ticket is about
+     *
+     * AI CONTEXT BANNER:
+     * When results come from AI search, we show a banner at the top explaining:
+     * - That this was AI-generated (transparency)
+     * - What search terms were used
+     * - Why (the AI's understanding of the ticket)
+     *
+     * This helps users understand the AI's reasoning and decide if they need
+     * to refine the search manually.
      */
-    function displayResults(results) {
+    function displayResults(results, context = null) {
         if (!linearPanelEl) return;
 
         const resultsContainer = linearPanelEl.querySelector('.zd-linear-results-container');
 
+        // AI SEARCH BANNER
+        // If this was an AI search, add a banner explaining what was searched and why.
+        // We show this banner EVEN when there are no results, so the user understands
+        // what the AI tried to search for (helps with debugging when no results found).
+        let aiBannerHTML = '';
+        if (context?.isAISearch) {
+            aiBannerHTML = `
+                <div class="zd-linear-ai-banner">
+                    <div class="zd-linear-ai-banner-icon">🤖</div>
+                    <div class="zd-linear-ai-banner-content">
+                        <div class="zd-linear-ai-banner-title">AI-Generated Search</div>
+                        <div class="zd-linear-ai-banner-query">Searched for: "${context.searchQuery}"</div>
+                        <div class="zd-linear-ai-banner-summary">${context.summary}</div>
+                    </div>
+                </div>
+            `;
+        }
+
         if (!results || results.length === 0) {
-            resultsContainer.innerHTML = `
+            const noResultsHint = context?.isAISearch
+                ? 'No similar issues found with AI search terms. Try manual search below.'
+                : 'Try different filters or search terms';
+
+            resultsContainer.innerHTML = aiBannerHTML + `
                 <div class="zd-linear-empty-state">
                     <div class="zd-linear-empty-icon">🔍</div>
                     <div class="zd-linear-empty-text">No issues found</div>
-                    <div class="zd-linear-empty-hint">Try different filters or search terms</div>
+                    <div class="zd-linear-empty-hint">${noResultsHint}</div>
                 </div>
             `;
             return;
@@ -513,7 +795,7 @@
             `;
         }).join('');
 
-        resultsContainer.innerHTML = resultsHTML;
+        resultsContainer.innerHTML = aiBannerHTML + resultsHTML;
 
         // Add click handlers to cards
         resultsContainer.querySelectorAll('.zd-linear-issue-card').forEach(card => {
@@ -566,9 +848,23 @@
 
     /**
      * Toggle Linear panel visibility
+     *
+     * Opens or closes the Linear search panel. On first open, checks if Linear
+     * API key is configured and shows setup modal if not.
+     *
+     * DEFAULT BEHAVIOR - "All Teams":
+     * When the panel opens, it defaults to "All Teams" instead of forcing the user
+     * to select a specific team. This improves UX because:
+     * 1. AI search works better across all teams (finds more similar issues)
+     * 2. User doesn't have to pick a team before searching
+     * 3. No auto-focus on team input means the dropdown doesn't auto-show and block interaction
+     *
+     * The user can still click the team input to filter by a specific team if desired.
+     * When they click the input, the text auto-selects so they can immediately type to search.
      */
     async function toggleLinearPanel() {
-        // Check if API key is configured
+        // STEP 1: CHECK LINEAR API KEY CONFIGURATION
+        // If no Linear API key is configured, show the setup modal instead of the panel
         const cfg = await window.ZDStorage.getConfig();
 
         if (!cfg.linearApiKey || cfg.linearApiKey.trim() === '') {
@@ -576,26 +872,43 @@
             return;
         }
 
-        // Create panel if it doesn't exist
+        // STEP 2: CREATE PANEL IF FIRST TIME
+        // Panel is created lazily (only when first opened, not on page load)
         if (!linearPanelEl) {
             createLinearPanel();
         }
 
-        // Toggle visibility
+        // STEP 3: TOGGLE VISIBILITY
         isLinearPanelVisible = !isLinearPanelVisible;
 
         if (isLinearPanelVisible) {
             linearPanelEl.style.display = 'flex';
 
-            // Load teams when panel opens
+            // Load teams from Linear API
             await loadTeams();
 
-            // Focus team input
+            // DEFAULT TO "ALL TEAMS"
+            // This is a key UX decision: instead of forcing the user to select a team,
+            // we default to "All Teams" so they can immediately search or use AI search.
+            selectedTeam = null;  // null = search all teams
             const teamInput = linearPanelEl.querySelector('#zd-linear-team-input');
+            const searchBtn = linearPanelEl.querySelector('#zd-linear-search-btn');
+
             if (teamInput) {
-                setTimeout(() => teamInput.focus(), 100);
+                teamInput.value = 'All Teams';  // Display text
             }
+
+            // Enable search button immediately (don't wait for team selection)
+            if (searchBtn) {
+                searchBtn.disabled = false;
+            }
+
+            // DON'T AUTO-FOCUS THE INPUT
+            // Previously we auto-focused the team input, which forced the dropdown open
+            // and blocked other interactions. Now we let the user click if they want
+            // to change the team selection.
         } else {
+            // Hide panel and clean up
             linearPanelEl.style.display = 'none';
             hideTeamDropdown();
         }

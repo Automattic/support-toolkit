@@ -7,7 +7,7 @@
 *Quality-of-life improvements for customer support workflows on Zendesk*
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/support-toolkit/gnjghfobmfiilldpoedmjfdfehkohefk)
-[![Version](https://img.shields.io/badge/version-2.5.1-blue.svg)](https://github.com/Automattic/support-toolkit)
+[![Version](https://img.shields.io/badge/version-2.6.1-blue.svg)](https://github.com/Automattic/support-toolkit)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Manifest](https://img.shields.io/badge/manifest-v3-orange.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 
@@ -82,6 +82,15 @@ A floating toolbar that lives in your Zendesk workspace, giving you:
 - **Background service worker** processing
 - **User-provided API key** for privacy
 - **Rate limiting** and error handling
+
+### 🔗 Linear Integration
+- **AI-powered "Find Similar Issues"** - Automatically analyzes Zendesk tickets and searches Linear
+- **Intelligent transcript extraction** from Zendesk conversations
+- **Context-aware search** - AI identifies feature names vs generic keywords
+- **Manual search** with team filtering and status selection
+- **Team autocomplete** - Type to search across all products
+- **Click-to-open** results in new tabs
+- **Graceful fallbacks** - Works even without AI configured (keyword extraction)
 
 ### 📈 Statistics & Analytics
 - **Daily/weekly/monthly breakdowns** of interactions
@@ -195,6 +204,33 @@ A floating toolbar that lives in your Zendesk workspace, giving you:
 - Click AI button for context-aware help
 - Ask questions about tickets, customers, or workflows
 
+#### Linear Integration
+1. **Setup:**
+   - Get your Linear API key from [Linear Settings](https://linear.app/a8c/settings/account/security)
+   - Click the settings icon (⚙️) in the Support Toolkit toolbar
+   - Paste your Linear API key (starts with `lin_api_`)
+   - *(Optional)* Add your Google Gemini API key for AI-powered search
+
+2. **Find Similar Issues (AI):**
+   - Open any Zendesk ticket
+   - Click the Linear button in the toolbar to open the panel
+   - Click **"Find Similar Issues"** button
+   - AI analyzes the ticket conversation and extracts the core feature/issue
+   - Results appear automatically with AI context banner showing what was searched
+
+3. **Manual Search:**
+   - Click the team input to select a specific team (or keep "All Teams")
+   - Optionally select a status filter (In Progress, Done, etc.)
+   - Type search terms in the search box
+   - Click **"Search"** button
+
+4. **View Results:**
+   - Click any issue card to open it in Linear
+   - AI searches show a banner explaining what was searched and why
+   - Refine your search manually if needed
+
+**Note:** AI search works best when both Linear and Gemini API keys are configured, but falls back to keyword extraction if Gemini key is missing.
+
 #### Viewing Statistics
 - **Quick view**: Expand toolbar for today's summary
 - **Detailed stats**: Click "Statistics" for weekly history
@@ -208,6 +244,8 @@ A floating toolbar that lives in your Zendesk workspace, giving you:
 | Setting | Description |
 |---------|-------------|
 | **Calendar URL** | ICS calendar URL from schedule.happy.tools |
+| **Linear API Key** | Personal API key from Linear (starts with `lin_api_`) |
+| **Gemini API Key** | Google Gemini API key for AI features (optional) |
 | **Chat Goal (per hour)** | Target number of chats per hour |
 | **Ticket Goal (per hour)** | Target number of tickets per hour |
 | **Enable Shift Reminders** | Pre-shift notifications |
@@ -257,6 +295,9 @@ support-toolkit/
 │   ├── notes.js                   # Notes system
 │   ├── translator.js              # Translation service
 │   ├── ai-panel.js                # AI Copilot panel
+│   ├── linear.js                  # Linear GraphQL API wrapper
+│   ├── linear-panel.js            # Linear issue search UI
+│   ├── transcript.js              # Zendesk ticket conversation extractor
 │   ├── auto-count.js              # Auto-increment on ticket resolution
 │   │
 │   │   # Infrastructure
@@ -306,6 +347,9 @@ support-toolkit/
   - `ZDNotes` - Notes system
   - `ZDTranslator` - Translation
   - `ZDAIPanel` - AI Copilot
+  - `ZDTranscript` - Ticket conversation extractor
+  - `ZDLinear` - Linear GraphQL API
+  - `ZDLinearPanel` - Linear search UI
   - `ZDAutoCount` - Auto-increment
   - `ZDTimers` - Shift timing
   - `ZDNotifications` - Alerts
@@ -315,26 +359,31 @@ support-toolkit/
   - `ZDConstants` - Constants
 
 **File Load Order** (Critical - defined in manifest.json):
-1. `error-handler.js` - Must be first
-2. `config.js` - Configuration
-3. `utils.js` - Utilities
-4. `constants.js` - Constants
-5. `storage.js` - Storage layer
-6. `events.js` - Event bus
-7. `state.js` - State management
-8. `notification-utils.js` - Toast UI
-9. `notifications.js` - Notification system
-10. `timers.js` - Timing engine
-11. `icons.js` - Icon rendering
-12. `ui-helpers.js` - UI utilities
-13. `theme.js` - Theme management
-14. `schedule.js` - Calendar logic
-15. `notes.js` - Notes system
-16. `translator.js` - Translation
-17. `ai-panel.js` - AI Copilot
-18. `auto-count.js` - Auto-increment
-19. `timer-manager.js` - Unified timer
-20. `content.js` - Main app (must be last)
+1. `error-handler.js` - Must be first (error handling for all modules)
+2. `config.js` - Configuration and feature flags
+3. `utils.js` - Utilities used by other modules
+4. `constants.js` - Global constants
+5. `storage.js` - Storage layer (required by most modules)
+6. `events.js` - Event bus for decoupled communication
+7. `state.js` - Centralized state management
+8. `notification-utils.js` - Toast UI components
+9. `notifications.js` - Notification orchestration
+10. `timers.js` - ICS parsing & shift detection
+11. `icons.js` - Dynamic SVG icon rendering
+12. `ui-helpers.js` - UI utility functions
+13. `theme.js` - Theme management & toolbar positioning
+14. `theme-presets.js` - Theme presets and configurations
+15. `schedule.js` - Calendar parsing & shift calculations
+16. `notes.js` - Notes system
+17. `translator.js` - Translation service
+18. `ai-panel.js` - AI Copilot panel (depends on storage, events)
+19. `transcript.js` - Zendesk conversation extractor (used by linear-panel.js)
+20. `linear.js` - Linear GraphQL API wrapper (used by linear-panel.js)
+21. `linear-panel.js` - Linear search UI (depends on transcript.js and linear.js)
+22. `auto-count.js` - Auto-increment on ticket resolution
+23. `export.js` - Data export functionality
+24. `timer-manager.js` - Unified timer for recurring tasks
+25. `content.js` - Main app initialization (must be last)
 
 ### Local Development
 
