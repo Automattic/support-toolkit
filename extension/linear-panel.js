@@ -3,17 +3,16 @@
 // This module provides a right-side panel for searching Linear issues directly from Zendesk.
 //
 // KEY FEATURES:
-// 1. **AI-Powered Search** - "Find Similar Issues" button that:
-//    - Extracts the current ticket conversation using transcript.js
-//    - Sends it to Google Gemini AI to understand the context
-//    - AI identifies the feature/component being discussed (e.g., "Cookie Consent")
-//    - Automatically searches Linear with smart terms
-//    - Shows results with AI context banner
+// 1. **Keyword Suggestions** - Privacy-first approach:
+//    - Extracts ticket conversation locally using transcript.js
+//    - Analyzes keywords locally (no external APIs, no data leaves browser)
+//    - Shows clickable keyword chips for quick searching
+//    - Each chip searches Linear when clicked
 //
 // 2. **Manual Search** - Traditional search with:
 //    - Team filtering (or "All Teams" to search everything)
 //    - Status filtering (In Progress, Done, etc.)
-//    - Free-text search
+//    - Free-text search input
 //
 // 3. **Autocomplete Team Dropdown** - Type to filter teams, shows team keys
 //
@@ -22,7 +21,7 @@
 // ARCHITECTURE:
 // - IIFE pattern for private scope
 // - Global exports on window.ZDLinearPanel
-// - Communicates with background.js for AI API calls (Manifest V3 requirement)
+// - All processing happens client-side (privacy-first)
 // - Uses ZDTranscript module for ticket extraction
 // - Uses ZDLinear module for GraphQL API calls
 //
@@ -149,15 +148,12 @@
             </div>
 
             <div class="zd-linear-filters">
-                <!-- AI Search Button -->
-                <div class="zd-linear-ai-search-section">
-                    <button id="zd-linear-ai-search-btn" class="zd-linear-ai-search-btn" title="Use AI to search for similar issues based on this ticket">
-                        Find Similar Issues
+                <!-- Keyword Suggestions -->
+                <div class="zd-linear-keyword-section">
+                    <button id="zd-linear-keyword-btn" class="zd-linear-keyword-btn" title="Extract keywords from this ticket to help you search">
+                        Get Keywords from Ticket
                     </button>
-                </div>
-
-                <div class="zd-linear-filters-divider">
-                    <span>OR</span>
+                    <div id="zd-linear-keyword-chips" class="zd-linear-keyword-chips" style="display: none;"></div>
                 </div>
 
                 <!-- Team Selection with Autocomplete -->
@@ -225,7 +221,7 @@
     function setupEventListeners() {
         if (!linearPanelEl) return;
 
-        const aiSearchBtn = linearPanelEl.querySelector('#zd-linear-ai-search-btn');
+        const keywordBtn = linearPanelEl.querySelector('#zd-linear-keyword-btn');
         const teamInput = linearPanelEl.querySelector('#zd-linear-team-input');
         const teamDropdown = linearPanelEl.querySelector('#zd-linear-team-dropdown');
         const statusSelect = linearPanelEl.querySelector('#zd-linear-status-select');
@@ -233,8 +229,8 @@
         const searchBtn = linearPanelEl.querySelector('#zd-linear-search-btn');
         const closeBtn = linearPanelEl.querySelector('.zd-linear-close-btn');
 
-        // AI Search button
-        aiSearchBtn.addEventListener('click', performAISearch);
+        // Keyword extraction button
+        keywordBtn.addEventListener('click', extractAndShowKeywords);
 
         // Team input focus - show dropdown and select all text
         teamInput.addEventListener('focus', () => {
@@ -487,173 +483,300 @@
      * If AI API key is not configured, the background script automatically
      * falls back to simple keyword extraction (still better than nothing).
      */
-    async function performAISearch() {
-        console.log('[Linear Panel] AI Search started');
 
-        // Get references to all UI controls
-        const aiSearchBtn = linearPanelEl.querySelector('#zd-linear-ai-search-btn');
-        const teamInput = linearPanelEl.querySelector('#zd-linear-team-input');
-        const statusSelect = linearPanelEl.querySelector('#zd-linear-status-select');
-        const searchInput = linearPanelEl.querySelector('#zd-linear-search-input');
-        const searchBtn = linearPanelEl.querySelector('#zd-linear-search-btn');
+    /**
+     * Extract keywords from ticket conversation
+     *
+     * Privacy-first approach: All processing happens locally in the browser.
+     * No data is sent to external APIs.
+     *
+     * This function extracts the most relevant keywords from the ticket to help users
+     * quickly search Linear. Keywords are extracted based on:
+     * - Frequency (how often they appear)
+     * - Technical relevance (capitalized words, product names)
+     * - Filtering out common words (stopwords)
+     *
+     * @param {string} text - The text to extract keywords from
+     * @returns {string[]} Array of 5-8 keywords sorted by relevance
+     */
+    function extractKeywordsFromText(text) {
+        // COMPREHENSIVE STOPWORDS - Expanded to be much more aggressive
+        // These are common words that don't help with search
+        const stopwords = new Set([
+            // Articles & demonstratives
+            'the', 'a', 'an', 'this', 'that', 'these', 'those',
+            // Prepositions
+            'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'into',
+            'through', 'during', 'before', 'after', 'above', 'below', 'between', 'under', 'over',
+            // Conjunctions
+            'and', 'or', 'but', 'nor', 'yet', 'so', 'if', 'then', 'because', 'while', 'although',
+            // Pronouns
+            'i', 'you', 'he', 'she', 'it', 'we', 'they', 'them', 'their', 'my', 'your', 'our',
+            'me', 'him', 'her', 'us', 'myself', 'yourself', 'himself', 'herself', 'itself',
+            // Verbs (common)
+            'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does',
+            'did', 'will', 'would', 'should', 'could', 'may', 'might', 'must', 'can', 'get', 'got',
+            'make', 'made', 'go', 'going', 'gone', 'come', 'came', 'see', 'saw', 'look', 'looking',
+            'know', 'find', 'use', 'using', 'used', 'give', 'take', 'work', 'works', 'working',
+            'keep', 'kept', 'let', 'put', 'seem', 'seems', 'tell', 'ask', 'asked', 'show', 'try',
+            // Support-specific stopwords
+            'user', 'customer', 'help', 'issue', 'problem', 'question', 'ticket', 'request',
+            'need', 'needs', 'want', 'wants', 'having', 'getting', 'trying', 'able', 'unable',
+            'hi', 'hello', 'hey', 'thanks', 'thank', 'please', 'yes', 'no', 'okay', 'ok', 'sure',
+            'bot', 'agent', 'end-user', 'support', 'zendesk', 'linear', 'app', 'website', 'site',
+            // Generic business/product terms
+            'free', 'paid', 'premium', 'basic', 'plan', 'plans', 'personal', 'business', 'enterprise',
+            'new', 'old', 'current', 'previous', 'next', 'first', 'last', 'now', 'here', 'there',
+            'thing', 'things', 'something', 'anything', 'everything', 'nothing', 'way', 'ways',
+            'time', 'times', 'page', 'pages', 'link', 'links', 'button', 'buttons', 'click', 'clicking',
+            // Generic adjectives and adverbs
+            'user-friendly', 'same', 'different', 'good', 'bad', 'better', 'best', 'worse', 'worst',
+            'also', 'just', 'really', 'very', 'too', 'quite', 'rather', 'pretty', 'kind', 'sort',
+            'sometimes', 'usually', 'always', 'never', 'often', 'maybe', 'probably', 'actually',
+            // Meta/system words
+            'transcript', 'summary', 'internal-note', 'conversation', 'message', 'chat', 'email',
+            'appearance', 'option', 'options', 'setting', 'settings', 'section', 'tab', 'menu',
+            // Generic verbs
+            'add', 'added', 'adding', 'remove', 'removing', 'delete', 'change', 'changing', 'edit',
+            // Generic nouns that need context
+            'back', 'front', 'additional', 'custom', 'content', 'text',
+            // User-specific info (not relevant for Linear search)
+            'site-name', 'site-url', 'email', 'emails', 'username', 'user-id',
+            // Product names that are too generic
+            'wordpress', 'wp',
+            // Numbers and dates (when standalone)
+            'one', 'two', 'three', 'four', 'five', 'today', 'yesterday', 'tomorrow', 'day', 'week',
+            'month', 'year', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+            // URLs and technical noise (removed css from here - it's actually relevant!)
+            'http', 'https', 'www', 'com', 'net', 'org', 'html', 'js', 'php'
+        ]);
 
-        // Store original button text so we can restore it later
-        const originalButtonText = aiSearchBtn.textContent;
-        console.log('[Linear Panel] Original button text:', originalButtonText);
+        // WORDPRESS/TECHNICAL TERMS - Words that are highly relevant for Linear search
+        const technicalTerms = new Set([
+            // Core WordPress concepts
+            'theme', 'themes', 'plugin', 'plugins', 'widget', 'widgets',
+            // Design/layout
+            'css', 'javascript', 'stylesheet', 'style', 'styles',
+            'sidebar', 'header', 'footer', 'navigation', 'menu',
+            'margin', 'padding', 'spacing', 'layout', 'template', 'customizer',
+            // Features
+            'tagline', 'subscribe', 'subscription', 'editor', 'block', 'blocks',
+            // Products
+            'jetpack', 'woocommerce', 'elementor', 'gutenberg',
+            // Technical
+            'database', 'admin', 'dashboard', 'domain', 'hosting', 'api'
+        ]);
 
-        /**
-         * Re-enable all controls after search completes (success or error)
-         *
-         * This helper function is called in multiple places (success, error, etc.)
-         * to ensure controls are always re-enabled and the UI isn't left in a disabled state.
-         */
-        const enableControls = () => {
-            aiSearchBtn.disabled = false;
-            aiSearchBtn.textContent = originalButtonText;
-            teamInput.disabled = false;
-            searchInput.disabled = false;
+        // WORD EXTRACTION with better filtering
+        const words = text
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, ' ')  // Keep alphanumeric, spaces, hyphens
+            .split(/\s+/)
+            .filter(word => {
+                if (!word) return false;
+                if (word.length < 3) return false;
+                if (stopwords.has(word)) return false;
+                if (/^\d+$/.test(word)) return false;  // Just numbers
+                if (word.includes('@') || word.includes('.com') || word.includes('.net')) return false;
+                if (word.length > 30) return false;  // Likely a URL or ID
+                // Filter out domain-like patterns (site names)
+                if (word.includes('.jp') || word.includes('.uk') || word.includes('.io') || word.includes('.co')) return false;
+                // Filter out words that look like site identifiers (long hyphenated user-specific names)
+                if (word.includes('-') && word.length > 15 && !technicalTerms.has(word)) return false;
+                return true;
+            });
 
-            // Only enable search button if teams are loaded
-            // (search button is disabled on initial load until we know what teams exist)
-            if (selectedTeam || allTeams.length > 0) {
-                searchBtn.disabled = false;
+        // FREQUENCY COUNTING
+        const wordCount = {};
+        for (const word of words) {
+            wordCount[word] = (wordCount[word] || 0) + 1;
+        }
+
+        // SMART SCORING: Frequency + Technical Relevance
+        const totalWords = words.length;
+        const scores = {};
+
+        for (const [word, count] of Object.entries(wordCount)) {
+            let score = 0;
+
+            // PRIORITY 1: Technical WordPress/web terms get HUGE boost
+            if (technicalTerms.has(word)) {
+                score = count * 50;  // Multiply frequency by 50!
+                // "css" appearing 10 times = score of 500
+            }
+            // PRIORITY 2: Specific names (theme names, site names) - Usually longer, unique words
+            // These appear a few times and are specific identifiers
+            else if (count >= 2 && count <= 8 && word.length >= 6) {
+                score = count * 30;  // High score for specific identifiers
+                // "retrospect" appearing 3 times = score of 90
+            }
+            // PRIORITY 3: Words that appear multiple times (the actual topic)
+            else if (count >= 3 && count <= 15) {
+                score = count * 10;  // Solid frequency = important
+            }
+            // PRIORITY 4: Words appearing 2 times
+            else if (count === 2) {
+                score = 15;
+            }
+            // PRIORITY 5: Rare words (might be specific but less confirmed)
+            else if (count === 1) {
+                score = 5;
+            }
+            // Too common (appears in almost every message)
+            else {
+                score = 2;
             }
 
-            // Re-enable status dropdown only if workflow states are loaded for selected team
-            // (status dropdown is team-specific, so it's disabled when "All Teams" is selected)
-            if (workflowStates.length > 0) {
-                statusSelect.disabled = false;
+            // BONUS: Capitalized in original text (product names like "Goran", "WordPress")
+            const capitalPattern = new RegExp(`\\b${word.charAt(0).toUpperCase()}${word.slice(1)}\\b`, 'i');
+            if (capitalPattern.test(text)) {
+                score *= 1.5;
             }
-        };
+
+            // BONUS: Longer, more specific words
+            if (word.length > 8) {
+                score *= 1.3;
+            }
+
+            // BONUS: Hyphenated words that aren't in stopwords (feature names like "cookie-consent")
+            // But NOT generic ones like "user-friendly" (already in stopwords)
+            if (word.includes('-') && word.length > 6 && !stopwords.has(word)) {
+                score *= 2;
+            }
+
+            scores[word] = score;
+        }
+
+        // SORTING & LIMITING
+        const sortedKeywords = Object.entries(scores)
+            .filter(([word, score]) => score >= 10)  // Higher threshold - only quality keywords
+            .sort((a, b) => b[1] - a[1])
+            .map(([word]) => word)
+            .slice(0, 8);
+
+        return sortedKeywords;
+    }
+
+    /**
+     * Extract keywords and display them as clickable chips
+     *
+     * This function:
+     * 1. Extracts the ticket conversation using ZDTranscript
+     * 2. Extracts keywords locally (no API calls)
+     * 3. Shows them as clickable chips below the button
+     * 4. Each chip searches Linear when clicked
+     */
+    function extractAndShowKeywords() {
+        console.log('[Linear Panel] Extracting keywords from ticket');
+
+        const keywordBtn = linearPanelEl.querySelector('#zd-linear-keyword-btn');
+        const keywordChipsContainer = linearPanelEl.querySelector('#zd-linear-keyword-chips');
+
+        // Check if ZDTranscript is available
+        if (!window.ZDTranscript) {
+            showErrorState('Transcript extraction not available. Please refresh the page.');
+            return;
+        }
+
+        // Change button text to show we're working
+        const originalText = keywordBtn.textContent;
+        keywordBtn.disabled = true;
+        keywordBtn.textContent = 'Extracting...';
 
         try {
-            // STEP 1: DISABLE ALL CONTROLS
-            // Lock the UI to prevent user from clicking other buttons while AI search is running.
-            // This creates a clear loading state and prevents confusion.
-            aiSearchBtn.disabled = true;
-            aiSearchBtn.textContent = 'Searching...';  // Visual feedback
-            teamInput.disabled = true;
-            statusSelect.disabled = true;
-            searchInput.disabled = true;
-            searchBtn.disabled = true;
-
-            // STEP 2: CHECK DEPENDENCIES
-            // ZDTranscript module should be loaded via manifest.json, but we check
-            // to be safe. If it's missing, the extension might not have loaded correctly.
-            if (!window.ZDTranscript) {
-                showErrorState('Transcript extraction not available. Please refresh the page.');
-                enableControls();
-                return;
-            }
-
-            showLoadingState('Analyzing ticket...');
-
-            // STEP 3: EXTRACT CONVERSATION FROM ZENDESK TICKET
-            // This calls transcript.js to scrape the DOM and get all messages
-            // from bots, agents, and end-users in the current ticket.
-            console.log('[Linear Panel] Extracting transcript...');
+            // Extract transcript from current ticket
             const transcriptData = window.ZDTranscript.extractTranscript();
-            console.log('[Linear Panel] Transcript data:', transcriptData);
 
-            // Validate transcript extraction succeeded
             if (!transcriptData.success) {
-                console.error('[Linear Panel] Transcript extraction failed:', transcriptData.error);
-                showErrorState(transcriptData.error || 'Failed to extract ticket transcript');
-                enableControls();
+                showErrorState(transcriptData.error || 'Failed to extract ticket conversation');
+                keywordBtn.disabled = false;
+                keywordBtn.textContent = originalText;
                 return;
             }
 
             const { title, transcript } = transcriptData;
-            console.log('[Linear Panel] Extracted title:', title);
-            console.log('[Linear Panel] Extracted transcript length:', transcript.length);
 
-            // STEP 4: GET API KEYS FROM CHROME STORAGE
-            // We need two keys:
-            // - linearApiKey: Required for searching Linear (if missing, we can't continue)
-            // - aiApiKey: Optional for Google Gemini (if missing, background.js falls back to keywords)
-            const cfg = await window.ZDStorage.getConfig();
-            const linearApiKey = cfg.linearApiKey || '';
-            const aiApiKey = cfg.aiApiKey || '';
-            console.log('[Linear Panel] Linear API key present:', !!linearApiKey);
-            console.log('[Linear Panel] AI API key present:', !!aiApiKey);
+            // Extract keywords from transcript ONLY (title usually has no relevant context)
+            const keywords = extractKeywordsFromText(transcript);
 
-            if (!linearApiKey) {
-                showErrorState('Linear API key not configured');
-                enableControls();
+            console.log('[Linear Panel] Extracted keywords:', keywords);
+
+            if (keywords.length === 0) {
+                keywordChipsContainer.innerHTML = '<div class="zd-linear-keyword-empty">No keywords found in this ticket</div>';
+                keywordChipsContainer.style.display = 'block';
+                keywordBtn.disabled = false;
+                keywordBtn.textContent = originalText;
                 return;
             }
 
-            // STEP 5: SEND TO BACKGROUND SCRIPT FOR AI ANALYSIS
-            // Why background script? Chrome Extension Manifest V3 requires that all
-            // external API calls (like Gemini) happen in the background service worker,
-            // not in content scripts. So we send a message to background.js.
-            //
-            // The background script will:
-            // 1. Send transcript to Google Gemini AI
-            // 2. AI extracts feature names (e.g., "Cookie Consent")
-            // 3. Returns { searchQuery: "...", summary: "..." }
-            // 4. OR falls back to keyword extraction if AI fails/not configured
-            showLoadingState('Analyzing conversation...');
-            console.log('[Linear Panel] Sending message to background script...');
+            // Create clickable chips
+            const chipsHTML = keywords.map(keyword => {
+                return `<button class="zd-linear-keyword-chip" data-keyword="${keyword}">${keyword}</button>`;
+            }).join('');
 
-            // Send message using Chrome Extension message passing API
-            chrome.runtime.sendMessage({
-                type: 'AI_LINEAR_SEARCH',
-                title: title,
-                transcript: transcript,
-                apiKey: aiApiKey // Will use AI if available, otherwise falls back to keywords
-            }, async (response) => {
-                // STEP 6: HANDLE RESPONSE FROM BACKGROUND SCRIPT
-                // The background script has completed AI analysis and returned search terms
-                console.log('[Linear Panel] Received response from background:', response);
+            keywordChipsContainer.innerHTML = chipsHTML;
+            keywordChipsContainer.style.display = 'flex';
 
-                if (!response.success) {
-                    // AI analysis failed completely (e.g., network error, invalid API key)
-                    showErrorState(response.error || 'AI search failed');
-                    enableControls();
-                    return;
-                }
-
-                // Extract AI-generated search query and summary
-                const { searchQuery, summary } = response.searchTerms;
-                console.log('[Linear Panel] AI generated search query:', searchQuery);
-                console.log('[Linear Panel] AI summary:', summary);
-
-                // Update loading message to show what we're searching for
-                showLoadingState(`Searching Linear for: "${searchQuery}"`);
-
-                // STEP 7: SEARCH LINEAR WITH AI-GENERATED TERMS
-                // Now that AI has identified the feature/component, search Linear
-                try {
-                    // Search all teams (not limited to selected team)
-                    // This gives best chance of finding similar issues across the product
-                    const results = await window.ZDLinear.searchAllTeams({
-                        search: searchQuery,
-                        stateId: undefined  // Don't filter by status
-                    }, linearApiKey);
-
-                    // STEP 8: DISPLAY RESULTS WITH AI CONTEXT
-                    // Show results with a banner explaining what AI searched for and why
-                    // This transparency helps users understand the AI's reasoning
-                    displayResults(results, {
-                        isAISearch: true,
-                        searchQuery: searchQuery,
-                        summary: summary
-                    });
-
-                    // Re-enable controls so user can refine search if needed
-                    enableControls();
-                } catch (error) {
-                    console.error('[Linear Panel] AI search failed:', error);
-                    showErrorState(error.message);
-                    enableControls();
-                }
+            // Add click handlers to chips
+            keywordChipsContainer.querySelectorAll('.zd-linear-keyword-chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    const keyword = chip.dataset.keyword;
+                    searchWithKeyword(keyword);
+                });
             });
 
+            // Re-enable button
+            keywordBtn.disabled = false;
+            keywordBtn.textContent = originalText;
+
         } catch (error) {
-            console.error('[Linear Panel] AI search failed:', error);
+            console.error('[Linear Panel] Keyword extraction failed:', error);
+            showErrorState('Failed to extract keywords: ' + error.message);
+            keywordBtn.disabled = false;
+            keywordBtn.textContent = originalText;
+        }
+    }
+
+    /**
+     * Search Linear with a specific keyword
+     *
+     * When user clicks a keyword chip, this function:
+     * 1. Fills the search input with the keyword
+     * 2. Searches all teams for that keyword
+     * 3. Displays results
+     */
+    async function searchWithKeyword(keyword) {
+        console.log('[Linear Panel] Searching with keyword:', keyword);
+
+        const searchInput = linearPanelEl.querySelector('#zd-linear-search-input');
+
+        // Fill search input so user can see what we're searching for
+        searchInput.value = keyword;
+
+        // Show loading state
+        showLoadingState(`Searching for "${keyword}"...`);
+
+        try {
+            const cfg = await window.ZDStorage.getConfig();
+            const apiKey = cfg.linearApiKey || '';
+
+            if (!apiKey) {
+                showErrorState('Linear API key not configured');
+                return;
+            }
+
+            // Search all teams (not limited to selected team)
+            const results = await window.ZDLinear.searchAllTeams({
+                search: keyword,
+                stateId: undefined
+            }, apiKey);
+
+            // Display results
+            displayResults(results);
+
+        } catch (error) {
+            console.error('[Linear Panel] Search failed:', error);
             showErrorState(error.message);
-            enableControls();
         }
     }
 
@@ -707,57 +830,19 @@
     /**
      * Display search results
      *
-     * This function renders the search results in the panel. It supports both
-     * manual search and AI search, with special handling for AI context.
-     *
      * @param {Array} results - Array of Linear issues from ZDLinear.searchIssues()
-     * @param {Object} context - Optional context object:
-     *   - isAISearch: {boolean} Whether this was AI-generated search
-     *   - searchQuery: {string} What terms were searched
-     *   - summary: {string} AI's explanation of what the ticket is about
-     *
-     * AI CONTEXT BANNER:
-     * When results come from AI search, we show a banner at the top explaining:
-     * - That this was AI-generated (transparency)
-     * - What search terms were used
-     * - Why (the AI's understanding of the ticket)
-     *
-     * This helps users understand the AI's reasoning and decide if they need
-     * to refine the search manually.
      */
-    function displayResults(results, context = null) {
+    function displayResults(results) {
         if (!linearPanelEl) return;
 
         const resultsContainer = linearPanelEl.querySelector('.zd-linear-results-container');
 
-        // AI SEARCH BANNER
-        // If this was an AI search, add a banner explaining what was searched and why.
-        // We show this banner EVEN when there are no results, so the user understands
-        // what the AI tried to search for (helps with debugging when no results found).
-        let aiBannerHTML = '';
-        if (context?.isAISearch) {
-            aiBannerHTML = `
-                <div class="zd-linear-ai-banner">
-                    <div class="zd-linear-ai-banner-icon">🤖</div>
-                    <div class="zd-linear-ai-banner-content">
-                        <div class="zd-linear-ai-banner-title">AI-Generated Search</div>
-                        <div class="zd-linear-ai-banner-query">Searched for: "${context.searchQuery}"</div>
-                        <div class="zd-linear-ai-banner-summary">${context.summary}</div>
-                    </div>
-                </div>
-            `;
-        }
-
         if (!results || results.length === 0) {
-            const noResultsHint = context?.isAISearch
-                ? 'No similar issues found with AI search terms. Try manual search below.'
-                : 'Try different filters or search terms';
-
-            resultsContainer.innerHTML = aiBannerHTML + `
+            resultsContainer.innerHTML = `
                 <div class="zd-linear-empty-state">
                     <div class="zd-linear-empty-icon">🔍</div>
                     <div class="zd-linear-empty-text">No issues found</div>
-                    <div class="zd-linear-empty-hint">${noResultsHint}</div>
+                    <div class="zd-linear-empty-hint">Try different filters or search terms</div>
                 </div>
             `;
             return;
@@ -795,7 +880,7 @@
             `;
         }).join('');
 
-        resultsContainer.innerHTML = aiBannerHTML + resultsHTML;
+        resultsContainer.innerHTML = resultsHTML;
 
         // Add click handlers to cards
         resultsContainer.querySelectorAll('.zd-linear-issue-card').forEach(card => {

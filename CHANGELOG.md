@@ -13,6 +13,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Data export formats (JSON, CSV, Excel)
 - Unit tests and CI/CD pipeline
 
+## [2.6.2] - 2025-01-26
+
+### Changed
+- **Privacy-First Approach**: Removed all external AI API integration to protect customer data
+- Replaced AI-powered search with local keyword extraction (no data leaves browser)
+- Keyword suggestions are now generated entirely client-side
+- Added clickable keyword chips UI for quick Linear searches
+- Improved keyword extraction algorithm with comprehensive stopword filtering
+- Keywords now prioritize capitalized terms (product names, features)
+
+### Removed
+- Google Gemini AI integration for Linear search
+- AI context banner from search results
+- Gemini API key requirement
+- All external API calls for ticket analysis
+
+### Technical
+- All transcript analysis now happens locally in browser
+- Enhanced stopword list for better keyword relevance
+- Frequency-based keyword scoring with technical term bonuses
+- No customer conversation data sent to third-party services
+
 ## [2.6.1] - 2025-01-22
 
 ### Added

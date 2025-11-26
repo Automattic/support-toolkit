@@ -7,7 +7,7 @@
 *Quality-of-life improvements for customer support workflows on Zendesk*
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/support-toolkit/gnjghfobmfiilldpoedmjfdfehkohefk)
-[![Version](https://img.shields.io/badge/version-2.6.1-blue.svg)](https://github.com/Automattic/support-toolkit)
+[![Version](https://img.shields.io/badge/version-2.6.2-blue.svg)](https://github.com/Automattic/support-toolkit)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Manifest](https://img.shields.io/badge/manifest-v3-orange.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 
@@ -83,14 +83,14 @@ A floating toolbar that lives in your Zendesk workspace, giving you:
 - **User-provided API key** for privacy
 - **Rate limiting** and error handling
 
-### 🔗 Linear Integration
-- **AI-powered "Find Similar Issues"** - Automatically analyzes Zendesk tickets and searches Linear
-- **Intelligent transcript extraction** from Zendesk conversations
-- **Context-aware search** - AI identifies feature names vs generic keywords
+### 🔗 Linear Integration (Privacy-First)
+- **Smart keyword suggestions** - Extracts relevant keywords from tickets locally (no external APIs)
+- **Client-side processing** - All analysis happens in browser, no customer data leaves your machine
+- **Clickable keyword chips** - One-click search with extracted terms
 - **Manual search** with team filtering and status selection
 - **Team autocomplete** - Type to search across all products
 - **Click-to-open** results in new tabs
-- **Graceful fallbacks** - Works even without AI configured (keyword extraction)
+- **Zero third-party data sharing** - Complete privacy protection for customer conversations
 
 ### 📈 Statistics & Analytics
 - **Daily/weekly/monthly breakdowns** of interactions
@@ -209,27 +209,30 @@ A floating toolbar that lives in your Zendesk workspace, giving you:
    - Get your Linear API key from [Linear Settings](https://linear.app/a8c/settings/account/security)
    - Click the settings icon (⚙️) in the Support Toolkit toolbar
    - Paste your Linear API key (starts with `lin_api_`)
-   - *(Optional)* Add your Google Gemini API key for AI-powered search
 
-2. **Find Similar Issues (AI):**
+2. **Get Keyword Suggestions:**
    - Open any Zendesk ticket
    - Click the Linear button in the toolbar to open the panel
-   - Click **"Find Similar Issues"** button
-   - AI analyzes the ticket conversation and extracts the core feature/issue
-   - Results appear automatically with AI context banner showing what was searched
+   - Click **"Get Keywords from Ticket"** button
+   - Keywords are extracted locally from the conversation (no external APIs)
+   - Clickable keyword chips appear below the button
 
-3. **Manual Search:**
+3. **Search with Keywords:**
+   - Click any keyword chip to instantly search Linear for that term
+   - The search input auto-fills with the selected keyword
+   - Results appear for all teams matching that keyword
+
+4. **Manual Search:**
    - Click the team input to select a specific team (or keep "All Teams")
    - Optionally select a status filter (In Progress, Done, etc.)
    - Type search terms in the search box
    - Click **"Search"** button
 
-4. **View Results:**
+5. **View Results:**
    - Click any issue card to open it in Linear
-   - AI searches show a banner explaining what was searched and why
-   - Refine your search manually if needed
+   - Refine your search with different keywords or manual terms as needed
 
-**Note:** AI search works best when both Linear and Gemini API keys are configured, but falls back to keyword extraction if Gemini key is missing.
+**Privacy Note:** All keyword extraction happens locally in your browser. No ticket conversation data is sent to external services.
 
 #### Viewing Statistics
 - **Quick view**: Expand toolbar for today's summary
@@ -245,7 +248,6 @@ A floating toolbar that lives in your Zendesk workspace, giving you:
 |---------|-------------|
 | **Calendar URL** | ICS calendar URL from schedule.happy.tools |
 | **Linear API Key** | Personal API key from Linear (starts with `lin_api_`) |
-| **Gemini API Key** | Google Gemini API key for AI features (optional) |
 | **Chat Goal (per hour)** | Target number of chats per hour |
 | **Ticket Goal (per hour)** | Target number of tickets per hour |
 | **Enable Shift Reminders** | Pre-shift notifications |
