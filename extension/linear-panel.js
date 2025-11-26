@@ -500,6 +500,22 @@
      * @returns {string[]} Array of 5-8 keywords sorted by relevance
      */
     function extractKeywordsFromText(text) {
+        // STEP 1: Remove all URLs and domains from text BEFORE processing
+        // This prevents domain names from being extracted as keywords
+        let cleanedText = text;
+
+        // Remove full URLs (http://example.com, https://example.com/path)
+        cleanedText = cleanedText.replace(/https?:\/\/[^\s]+/gi, ' ');
+
+        // Remove domain patterns (example.com, subdomain.example.com)
+        cleanedText = cleanedText.replace(/\b[\w-]+\.(?:com|net|org|io|co|app|blog|site|online|dev|tech|ai|jp|uk|ca|au|de|fr|es|it|info|biz|me|tv|cc)\b[^\s]*/gi, ' ');
+
+        // Remove email addresses
+        cleanedText = cleanedText.replace(/\b[\w.-]+@[\w.-]+\.\w+/gi, ' ');
+
+        // Remove words that look like concatenated domains (moliereexpressionsdotcom, exampledotcom)
+        cleanedText = cleanedText.replace(/\b\w*dot(?:com|net|org|io|co)\w*\b/gi, ' ');
+
         // COMPREHENSIVE STOPWORDS - Expanded to be much more aggressive
         // These are common words that don't help with search
         const stopwords = new Set([
@@ -524,6 +540,7 @@
             'need', 'needs', 'want', 'wants', 'having', 'getting', 'trying', 'able', 'unable',
             'hi', 'hello', 'hey', 'thanks', 'thank', 'please', 'yes', 'no', 'okay', 'ok', 'sure',
             'bot', 'agent', 'end-user', 'support', 'zendesk', 'linear', 'app',
+            'happiness', 'engineer', 'team', // Support team references
             // Website/domain-related (not relevant for feature search)
             'website', 'site', 'blog', 'url', 'link', 'domain', 'address', 'web', 'online',
             'host', 'hosting', 'server', 'subdomain', 'homepage', 'webpage',
@@ -542,7 +559,7 @@
             // Generic verbs
             'add', 'added', 'adding', 'remove', 'removing', 'delete', 'change', 'changing', 'edit',
             // Generic nouns that need context
-            'back', 'front', 'additional', 'custom', 'content', 'text',
+            'back', 'front', 'additional', 'custom', 'content', 'text', 'feature', 'features',
             // User-specific info (not relevant for Linear search)
             'site-name', 'site-url', 'email', 'emails', 'username', 'user-id',
             // Product names that are too generic
@@ -570,8 +587,8 @@
             'database', 'admin', 'dashboard', 'api'
         ]);
 
-        // WORD EXTRACTION with aggressive website/domain filtering
-        const words = text
+        // WORD EXTRACTION from cleaned text (URLs/domains already removed)
+        const words = cleanedText
             .toLowerCase()
             .replace(/[^\w\s-]/g, ' ')  // Keep alphanumeric, spaces, hyphens
             .split(/\s+/)
@@ -581,32 +598,18 @@
                 if (stopwords.has(word)) return false;
                 if (/^\d+$/.test(word)) return false;  // Just numbers
 
-                // AGGRESSIVE DOMAIN/URL FILTERING
-                // Filter any word containing email/domain indicators
-                if (word.includes('@')) return false;
-                if (word.includes('.com') || word.includes('.net') || word.includes('.org')) return false;
-                if (word.includes('.io') || word.includes('.co') || word.includes('.app')) return false;
-                if (word.includes('.blog') || word.includes('.site') || word.includes('.online')) return false;
-                if (word.includes('.dev') || word.includes('.tech') || word.includes('.ai')) return false;
-                if (word.includes('.jp') || word.includes('.uk') || word.includes('.ca') || word.includes('.au')) return false;
-                if (word.includes('.de') || word.includes('.fr') || word.includes('.es') || word.includes('.it')) return false;
-
-                // Filter words that look like domains (multiple dots or domain-like patterns)
-                if (word.split('.').length > 1) return false;  // Contains dots = likely domain
-
-                // Filter very long words (likely URLs, IDs, or concatenated strings)
-                if (word.length > 30) return false;
+                // Filter very long words (likely IDs or concatenated strings)
+                if (word.length > 25) return false;
 
                 // Filter long hyphenated identifiers (site names, user IDs)
                 // BUT keep technical terms like "cookie-consent", "user-interface"
                 if (word.includes('-') && word.length > 15 && !technicalTerms.has(word)) return false;
 
-                // Filter words with numbers mixed in (likely IDs or versions unless it's a known pattern)
-                if (/\d/.test(word) && !/^(css|html|http|v\d+)$/i.test(word)) return false;
+                // Filter words with numbers mixed in (likely IDs or versions)
+                if (/\d/.test(word) && !/^(css\d+|html\d+)$/i.test(word)) return false;
 
-                // Filter words that end with common website/brand suffixes
-                if (word.endsWith('blog') || word.endsWith('site') || word.endsWith('web')) return false;
-                if (word.endsWith('online') || word.endsWith('host') || word.endsWith('server')) return false;
+                // Filter remaining domain-like patterns that slipped through
+                if (word.includes('.')) return false;
 
                 return true;
             });
