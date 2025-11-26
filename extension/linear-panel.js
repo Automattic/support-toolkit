@@ -522,10 +522,12 @@
             // Articles & demonstratives
             'the', 'a', 'an', 'this', 'that', 'these', 'those',
             // Prepositions
-            'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'into',
+            'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'into', 'onto',
             'through', 'during', 'before', 'after', 'above', 'below', 'between', 'under', 'over',
-            // Conjunctions
+            'out', 'off', 'down', 'around', 'near', 'against', 'within', 'without', 'beyond', 'across',
+            // Conjunctions and negations
             'and', 'or', 'but', 'nor', 'yet', 'so', 'if', 'then', 'because', 'while', 'although',
+            'not', 'don', 'doesn', 'didn', 'won', 'wouldn', 'shouldn', 'couldn', 'isn', 'aren', 'wasn', 'weren',
             // Pronouns
             'i', 'you', 'he', 'she', 'it', 'we', 'they', 'them', 'their', 'my', 'your', 'our',
             'me', 'him', 'her', 'us', 'myself', 'yourself', 'himself', 'herself', 'itself',
@@ -535,6 +537,12 @@
             'make', 'made', 'go', 'going', 'gone', 'come', 'came', 'see', 'saw', 'look', 'looking',
             'know', 'find', 'use', 'using', 'used', 'give', 'take', 'work', 'works', 'working',
             'keep', 'kept', 'let', 'put', 'seem', 'seems', 'tell', 'ask', 'asked', 'show', 'try',
+            'like', 'likes', 'liked', 'liking', 'say', 'said', 'saying', 'says',
+            'become', 'becomes', 'became', 'becoming', 'call', 'called', 'calling', 'calls',
+            'start', 'started', 'starting', 'starts', 'end', 'ended', 'ending', 'ends',
+            'turn', 'turned', 'turning', 'turns', 'mean', 'means', 'meant', 'meaning',
+            'leave', 'left', 'leaving', 'leaves', 'feel', 'felt', 'feeling', 'feels',
+            'bring', 'brought', 'bringing', 'brings', 'run', 'ran', 'running', 'runs',
             'connect', 'connecting', 'connected', 'connection',
             'lose', 'lost', 'losing', 'stop', 'stops', 'stopped', 'stopping',
             'revert', 'reverts', 'reverting', 'drop', 'drops', 'dropped', 'dropping',
@@ -567,6 +575,9 @@
             // Interrogatives and connectors
             'what', 'when', 'where', 'why', 'how', 'who', 'which', 'whose', 'whom',
             'instead', 'however', 'therefore', 'thus', 'hence', 'moreover', 'furthermore',
+            // Determiners and quantifiers
+            'all', 'any', 'some', 'each', 'every', 'both', 'either', 'neither', 'another', 'other',
+            'such', 'own', 'only', 'even', 'still', 'well',
             // Generic adjectives and adverbs
             'user-friendly', 'same', 'different', 'good', 'bad', 'better', 'best', 'worse', 'worst',
             'also', 'just', 'really', 'very', 'too', 'quite', 'rather', 'pretty', 'kind', 'sort',
@@ -575,6 +586,9 @@
             'able', 'unable', 'available', 'unavailable', 'possible', 'impossible',
             'little', 'much', 'many', 'few', 'several', 'enough', 'more', 'most', 'less', 'least',
             'specific', 'general', 'particular', 'certain', 'related', 'relevant',
+            'right', 'left', 'long', 'short', 'big', 'small', 'large', 'great', 'nice', 'fine',
+            'high', 'low', 'full', 'empty', 'whole', 'half', 'single', 'double',
+            'main', 'major', 'minor', 'important', 'significant', 'common', 'rare',
             // Meta/system words
             'transcript', 'summary', 'internal-note', 'conversation', 'message', 'chat', 'email',
             'appearance', 'option', 'options', 'setting', 'settings', 'section', 'tab', 'menu',
@@ -587,6 +601,12 @@
             'reason', 'reasons', 'chance', 'opportunity', 'situation', 'information',
             'data', 'result', 'results', 'process', 'step', 'steps',
             'action', 'actions', 'taken', 'point', 'points', 'example', 'examples',
+            'design', 'part', 'parts', 'area', 'areas', 'place', 'places',
+            'side', 'top', 'bottom', 'beginning', 'middle', 'center',
+            'number', 'numbers', 'amount', 'total', 'value', 'values',
+            'type', 'types', 'version', 'versions', 'form', 'forms',
+            'list', 'lists', 'item', 'items', 'element', 'elements',
+            'method', 'methods', 'approach',
             // User-specific info (not relevant for Linear search)
             'site-name', 'site-url', 'email', 'emails', 'username', 'user-id',
             // Product names that are too generic
