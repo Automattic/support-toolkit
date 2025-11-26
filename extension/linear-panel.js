@@ -535,12 +535,27 @@
             'make', 'made', 'go', 'going', 'gone', 'come', 'came', 'see', 'saw', 'look', 'looking',
             'know', 'find', 'use', 'using', 'used', 'give', 'take', 'work', 'works', 'working',
             'keep', 'kept', 'let', 'put', 'seem', 'seems', 'tell', 'ask', 'asked', 'show', 'try',
+            'connect', 'connecting', 'connected', 'connection',
+            'lose', 'lost', 'losing', 'stop', 'stops', 'stopped', 'stopping',
+            'revert', 'reverts', 'reverting', 'drop', 'drops', 'dropped', 'dropping',
+            'allow', 'allows', 'allowing', 'allowed', 'provide', 'provides', 'providing', 'provided',
+            'check', 'checks', 'checking', 'checked', 'follow', 'follows', 'following', 'followed',
+            'hear', 'heard', 'hearing', 'move', 'moves', 'moving', 'moved',
+            'happen', 'happens', 'happened', 'happening', 'join', 'joined', 'joining',
+            'appear', 'appears', 'appeared', 'appearing', 'reach', 'reached', 'reaching',
+            'share', 'shared', 'sharing', 'wait', 'waiting', 'waited',
+            'understand', 'understanding', 'understands', 'understood',
+            'explain', 'explains', 'explaining', 'explained',
             // Support-specific stopwords
             'user', 'customer', 'help', 'issue', 'problem', 'question', 'ticket', 'request',
             'need', 'needs', 'want', 'wants', 'having', 'getting', 'trying', 'able', 'unable',
             'hi', 'hello', 'hey', 'thanks', 'thank', 'please', 'yes', 'no', 'okay', 'ok', 'sure',
             'bot', 'agent', 'end-user', 'support', 'zendesk', 'linear', 'app',
-            'happiness', 'engineer', 'team', // Support team references
+            'happiness', 'engineer', 'team', 'assist', 'assistance', 'assisted', // Support team references
+            'sorry', 'apology', 'apologize', 'appreciate', 'appreciated', 'appreciating', // Polite phrases
+            'worry', 'patience', 'patient', 'prompting', 'proceed', 'primary', // Support conversation words
+            'choice', 'choose', 'chosen', 'choosing', 'consider', 'considering', 'considered',
+            'longer', 'usual', 'minute', 'minutes', 'hour', 'hours',
             // Website/domain-related (not relevant for feature search)
             'website', 'site', 'blog', 'url', 'link', 'domain', 'address', 'web', 'online',
             'host', 'hosting', 'server', 'subdomain', 'homepage', 'webpage',
@@ -549,10 +564,17 @@
             'new', 'old', 'current', 'previous', 'next', 'first', 'last', 'now', 'here', 'there',
             'thing', 'things', 'something', 'anything', 'everything', 'nothing', 'way', 'ways',
             'time', 'times', 'page', 'pages', 'link', 'links', 'button', 'buttons', 'click', 'clicking',
+            // Interrogatives and connectors
+            'what', 'when', 'where', 'why', 'how', 'who', 'which', 'whose', 'whom',
+            'instead', 'however', 'therefore', 'thus', 'hence', 'moreover', 'furthermore',
             // Generic adjectives and adverbs
             'user-friendly', 'same', 'different', 'good', 'bad', 'better', 'best', 'worse', 'worst',
             'also', 'just', 'really', 'very', 'too', 'quite', 'rather', 'pretty', 'kind', 'sort',
             'sometimes', 'usually', 'always', 'never', 'often', 'maybe', 'probably', 'actually',
+            'advanced', 'basic', 'simple', 'easy', 'difficult', 'hard', 'quick', 'fast', 'slow',
+            'able', 'unable', 'available', 'unavailable', 'possible', 'impossible',
+            'little', 'much', 'many', 'few', 'several', 'enough', 'more', 'most', 'less', 'least',
+            'specific', 'general', 'particular', 'certain', 'related', 'relevant',
             // Meta/system words
             'transcript', 'summary', 'internal-note', 'conversation', 'message', 'chat', 'email',
             'appearance', 'option', 'options', 'setting', 'settings', 'section', 'tab', 'menu',
@@ -560,6 +582,11 @@
             'add', 'added', 'adding', 'remove', 'removing', 'delete', 'change', 'changing', 'edit',
             // Generic nouns that need context
             'back', 'front', 'additional', 'custom', 'content', 'text', 'feature', 'features',
+            'access', 'guidance', 'detail', 'details', 'case', 'cases', 'bit', 'bits',
+            'impact', 'impacts', 'change', 'changes', 'experience', 'decision',
+            'reason', 'reasons', 'chance', 'opportunity', 'situation', 'information',
+            'data', 'result', 'results', 'process', 'step', 'steps',
+            'action', 'actions', 'taken', 'point', 'points', 'example', 'examples',
             // User-specific info (not relevant for Linear search)
             'site-name', 'site-url', 'email', 'emails', 'username', 'user-id',
             // Product names that are too generic
