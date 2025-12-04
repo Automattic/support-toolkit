@@ -1272,7 +1272,6 @@ async function checkForVersionUpdate() {
                     <section class="zd-settings-section">
                         <div class="zd-section-header">
                             <h3>Appearance & Themes</h3>
-                            <p class="zd-section-desc">Customize your look</p>
                         </div>
 
                         <div class="zd-setting-item">
@@ -1655,11 +1654,21 @@ async function checkForVersionUpdate() {
             showNotes: panel.querySelector('.cfg-showNotes').checked,
             showStats: panel.querySelector('.cfg-showStats').checked,
 
+            // Theme settings
+            currentTheme: panel.querySelector('#zd-theme-select')?.value || 'default',
+            currentSize: panel.querySelector('#zd-size-select')?.value || 'normal',
+
             // once you open settings, consider calendar "onboarded"
             onboardedCalendar: true
         };
 
         await ZDStorage.setConfig(newCfg);
+
+        // Apply theme immediately after saving
+        if (window.ZDThemePresets) {
+            const isDark = newCfg.theme === 'dark';
+            await window.ZDThemePresets.applyTheme(newCfg.currentTheme, isDark, newCfg.currentSize);
+        }
     }
 
     // ------------------------------------------------------------
