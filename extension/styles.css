@@ -171,7 +171,7 @@
 }
 
 .zd-low {
-  color: #d63638 !important;
+  color: var(--zd-accent) !important;
   font-weight: 600;
 }
 
@@ -409,7 +409,7 @@
   color: #fff;
 }
 .zd-settings-row-buttons .zd-danger {
-  background: #d63638;
+  background: var(--zd-accent);
 }
 
 .zd-settings-footer {
@@ -3448,7 +3448,7 @@ button:focus {
 .zd-linear-error-text {
     font-size: 16px;
     font-weight: 600;
-    color: var(--zd-accent-red);
+    color: var(--zd-accent);
     margin-bottom: 8px;
 }
 
