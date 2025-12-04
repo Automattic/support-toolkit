@@ -168,14 +168,27 @@
             if (themePreset.effects.pixelated) document.body.classList.add('zd-theme-pixel');
             if (themePreset.effects.scanlines && isDark) document.body.classList.add('zd-theme-scanlines');
 
-            // Apply CSS custom properties
+            // Apply CSS custom properties (using existing variable names from styles.css)
             const root = document.documentElement;
+
+            // Main colors
+            root.style.setProperty('--zd-bg-light', colors.background);
+            root.style.setProperty('--zd-text-light', colors.text);
+            root.style.setProperty('--zd-bg-dark', colors.background);
+            root.style.setProperty('--zd-text-dark', colors.text);
+            root.style.setProperty('--zd-accent', colors.primary);
+            root.style.setProperty('--zd-accent-green', colors.secondary);
+
+            // Borders
+            root.style.setProperty('--zd-border', colors.border);
+            root.style.setProperty('--zd-border-light', colors.border);
+
+            // Also set new variable names for future compatibility
             root.style.setProperty('--zd-primary', colors.primary);
             root.style.setProperty('--zd-secondary', colors.secondary);
             root.style.setProperty('--zd-background', colors.background);
             root.style.setProperty('--zd-text', colors.text);
             root.style.setProperty('--zd-text-secondary', colors.textSecondary);
-            root.style.setProperty('--zd-border', colors.border);
             root.style.setProperty('--zd-modal-bg', colors.modalBg);
             root.style.setProperty('--zd-section-bg', colors.sectionBg);
             root.style.setProperty('--zd-input-bg', colors.inputBg);
