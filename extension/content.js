@@ -1867,7 +1867,7 @@ async function checkForVersionUpdate() {
                     <img
                         class="zd-stats-gif"
                         src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZHhrMDVyeW53aHFyMG5iajJwamNxaWk4dGdsbzg5amJtYnE1MDdqbSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/HyL8jQ3hvC9bCGmCk4/giphy.gif"
-                        alt="Festive stats"
+                        alt="Stats visualization"
                     />
                 </div>
             </div>

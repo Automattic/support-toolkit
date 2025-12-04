@@ -780,7 +780,7 @@
   color: var(--zd-accent-green);
 }
 
-/* 🎄 Centered shift/reminder notification overlay – Christmas style */
+/* Centered shift/reminder notification overlay */
 .zd-center-overlay {
   position: fixed;
   z-index: 9999999999;
@@ -1249,10 +1249,6 @@
 .zd-theme-dark .zd-activity-desc,
 .zd-theme-dark .zd-activity-empty {
   color: var(--zd-text-dark);
-}
-.zd-theme-dark .zd-mode-btn {
-  background: #b71c1c;
-  color: #fff;
 }
 
 /* ---------------- Google Calendar Style Schedule ---------------- */
@@ -1848,8 +1844,6 @@
     transform: translateY(0) scale(1);
   }
 }
-
-/* Removed Christmas accent line per user request */
 
 /* Hover Effects for Cards */
 
