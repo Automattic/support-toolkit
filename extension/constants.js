@@ -53,6 +53,8 @@
         // Developer and theme
         devMode: false,
         theme: 'light',
+        currentTheme: 'default',
+        currentSize: 'normal',
 
         // Linear Integration (optional)
         linearApiKey: ''

@@ -1629,6 +1629,9 @@ async function checkForVersionUpdate() {
         const panel = settingsOverlayEl.querySelector('.zd-settings-panel');
         const calVal = panel.querySelector('.cfg-calendarURL').value.trim();
 
+        // Get current config to preserve properties not in the form
+        const currentCfg = await ZDStorage.getConfig();
+
         const newCfg = {
             showPercentages: panel.querySelector('.cfg-showPercentages').checked,
             showShiftReminders: panel.querySelector('.cfg-showShiftReminders').checked,
@@ -1657,6 +1660,7 @@ async function checkForVersionUpdate() {
             // Theme settings
             currentTheme: panel.querySelector('#zd-theme-select')?.value || 'default',
             currentSize: panel.querySelector('#zd-size-select')?.value || 'normal',
+            theme: currentCfg.theme || 'light', // Preserve dark/light mode
 
             // once you open settings, consider calendar "onboarded"
             onboardedCalendar: true
