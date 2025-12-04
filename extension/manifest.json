@@ -15,7 +15,6 @@
 
   "host_permissions": [
     "https://schedule.happy.tools/*",
-    "https://lingva.ml/*",
     "https://api.linear.app/*"
   ],
 
@@ -43,7 +42,6 @@
         "theme-presets.js",
         "schedule.js",
         "notes.js",
-        "translator.js",
         "transcript.js",
         "linear.js",
         "linear-panel.js",

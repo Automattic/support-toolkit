@@ -38,7 +38,6 @@
         enableDeduplication: true,
 
         // Toolbar customization
-        showTranslator: true,
         showLinear: true,
         showNotes: true,
         showStats: true,

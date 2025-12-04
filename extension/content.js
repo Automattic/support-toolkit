@@ -228,9 +228,6 @@
         const notesBtn = await makeIconButton('📝', 'notes', 'Daily Notes', async () => {
             await openNotesPanel();
         });
-        const translateBtn = await makeIconButton('🌐', 'translate', 'Translator', async () => {
-            await openTranslatePanel();
-        });
         const linearBtn = await makeIconButton('⚡', 'linear', 'Search Linear Issues', async () => {
             if (window.ZDLinearPanel && window.ZDLinearPanel.toggleLinearPanel) {
                 await window.ZDLinearPanel.toggleLinearPanel();
@@ -238,7 +235,6 @@
         });
 
         // Store button references for toggling
-        translateBtn.dataset.featureId = 'translator';
         linearBtn.dataset.featureId = 'linear';
         notesBtn.dataset.featureId = 'notes';
         statsBtn.dataset.featureId = 'stats';
@@ -251,7 +247,6 @@
         iconGroup.appendChild(themeBtn);
         iconGroup.appendChild(statsBtn);
         iconGroup.appendChild(notesBtn);
-        iconGroup.appendChild(translateBtn);
         iconGroup.appendChild(linearBtn);
 
         // Timer cluster
@@ -418,7 +413,6 @@
                 let shouldShow = true;
 
                 // Check individual feature settings
-                if (featureId === 'translator' && !cfg.showTranslator) shouldShow = false;
                 if (featureId === 'linear' && !cfg.showLinear) shouldShow = false;
                 if (featureId === 'notes' && !cfg.showNotes) shouldShow = false;
                 if (featureId === 'stats' && !cfg.showStats) shouldShow = false;
@@ -1229,11 +1223,6 @@ async function checkForVersionUpdate() {
 
                         <div class="zd-setting-group">
                             <label class="zd-setting-check">
-                                <input type="checkbox" class="cfg-showTranslator" />
-                                <span>${window.ZDIcons ? window.ZDIcons.getIconHTML('translate', 14) : '🌐'} Translator</span>
-                            </label>
-
-                            <label class="zd-setting-check">
                                 <input type="checkbox" class="cfg-showLinear" />
                                 <span>${window.ZDIcons ? window.ZDIcons.getIconHTML('linear', 14) : '⚡'} Linear</span>
                             </label>
@@ -1581,8 +1570,6 @@ async function checkForVersionUpdate() {
         selectEl.value = cfg.weekStartsOn || 'Mon';
 
         // Toolbar customization checkboxes (default true)
-        panel.querySelector('.cfg-showTranslator').checked =
-            cfg.showTranslator === false ? false : true;
         panel.querySelector('.cfg-showLinear').checked =
             cfg.showLinear === false ? false : true;
         panel.querySelector('.cfg-showNotes').checked =
@@ -1652,7 +1639,6 @@ async function checkForVersionUpdate() {
             linearApiKey: panel.querySelector('.cfg-linearApiKey').value.trim(),
 
             // Toolbar customization
-            showTranslator: panel.querySelector('.cfg-showTranslator').checked,
             showLinear: panel.querySelector('.cfg-showLinear').checked,
             showNotes: panel.querySelector('.cfg-showNotes').checked,
             showStats: panel.querySelector('.cfg-showStats').checked,
@@ -2878,178 +2864,6 @@ async function checkForVersionUpdate() {
     }
 
     // ------------------------------------------------------------
-    // 14. TRANSLATION SYSTEM
-    // ------------------------------------------------------------
-
-    // Translate text using Lingva Translate (Google Translate frontend)
-    async function translateText(text, targetLang, sourceLang = 'auto') {
-        if (!text || text.trim() === '') return '';
-
-        try {
-            // Limit text length to avoid issues
-            const maxLength = 1000;
-            const truncatedText = text.length > maxLength ? text.substring(0, maxLength) : text;
-
-            const encodedText = encodeURIComponent(truncatedText);
-            const source = sourceLang === 'auto' ? 'auto' : sourceLang;
-
-            const url = `https://lingva.ml/api/v1/${source}/${targetLang}/${encodedText}`;
-
-            const response = await fetch(url);
-
-            if (!response.ok) {
-                console.error('[Translator] HTTP error:', response.status);
-                return 'Translation service unavailable. Please try again.';
-            }
-
-            const data = await response.json();
-
-            if (data && data.translation) {
-                return data.translation;
-            } else {
-                console.error('[Translator] No translation in response:', data);
-                return 'Translation error. Please try again.';
-            }
-        } catch (err) {
-            console.error('[Translator] Error:', err);
-            return 'Translation failed. Check your connection.';
-        }
-    }
-
-    // Open translation panel
-    async function openTranslatePanel() {
-        // Check if panel already exists
-        let panel = document.querySelector('.zd-translate-panel');
-        if (panel) {
-            // Toggle visibility
-            if (panel.style.display === 'none') {
-                panel.style.display = 'flex';
-            } else {
-                panel.style.display = 'none';
-            }
-            return;
-        }
-
-        // Get saved target language preference
-        const savedLang = localStorage.getItem('zd-translate-target') || 'en';
-
-        // Create panel
-        panel = document.createElement('div');
-        panel.className = 'zd-translate-panel';
-        panel.innerHTML = `
-            <div class="zd-translate-header">
-                <h3 class="zd-translate-title">${window.ZDIcons ? window.ZDIcons.getIconHTML('translate', 18) : '🌐'} Translator</h3>
-                <button class="zd-translate-close-btn" title="Close">×</button>
-            </div>
-            <div class="zd-translate-content">
-                <div class="zd-translate-section">
-                    <div class="zd-translate-label">Source Text (Auto-detect)</div>
-                    <textarea class="zd-translate-source" placeholder="Paste or type text here to translate..."></textarea>
-                </div>
-                <div class="zd-translate-controls">
-                    <label class="zd-translate-lang-label">
-                        Translate to:
-                        <select class="zd-translate-lang-select">
-                            <option value="en">English</option>
-                            <option value="es">Spanish</option>
-                            <option value="pt">Portuguese</option>
-                            <option value="fr">French</option>
-                            <option value="de">German</option>
-                            <option value="it">Italian</option>
-                            <option value="nl">Dutch</option>
-                            <option value="ru">Russian</option>
-                            <option value="zh">Chinese</option>
-                            <option value="ja">Japanese</option>
-                            <option value="ko">Korean</option>
-                            <option value="ar">Arabic</option>
-                        </select>
-                    </label>
-                </div>
-                <div class="zd-translate-section">
-                    <div class="zd-translate-label">
-                        Translation
-                        <button class="zd-translate-copy-btn" title="Copy translation">📋</button>
-                    </div>
-                    <textarea class="zd-translate-target" placeholder="Translation will appear here..." readonly></textarea>
-                </div>
-            </div>
-            <div class="zd-translate-footer">
-                <span class="zd-translate-status">Ready to translate</span>
-                <span class="zd-translate-powered">Powered by Google Translate</span>
-            </div>
-        `;
-
-        document.body.appendChild(panel);
-
-        const sourceTextarea = panel.querySelector('.zd-translate-source');
-        const targetTextarea = panel.querySelector('.zd-translate-target');
-        const langSelect = panel.querySelector('.zd-translate-lang-select');
-        const closeBtn = panel.querySelector('.zd-translate-close-btn');
-        const copyBtn = panel.querySelector('.zd-translate-copy-btn');
-        const statusEl = panel.querySelector('.zd-translate-status');
-
-        // Set saved language
-        langSelect.value = savedLang;
-
-        // Auto-translate with debounce
-        let translateTimeout;
-        async function performTranslation() {
-            const sourceText = sourceTextarea.value;
-            const targetLang = langSelect.value;
-
-            if (!sourceText || sourceText.trim() === '') {
-                targetTextarea.value = '';
-                statusEl.textContent = 'Ready to translate';
-                return;
-            }
-
-            statusEl.textContent = 'Translating...';
-
-            const translation = await translateText(sourceText, targetLang);
-            targetTextarea.value = translation;
-
-            statusEl.textContent = 'Translation complete';
-        }
-
-        sourceTextarea.addEventListener('input', () => {
-            clearTimeout(translateTimeout);
-            translateTimeout = setTimeout(performTranslation, 800);
-        });
-
-        langSelect.addEventListener('change', () => {
-            localStorage.setItem('zd-translate-target', langSelect.value);
-            if (sourceTextarea.value.trim()) {
-                performTranslation();
-            }
-        });
-
-        // Close button
-        closeBtn.addEventListener('click', () => {
-            panel.style.display = 'none';
-        });
-
-        // Copy button
-        copyBtn.addEventListener('click', () => {
-            const translation = targetTextarea.value;
-            if (translation && translation.trim()) {
-                navigator.clipboard.writeText(translation).then(() => {
-                    statusEl.textContent = 'Translation copied!';
-                    setTimeout(() => {
-                        statusEl.textContent = 'Ready to translate';
-                    }, 2000);
-                }).catch((err) => {
-                    console.error('[Clipboard] Copy failed:', err);
-                    statusEl.textContent = 'Copy failed - try again';
-                    setTimeout(() => {
-                        statusEl.textContent = 'Ready to translate';
-                    }, 2000);
-                });
-            }
-        });
-
-        // Apply theme
-        await applyThemeToDOM();
-    }
 
     // ------------------------------------------------------------
     // 15. MODE SWITCH (Chats <> Tickets pill)
