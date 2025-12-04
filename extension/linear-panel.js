@@ -461,14 +461,14 @@
     }
 
     /**
-     * Perform AI-powered search based on current ticket
+     * Extract keywords from current ticket (PRIVACY-FIRST - NO EXTERNAL APIs)
      *
-     * This is the main function for the "Find Similar Issues" feature. It:
+     * This is the main function for the "Get Keywords from Ticket" feature. It:
      * 1. Extracts the full conversation from the current Zendesk ticket
-     * 2. Sends it to Google Gemini AI via background.js
-     * 3. AI analyzes the conversation and extracts feature names
-     * 4. Searches Linear with AI-generated terms
-     * 5. Displays results with AI context (what was searched and why)
+     * 2. Analyzes locally in the browser (no external API calls)
+     * 3. Extracts relevant technical keywords using frequency analysis
+     * 4. Displays clickable keyword chips for quick Linear search
+     * 5. All processing happens client-side - zero data leaves your computer
      *
      * LOADING STATE MANAGEMENT:
      * While the search is running, all controls are disabled to prevent

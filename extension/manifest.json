@@ -16,7 +16,6 @@
   "host_permissions": [
     "https://schedule.happy.tools/*",
     "https://lingva.ml/*",
-    "https://generativelanguage.googleapis.com/*",
     "https://api.linear.app/*"
   ],
 
@@ -45,7 +44,6 @@
         "schedule.js",
         "notes.js",
         "translator.js",
-        "ai-panel.js",
         "transcript.js",
         "linear.js",
         "linear-panel.js",

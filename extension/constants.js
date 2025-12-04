@@ -39,7 +39,6 @@
 
         // Toolbar customization
         showTranslator: true,
-        showAICopilot: true,
         showLinear: true,
         showNotes: true,
         showStats: true,
@@ -54,9 +53,6 @@
         // Developer and theme
         devMode: false,
         theme: 'light',
-
-        // AI Copilot (optional)
-        aiApiKey: '',
 
         // Linear Integration (optional)
         linearApiKey: ''
