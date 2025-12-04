@@ -154,13 +154,17 @@
 
 /* live number */
 .zd-current-count-wrapper {
-  font-weight: bold;
+  font-weight: 700;
   font-size: 15px;
   min-width: 24px;
   text-align: center;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
 }
 .zd-current-count {
   display: inline-block;
+  transition: all var(--zd-transition-slow) var(--zd-ease-bounce);
 }
 
 /* toolbar icon buttons and separators */
@@ -175,29 +179,45 @@
   border: none;
   font-size: 16px;
   cursor: pointer;
-  padding: 2px 5px;
+  padding: 4px 6px;
   color: inherit;
-  transition: all 0.15s ease;
+  border-radius: var(--zd-radius-md);
+  transition: all var(--zd-transition-fast) var(--zd-ease-smooth);
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
 }
 .zd-ico-btn:hover {
-  opacity: 0.7;
+  opacity: 0.8;
+  background: rgba(0, 0, 0, 0.04);
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+  transform: translateY(-1px);
+}
+.zd-ico-btn:active {
+  transform: scale(0.92);
+  opacity: 0.7;
 }
 .zd-theme-dark .zd-ico-btn {
   filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.08));
 }
 .zd-theme-dark .zd-ico-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
   filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.15));
+  transform: translateY(-1px);
+}
+.zd-theme-dark .zd-ico-btn:active {
+  transform: scale(0.92);
 }
 
 /* visual pipe dividers in the bar */
 .zd-separator {
   color: rgba(0,0,0,0.25);
-  font-weight: 300;
+  font-weight: 200;
+  opacity: 0.6;
+  margin: 0 2px;
+  transition: opacity var(--zd-transition-base) var(--zd-ease-smooth);
 }
 .zd-theme-dark .zd-separator {
   color: rgba(255,255,255,0.2);
+  opacity: 0.5;
 }
 
 /* Timer section */
@@ -269,11 +289,18 @@
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px) saturate(1.2);
+  -webkit-backdrop-filter: blur(4px) saturate(1.2);
   z-index: 9999999;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* note: dark theme is handled by children panels */
+  animation: overlayFadeIn var(--zd-transition-base) var(--zd-ease-smooth);
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Shared panel base */
@@ -281,16 +308,28 @@
 .zd-log-panel,
 .zd-schedule-panel {
   background: var(--zd-bg-light);
-  border-radius: 2px;
-  padding: 20px 24px;
+  border-radius: var(--zd-radius-xl);
+  padding: 24px;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: var(--zd-shadow);
+  box-shadow: var(--zd-shadow-xl), inset 0 1px 0 rgba(255, 255, 255, 0.5);
   color: var(--zd-text-light);
   border: 1px solid var(--zd-border-light);
   font-family: system-ui, sans-serif;
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.5;
+  animation: modalSlideIn var(--zd-transition-slow) var(--zd-ease-spring);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 /* panel widths */
@@ -302,15 +341,17 @@
   width: 720px;
   display: flex;
   flex-direction: column;
-  row-gap: 20px;
+  row-gap: 28px;
 }
 
 /* ---------------- Settings Modal ---------------- */
 
 .zd-settings-title {
-  margin: 0 0 8px;
+  margin: 0 0 12px;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   color: var(--zd-text-light);
 }
 .zd-theme-dark .zd-settings-title {
@@ -392,29 +433,59 @@
 .zd-settings-row input[type="text"],
 .zd-settings-row input[type="number"],
 .zd-settings-row input[type="url"],
-.zd-settings-row select {
+.zd-settings-row select,
+.zd-setting-item input[type="text"],
+.zd-setting-item input[type="number"],
+.zd-setting-item input[type="url"],
+.zd-setting-item select {
   width: 100%;
   padding: 10px;
   border: 1px solid var(--zd-border-light);
-  border-radius: 2px;
+  border-radius: var(--zd-radius-sm);
   font-size: 14px;
   line-height: 1.5;
   color: var(--zd-text-light);
   background: var(--zd-bg-light);
   box-sizing: border-box;
+  transition: border-color var(--zd-transition-base) var(--zd-ease-smooth),
+              box-shadow var(--zd-transition-base) var(--zd-ease-smooth),
+              background-color var(--zd-transition-base) var(--zd-ease-smooth);
 }
 
-.zd-settings-row select {
+.zd-settings-row input:focus,
+.zd-settings-row select:focus,
+.zd-setting-item input:focus,
+.zd-setting-item select:focus {
+  outline: none;
+  border-color: var(--zd-accent);
+  box-shadow: 0 0 0 3px rgba(90, 109, 158, 0.15);
+}
+
+.zd-settings-row select,
+.zd-setting-item select {
   height: auto;
   min-height: 38px;
 }
+
 .zd-theme-dark .zd-settings-row input[type="text"],
 .zd-theme-dark .zd-settings-row input[type="number"],
 .zd-theme-dark .zd-settings-row input[type="url"],
-.zd-theme-dark .zd-settings-row select {
+.zd-theme-dark .zd-settings-row select,
+.zd-theme-dark .zd-setting-item input[type="text"],
+.zd-theme-dark .zd-setting-item input[type="number"],
+.zd-theme-dark .zd-setting-item input[type="url"],
+.zd-theme-dark .zd-setting-item select {
   background: var(--zd-bg-dark);
   border: 1px solid var(--zd-border);
   color: var(--zd-text-dark);
+}
+
+.zd-theme-dark .zd-settings-row input:focus,
+.zd-theme-dark .zd-settings-row select:focus,
+.zd-theme-dark .zd-setting-item input:focus,
+.zd-theme-dark .zd-setting-item select:focus {
+  border-color: #4fb1ff;
+  box-shadow: 0 0 0 3px rgba(79, 177, 255, 0.25);
 }
 
 .zd-input-with-unit {
@@ -461,13 +532,24 @@
 
 .zd-settings-row-buttons button {
   border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
+  border-radius: var(--zd-radius-lg);
+  padding: 8px 16px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 13px;
+  letter-spacing: 0.01em;
   background: var(--zd-accent);
   color: #fff;
+  box-shadow: var(--zd-shadow-base);
+  transition: all var(--zd-transition-base) var(--zd-ease-smooth);
+}
+.zd-settings-row-buttons button:hover {
+  box-shadow: var(--zd-shadow-md);
+  transform: translateY(-1px);
+}
+.zd-settings-row-buttons button:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--zd-shadow-sm);
 }
 .zd-settings-row-buttons .zd-danger {
   background: var(--zd-accent);
