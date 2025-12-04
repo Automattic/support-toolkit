@@ -2,11 +2,11 @@
 
 /* Color tokens */
 :root {
-  /* Christmas palette */
+  /* Base palette - theme colors set dynamically via theme-presets.js */
   --zd-bg-light: #ffffff;           /* clean white */
   --zd-text-light: #1a1a1a;
-  --zd-accent: #a91b1b;             /* Christmas red */
-  --zd-accent-green: #165c3a;       /* Christmas green */
+  --zd-accent: #5a6d9e;             /* default blue-purple */
+  --zd-accent-green: #6b5b87;       /* default secondary */
   --zd-bg-dark: #0f0f0f;            /* deep dark */
   --zd-text-dark: #e8e8e8;
   --zd-border: #2a2a2a;
@@ -44,14 +44,14 @@
   border: 1px solid var(--zd-border);
 }
 
-/* Festive glow on mode button */
+/* Mode button styling */
 .zd-mode-btn {
   background: var(--zd-accent);
-  box-shadow: 0 0 10px rgba(198,40,40,0.4);
+  box-shadow: 0 0 10px rgba(90, 109, 158, 0.4);
 }
 .zd-theme-dark .zd-mode-btn {
-  background: #c62828;
-  box-shadow: 0 0 12px rgba(255,64,64,0.4);
+  background: var(--zd-accent);
+  box-shadow: 0 0 12px rgba(79, 94, 135, 0.4);
 }
 
 /* Left cluster = mode + stepper */
@@ -1171,11 +1171,7 @@
   padding: 12px 0;
 }
 
-/* 🎄 Seasonal overrides */
-.zd-theme-dark {
-  --zd-accent: #c62828;
-  --zd-accent-green: #66bb6a;
-}
+/* Dark theme - colors set dynamically via theme-presets.js */
 .zd-theme-dark .zd-stats-panel {
   background: var(--zd-bg-dark);
   color: var(--zd-text-dark);
