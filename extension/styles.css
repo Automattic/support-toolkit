@@ -22,17 +22,19 @@
   background: var(--zd-bg-light);
   color: var(--zd-text-light);
   border-radius: 4px;
-  padding: 8px 12px;
+  padding: var(--zd-padding, 8px) calc(var(--zd-padding, 8px) * 1.5);
   box-shadow: var(--zd-shadow);
   font-family: system-ui, sans-serif;
-  font-size: 13px;
+  font-size: var(--zd-font-size, 13px);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--zd-padding, 8px);
   cursor: default;
   user-select: none;
   border: 1px solid var(--zd-border-light);
   transition: background 0.2s, color 0.2s;
+  transform: scale(var(--zd-scale, 1.0));
+  transform-origin: top left;
 }
 
 .zd-theme-dark .zd-toolbar {
@@ -302,23 +304,27 @@
   color: var(--zd-text-dark);
 }
 
-.zd-settings-row {
+.zd-settings-row,
+.zd-setting-item {
   display: flex;
   flex-direction: column;
   margin: 6px 0;
   font-size: 13px;
   color: var(--zd-text-light);
 }
-.zd-theme-dark .zd-settings-row {
+.zd-theme-dark .zd-settings-row,
+.zd-theme-dark .zd-setting-item {
   color: var(--zd-text-dark);
 }
 
-.zd-settings-row label {
+.zd-settings-row label,
+.zd-setting-item label {
   font-weight: 500;
   margin-bottom: 4px;
   color: var(--zd-text-light);
 }
-.zd-theme-dark .zd-settings-row label {
+.zd-theme-dark .zd-settings-row label,
+.zd-theme-dark .zd-setting-item label {
   color: var(--zd-text-dark);
 }
 
