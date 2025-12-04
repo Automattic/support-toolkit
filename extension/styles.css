@@ -148,7 +148,7 @@
   color: var(--zd-accent);
 }
 .zd-theme-dark .zd-timer-wrapper {
-  color: #1da1f2;
+  color: var(--zd-accent);
 }
 .zd-timer-icon {
   font-size: 13px;
@@ -777,7 +777,7 @@
 .zd-theme-dark .zd-timer-icon.zd-timer-done,
 .zd-theme-dark .zd-timer-text.zd-timer-idle,
 .zd-theme-dark .zd-timer-icon.zd-timer-idle {
-  color: #66bb6a;
+  color: var(--zd-accent-green);
 }
 
 /* 🎄 Centered shift/reminder notification overlay – Christmas style */
