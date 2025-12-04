@@ -95,11 +95,13 @@
      * @param {string} params.teamKey - Team key (required)
      * @param {string} params.search - Search query (optional)
      * @param {string} params.stateId - State ID filter (optional)
+     * @param {Array<number>} params.priority - Priority values to filter by (optional)
+     * @param {string} params.createdAfter - ISO 8601 date string or relative duration (optional)
      * @param {string} apiKey - Linear API key
      * @returns {Promise<Array>} Array of issue objects
      */
     async function searchIssues(params, apiKey) {
-        const { teamKey, search, stateId } = params;
+        const { teamKey, search, stateId, priority, createdAfter } = params;
 
         if (!teamKey || teamKey.trim() === '') {
             throw new Error('Team is required for search');
@@ -120,12 +122,24 @@
                 variables.search = search.trim();
             }
 
+            if (priority && priority.length > 0) {
+                filterParts.push('priority: { in: $priority }');
+                variables.priority = priority;
+            }
+
+            if (createdAfter) {
+                filterParts.push('createdAt: { gte: $createdAfter }');
+                variables.createdAfter = createdAfter;
+            }
+
             const filterString = `{ ${filterParts.join(', ')} }`;
 
             // Build query with conditional variables
             let queryVariables = '$teamKey: String!';
             if (stateId && stateId.trim() !== '') queryVariables += ', $stateId: ID!';
             if (search && search.trim() !== '') queryVariables += ', $search: String!';
+            if (priority && priority.length > 0) queryVariables += ', $priority: [Int!]!';
+            if (createdAfter) queryVariables += ', $createdAfter: DateTime!';
 
             const graphqlQuery = `
                 query(${queryVariables}) {
@@ -139,6 +153,10 @@
                                 name
                                 email
                             }
+                            creator {
+                                name
+                                email
+                            }
                             state {
                                 id
                                 name
@@ -146,12 +164,19 @@
                             }
                             priority
                             priorityLabel
+                            createdAt
                             updatedAt
                             url
                             team {
                                 id
                                 name
                                 key
+                            }
+                            labels {
+                                nodes {
+                                    name
+                                    color
+                                }
                             }
                         }
                     }
@@ -177,12 +202,14 @@
      * @param {Object} params - Search parameters
      * @param {string|null} params.search - Search query (optional)
      * @param {string|null} params.stateId - State ID to filter by (optional)
+     * @param {Array<number>} params.priority - Priority values to filter by (optional)
+     * @param {string} params.createdAfter - ISO 8601 date string or relative duration (optional)
      * @param {string} apiKey - Linear API key
      * @returns {Promise<Array>} Array of issue objects
      */
     async function searchAllTeams(params, apiKey) {
         try {
-            const { search, stateId } = params;
+            const { search, stateId, priority, createdAfter } = params;
 
             // Build filter parts
             const filterParts = [];
@@ -198,6 +225,16 @@
                 variables.search = search;
             }
 
+            if (priority && priority.length > 0) {
+                filterParts.push('priority: { in: $priority }');
+                variables.priority = priority;
+            }
+
+            if (createdAfter) {
+                filterParts.push('createdAt: { gte: $createdAfter }');
+                variables.createdAfter = createdAfter;
+            }
+
             const filterString = filterParts.length > 0 ? `filter: { ${filterParts.join(', ')} }` : '';
 
             // Build query with conditional variables
@@ -205,6 +242,8 @@
             const varParts = [];
             if (stateId) varParts.push('$stateId: ID!');
             if (search) varParts.push('$search: String!');
+            if (priority && priority.length > 0) varParts.push('$priority: [Int!]!');
+            if (createdAfter) varParts.push('$createdAfter: DateTime!');
             if (varParts.length > 0) {
                 queryVariables = `(${varParts.join(', ')})`;
             }
@@ -221,6 +260,10 @@
                                 name
                                 email
                             }
+                            creator {
+                                name
+                                email
+                            }
                             state {
                                 id
                                 name
@@ -228,12 +271,19 @@
                             }
                             priority
                             priorityLabel
+                            createdAt
                             updatedAt
                             url
                             team {
                                 id
                                 name
                                 key
+                            }
+                            labels {
+                                nodes {
+                                    name
+                                    color
+                                }
                             }
                         }
                     }
@@ -361,14 +411,213 @@
         }
     }
 
+    /**
+     * Get issues assigned to the authenticated user
+     * @param {string} apiKey - Linear API key
+     * @param {Object} filters - Optional filters
+     * @param {Array<number>} filters.priority - Priority values to filter by
+     * @param {string} filters.createdAfter - ISO 8601 date string or relative duration (e.g., "-P7D")
+     * @returns {Promise<Array>} Array of issue objects
+     */
+    async function getMyAssignedIssues(apiKey, filters = {}) {
+        try {
+            // Build filter parts
+            const filterParts = [];
+            const variables = {};
+
+            if (filters.priority && filters.priority.length > 0) {
+                filterParts.push('priority: { in: $priority }');
+                variables.priority = filters.priority;
+            }
+
+            if (filters.createdAfter) {
+                filterParts.push('createdAt: { gte: $createdAfter }');
+                variables.createdAfter = filters.createdAfter;
+            }
+
+            const filterString = filterParts.length > 0 ? `filter: { ${filterParts.join(', ')} }, ` : '';
+
+            // Build query with conditional variables
+            let queryVariables = '';
+            if (filters.priority && filters.priority.length > 0) queryVariables += '$priority: [Int!]!';
+            if (filters.createdAfter) {
+                if (queryVariables) queryVariables += ', ';
+                queryVariables += '$createdAfter: DateTime!';
+            }
+            if (queryVariables) queryVariables = `(${queryVariables})`;
+
+            const graphqlQuery = `
+                query${queryVariables} {
+                    viewer {
+                        assignedIssues(${filterString}first: 100) {
+                            nodes {
+                                id
+                                identifier
+                                title
+                                description
+                                assignee {
+                                    name
+                                    email
+                                }
+                                creator {
+                                    name
+                                    email
+                                }
+                                state {
+                                    id
+                                    name
+                                    type
+                                }
+                                priority
+                                priorityLabel
+                                createdAt
+                                updatedAt
+                                url
+                                team {
+                                    id
+                                    name
+                                    key
+                                }
+                                labels {
+                                    nodes {
+                                        name
+                                        color
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            `;
+
+            const data = await makeLinearRequest(graphqlQuery, variables, apiKey);
+
+            if (!data || !data.viewer || !data.viewer.assignedIssues || !data.viewer.assignedIssues.nodes) {
+                return [];
+            }
+
+            return data.viewer.assignedIssues.nodes;
+        } catch (error) {
+            console.error('[Linear] Get assigned issues failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Get issues created by the authenticated user
+     * @param {string} apiKey - Linear API key
+     * @param {Object} filters - Optional filters
+     * @param {Array<number>} filters.priority - Priority values to filter by
+     * @param {string} filters.createdAfter - ISO 8601 date string or relative duration (e.g., "-P7D")
+     * @returns {Promise<Array>} Array of issue objects
+     */
+    async function getMyCreatedIssues(apiKey, filters = {}) {
+        try {
+            // Build filter parts
+            const filterParts = [];
+            const variables = {};
+
+            if (filters.priority && filters.priority.length > 0) {
+                filterParts.push('priority: { in: $priority }');
+                variables.priority = filters.priority;
+            }
+
+            if (filters.createdAfter) {
+                filterParts.push('createdAt: { gte: $createdAfter }');
+                variables.createdAfter = filters.createdAfter;
+            }
+
+            const filterString = filterParts.length > 0 ? `filter: { ${filterParts.join(', ')} }, ` : '';
+
+            // Build query with conditional variables
+            let queryVariables = '';
+            if (filters.priority && filters.priority.length > 0) queryVariables += '$priority: [Int!]!';
+            if (filters.createdAfter) {
+                if (queryVariables) queryVariables += ', ';
+                queryVariables += '$createdAfter: DateTime!';
+            }
+            if (queryVariables) queryVariables = `(${queryVariables})`;
+
+            const graphqlQuery = `
+                query${queryVariables} {
+                    viewer {
+                        createdIssues(${filterString}first: 100) {
+                            nodes {
+                                id
+                                identifier
+                                title
+                                description
+                                assignee {
+                                    name
+                                    email
+                                }
+                                creator {
+                                    name
+                                    email
+                                }
+                                state {
+                                    id
+                                    name
+                                    type
+                                }
+                                priority
+                                priorityLabel
+                                createdAt
+                                updatedAt
+                                url
+                                team {
+                                    id
+                                    name
+                                    key
+                                }
+                                labels {
+                                    nodes {
+                                        name
+                                        color
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            `;
+
+            const data = await makeLinearRequest(graphqlQuery, variables, apiKey);
+
+            if (!data || !data.viewer || !data.viewer.createdIssues || !data.viewer.createdIssues.nodes) {
+                return [];
+            }
+
+            return data.viewer.createdIssues.nodes;
+        } catch (error) {
+            console.error('[Linear] Get created issues failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Calculate ISO 8601 date from days ago
+     * @param {number} daysAgo - Number of days in the past
+     * @returns {string} ISO 8601 date string
+     */
+    function calculateDateFromDaysAgo(daysAgo) {
+        const date = new Date();
+        date.setDate(date.getDate() - daysAgo);
+        date.setHours(0, 0, 0, 0); // Start of day
+        return date.toISOString();
+    }
+
     // Export to global scope
     window.ZDLinear = {
         searchIssues,
         searchAllTeams,
         getTeams,
         getWorkflowStates,
+        getMyAssignedIssues,
+        getMyCreatedIssues,
         formatPriority,
-        formatDate
+        formatDate,
+        calculateDateFromDaysAgo
     };
 
 })();

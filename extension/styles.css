@@ -44,6 +44,108 @@
   --zd-shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.7), 0 6px 12px rgba(0, 0, 0, 0.6);
 }
 
+/* ---------------- Global Feedback States ---------------- */
+
+/* Disabled state for all interactive elements */
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.3);
+  pointer-events: none;
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0, 0, 0, 0.02) 10px,
+    rgba(0, 0, 0, 0.02) 20px
+  );
+}
+
+.zd-theme-dark input:disabled,
+.zd-theme-dark select:disabled,
+.zd-theme-dark textarea:disabled {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(255, 255, 255, 0.02) 10px,
+    rgba(255, 255, 255, 0.02) 20px
+  );
+}
+
+/* Loading state */
+.zd-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.zd-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid currentColor;
+  border-color: #fff transparent #fff transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Success flash animation */
+.zd-success-flash {
+  animation: successFlash 0.6s var(--zd-ease-smooth);
+}
+
+@keyframes successFlash {
+  0% { background: inherit; }
+  30% {
+    background: rgba(76, 175, 80, 0.2);
+    transform: scale(1.02);
+  }
+  100% {
+    background: inherit;
+    transform: scale(1);
+  }
+}
+
+/* Enhanced Focus States for Accessibility */
+*:focus-visible {
+  outline: 2px solid var(--zd-accent);
+  outline-offset: 2px;
+  border-radius: var(--zd-radius-sm);
+}
+
+.zd-theme-dark *:focus-visible {
+  outline-color: #4fb1ff;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--zd-accent);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px rgba(90, 109, 158, 0.1);
+}
+
+.zd-theme-dark button:focus-visible {
+  outline-color: #4fb1ff;
+  box-shadow: 0 0 0 4px rgba(79, 177, 255, 0.2);
+}
+
 /* ---------------- Toolbar ---------------- */
 
 .zd-toolbar {
@@ -186,14 +288,13 @@
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
 }
 .zd-ico-btn:hover {
-  opacity: 0.8;
-  background: rgba(0, 0, 0, 0.04);
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+  background: rgba(0, 0, 0, 0.15);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
   transform: translateY(-1px);
 }
 .zd-ico-btn:active {
   transform: scale(0.92);
-  opacity: 0.7;
+  background: rgba(0, 0, 0, 0.2);
 }
 .zd-theme-dark .zd-ico-btn {
   filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.08));
@@ -1885,40 +1986,12 @@
 
 /* Improved Button Animations */
 
-.zd-mode-btn {
-  transition: all 0.2s ease;
-}
-
-.zd-mode-btn:hover {
-  transform: scale(1.05);
-}
-
-.zd-mode-btn:active {
-  transform: scale(0.95);
-}
-
-.zd-step-btn {
-  transition: all 0.2s ease;
-}
-
 .zd-step-btn:hover {
   transform: translateY(-2px);
 }
 
 .zd-step-btn:active {
   transform: translateY(0);
-}
-
-.zd-ico-btn {
-  transition: all 0.2s ease;
-}
-
-.zd-ico-btn:hover {
-  transform: scale(1.15) rotate(5deg);
-}
-
-.zd-ico-btn:active {
-  transform: scale(0.95);
 }
 
 /* Toolbar Improvements */
@@ -2194,33 +2267,6 @@ input[type="checkbox"]:hover {
   height: 2px;
   background: var(--zd-accent);
   border-radius: 2px;
-}
-
-/* Icon button pulse on hover */
-.zd-ico-btn {
-  position: relative;
-  transition: all 0.2s ease;
-}
-
-.zd-ico-btn:hover::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 6px;
-  background: currentColor;
-  opacity: 0.1;
-  animation: iconPulse 0.6s ease-out;
-}
-
-@keyframes iconPulse {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.2;
-  }
-  100% {
-    transform: scale(1.2);
-    opacity: 0;
-  }
 }
 
 /* Enhanced card shadows on hover */
@@ -3449,5 +3495,573 @@ button:focus {
     text-align: center;
     padding: 8px;
     font-style: italic;
+}
+
+/* ============================================
+   Linear Panel - Enhanced Features
+   ============================================ */
+
+/* Tab Navigation */
+.zd-linear-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px 0 16px;
+    border-bottom: 1px solid var(--zd-border);
+    background: var(--zd-bg-light);
+}
+
+.zd-theme-dark .zd-linear-tabs {
+    background: var(--zd-bg-dark);
+}
+
+.zd-linear-tab {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--zd-text-secondary);
+    cursor: pointer;
+    transition: all var(--zd-transition-fast) var(--zd-ease-smooth);
+    border-radius: var(--zd-radius-sm) var(--zd-radius-sm) 0 0;
+}
+
+.zd-linear-tab:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--zd-text);
+}
+
+.zd-theme-dark .zd-linear-tab:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.zd-linear-tab-active {
+    color: var(--zd-accent);
+    border-bottom-color: var(--zd-accent);
+    font-weight: 600;
+}
+
+/* Advanced Filters Section */
+.zd-linear-advanced-filters {
+    margin-top: 12px;
+}
+
+.zd-linear-advanced-toggle {
+    background: transparent;
+    border: 1px solid var(--zd-border);
+    border-radius: var(--zd-radius-sm);
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--zd-text);
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all var(--zd-transition-fast) var(--zd-ease-smooth);
+}
+
+.zd-linear-advanced-toggle:hover {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: var(--zd-accent);
+}
+
+.zd-theme-dark .zd-linear-advanced-toggle:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.zd-linear-advanced-arrow {
+    font-size: 10px;
+    transition: transform var(--zd-transition-fast) var(--zd-ease-smooth);
+}
+
+.zd-linear-advanced-content {
+    margin-top: 12px;
+    padding: 12px;
+    background: var(--zd-section-bg);
+    border-radius: var(--zd-radius-md);
+    border: 1px solid var(--zd-border);
+}
+
+/* Date Filter Presets */
+.zd-linear-date-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.zd-linear-date-btn {
+    background: var(--zd-button-secondary-bg);
+    border: 1px solid var(--zd-border);
+    border-radius: var(--zd-radius-sm);
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--zd-text);
+    cursor: pointer;
+    transition: all var(--zd-transition-fast) var(--zd-ease-smooth);
+}
+
+.zd-linear-date-btn:hover {
+    background: var(--zd-accent);
+    color: #fff;
+    border-color: var(--zd-accent);
+    transform: translateY(-1px);
+    box-shadow: var(--zd-shadow-sm);
+}
+
+.zd-linear-date-btn.active {
+    background: var(--zd-accent);
+    color: #fff;
+    border-color: var(--zd-accent);
+    box-shadow: var(--zd-shadow-base);
+}
+
+.zd-linear-date-btn.zd-linear-date-clear {
+    background: transparent;
+    border-style: dashed;
+}
+
+.zd-linear-date-btn.zd-linear-date-clear:hover,
+.zd-linear-date-btn.zd-linear-date-clear.active {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--zd-text);
+    border-style: solid;
+}
+
+.zd-theme-dark .zd-linear-date-btn.zd-linear-date-clear:hover,
+.zd-theme-dark .zd-linear-date-btn.zd-linear-date-clear.active {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Priority Filter Checkboxes */
+.zd-linear-priority-checks {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.zd-linear-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: var(--zd-radius-sm);
+    border: 1px solid var(--zd-border);
+    background: var(--zd-button-secondary-bg);
+    transition: all var(--zd-transition-fast) var(--zd-ease-smooth);
+}
+
+.zd-linear-checkbox:hover {
+    border-color: var(--zd-accent);
+    transform: translateX(2px);
+}
+
+.zd-linear-checkbox input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+}
+
+.zd-linear-checkbox input[type="checkbox"]:checked {
+    accent-color: var(--zd-accent);
+}
+
+.zd-priority-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.zd-linear-checkbox span:not(.zd-priority-indicator) {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--zd-text);
+    user-select: none;
+}
+
+/* Priority-specific colors */
+.zd-priority-urgent .zd-priority-indicator {
+    background: #ef4444;
+}
+
+.zd-priority-high .zd-priority-indicator {
+    background: #f97316;
+}
+
+.zd-priority-medium .zd-priority-indicator {
+    background: #eab308;
+}
+
+.zd-priority-low .zd-priority-indicator {
+    background: #3b82f6;
+}
+
+.zd-priority-none .zd-priority-indicator {
+    background: #9ca3af;
+    border: 1px solid var(--zd-border);
+}
+
+/* Checked state styling */
+.zd-linear-checkbox:has(input:checked).zd-priority-urgent {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
+
+.zd-linear-checkbox:has(input:checked).zd-priority-high {
+    background: rgba(249, 115, 22, 0.1);
+    border-color: #f97316;
+}
+
+.zd-linear-checkbox:has(input:checked).zd-priority-medium {
+    background: rgba(234, 179, 8, 0.1);
+    border-color: #eab308;
+}
+
+.zd-linear-checkbox:has(input:checked).zd-priority-low {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+}
+
+.zd-linear-checkbox:has(input:checked).zd-priority-none {
+    background: rgba(156, 163, 175, 0.1);
+    border-color: #9ca3af;
+}
+
+/* Dark mode adjustments */
+.zd-theme-dark .zd-linear-checkbox:has(input:checked).zd-priority-urgent {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.zd-theme-dark .zd-linear-checkbox:has(input:checked).zd-priority-high {
+    background: rgba(249, 115, 22, 0.15);
+}
+
+.zd-theme-dark .zd-linear-checkbox:has(input:checked).zd-priority-medium {
+    background: rgba(234, 179, 8, 0.15);
+}
+
+.zd-theme-dark .zd-linear-checkbox:has(input:checked).zd-priority-low {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+.zd-theme-dark .zd-linear-checkbox:has(input:checked).zd-priority-none {
+    background: rgba(156, 163, 175, 0.15);
+}
+
+/* Enhanced Issue Cards */
+.zd-linear-issue-card {
+    position: relative;
+    padding-bottom: 40px; /* Space for action buttons */
+}
+
+.zd-linear-issue-creator {
+    font-size: 11px;
+    color: var(--zd-text-secondary);
+    margin-top: 8px;
+    padding: 6px 0;
+    border-top: 1px solid var(--zd-border);
+}
+
+.zd-linear-issue-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.zd-linear-label-chip {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: var(--zd-radius-pill);
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid;
+    color: var(--zd-text);
+    line-height: 1;
+}
+
+.zd-theme-dark .zd-linear-label-chip {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Copy Action Buttons */
+.zd-linear-issue-actions {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    display: flex;
+    gap: 4px;
+    opacity: 1;
+    transition: opacity var(--zd-transition-fast) var(--zd-ease-smooth);
+}
+
+.zd-linear-copy-btn {
+    background: var(--zd-button-secondary-bg);
+    border: 1px solid var(--zd-border);
+    border-radius: var(--zd-radius-sm);
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: all var(--zd-transition-fast) var(--zd-ease-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--zd-text);
+}
+
+.zd-linear-copy-btn svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+}
+
+.zd-linear-copy-btn:hover {
+    background: var(--zd-accent);
+    border-color: var(--zd-accent);
+    color: #fff;
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: var(--zd-shadow-md);
+}
+
+.zd-linear-copy-btn:active {
+    transform: translateY(0) scale(0.95);
+}
+
+/* ============================================
+   Component-Specific Animations
+   ============================================ */
+
+/* Card entrance animations with stagger */
+.zd-log-entry,
+.zd-shift-card,
+.zd-linear-result {
+    animation: cardEnter var(--zd-transition-base) var(--zd-ease-smooth) backwards;
+}
+
+@keyframes cardEnter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced card hover effects */
+.zd-log-entry:hover,
+.zd-shift-card:hover,
+.zd-linear-result:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--zd-shadow-md);
+}
+
+/* Close button animations */
+.zd-modal-close,
+.zd-close-btn {
+    transition: all var(--zd-transition-fast) var(--zd-ease-smooth);
+}
+
+.zd-modal-close:hover,
+.zd-close-btn:hover {
+    transform: rotate(90deg) scale(1.1);
+    opacity: 0.8;
+}
+
+.zd-modal-close:active,
+.zd-close-btn:active {
+    transform: rotate(90deg) scale(0.95);
+}
+
+/* Button group stagger animation */
+.zd-btn-group button {
+    animation: btnGroupEnter var(--zd-transition-base) var(--zd-ease-spring) backwards;
+}
+
+.zd-btn-group button:nth-child(1) { animation-delay: 0.05s; }
+.zd-btn-group button:nth-child(2) { animation-delay: 0.1s; }
+.zd-btn-group button:nth-child(3) { animation-delay: 0.15s; }
+.zd-btn-group button:nth-child(4) { animation-delay: 0.2s; }
+
+@keyframes btnGroupEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Tab switching animation */
+.zd-tab-content {
+    animation: tabContentFade var(--zd-transition-base) var(--zd-ease-smooth);
+}
+
+@keyframes tabContentFade {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Toggle switch animation */
+input[type="checkbox"] {
+    transition: all var(--zd-transition-fast) var(--zd-ease-spring);
+}
+
+input[type="checkbox"]:checked {
+    animation: checkboxPop 0.3s var(--zd-ease-bounce);
+}
+
+@keyframes checkboxPop {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Notification badge pulse */
+.zd-notification-badge,
+.zd-badge {
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Panel section hover */
+.zd-setting-section:hover,
+.zd-stats-section:hover {
+    background: var(--zd-section-bg);
+    border-radius: var(--zd-radius-md);
+    transition: background var(--zd-transition-base) var(--zd-ease-smooth);
+}
+
+/* Dropdown menu animation */
+select {
+    transition: all var(--zd-transition-base) var(--zd-ease-smooth);
+}
+
+select:hover {
+    border-color: var(--zd-accent);
+}
+
+/* Timer number flip animation */
+.zd-timer-display {
+    transition: all var(--zd-transition-fast) var(--zd-ease-smooth);
+}
+
+.zd-timer-display.updated {
+    animation: numberFlip 0.4s var(--zd-ease-smooth);
+}
+
+@keyframes numberFlip {
+    0% { transform: rotateX(0deg); }
+    50% { transform: rotateX(90deg); opacity: 0.5; }
+    100% { transform: rotateX(0deg); }
+}
+
+/* ============================================
+   Custom Scrollbar Styling
+   ============================================ */
+
+/* Scrollbar for all panels - Light Mode */
+.zd-settings-panel::-webkit-scrollbar,
+.zd-log-panel::-webkit-scrollbar,
+.zd-schedule-panel::-webkit-scrollbar,
+.zd-linear-results-container::-webkit-scrollbar,
+.zd-notes-display::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.zd-settings-panel::-webkit-scrollbar-track,
+.zd-log-panel::-webkit-scrollbar-track,
+.zd-schedule-panel::-webkit-scrollbar-track,
+.zd-linear-results-container::-webkit-scrollbar-track,
+.zd-notes-display::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: var(--zd-radius-pill);
+    margin: 4px;
+}
+
+.zd-settings-panel::-webkit-scrollbar-thumb,
+.zd-log-panel::-webkit-scrollbar-thumb,
+.zd-schedule-panel::-webkit-scrollbar-thumb,
+.zd-linear-results-container::-webkit-scrollbar-thumb,
+.zd-notes-display::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: var(--zd-radius-pill);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background var(--zd-transition-base) var(--zd-ease-smooth);
+}
+
+.zd-settings-panel::-webkit-scrollbar-thumb:hover,
+.zd-log-panel::-webkit-scrollbar-thumb:hover,
+.zd-schedule-panel::-webkit-scrollbar-thumb:hover,
+.zd-linear-results-container::-webkit-scrollbar-thumb:hover,
+.zd-notes-display::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+    background-clip: padding-box;
+}
+
+/* Scrollbar for Dark Mode */
+.zd-theme-dark .zd-settings-panel::-webkit-scrollbar-track,
+.zd-theme-dark .zd-log-panel::-webkit-scrollbar-track,
+.zd-theme-dark .zd-schedule-panel::-webkit-scrollbar-track,
+.zd-theme-dark .zd-linear-results-container::-webkit-scrollbar-track,
+.zd-theme-dark .zd-notes-display::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.zd-theme-dark .zd-settings-panel::-webkit-scrollbar-thumb,
+.zd-theme-dark .zd-log-panel::-webkit-scrollbar-thumb,
+.zd-theme-dark .zd-schedule-panel::-webkit-scrollbar-thumb,
+.zd-theme-dark .zd-linear-results-container::-webkit-scrollbar-thumb,
+.zd-theme-dark .zd-notes-display::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    background-clip: padding-box;
+}
+
+.zd-theme-dark .zd-settings-panel::-webkit-scrollbar-thumb:hover,
+.zd-theme-dark .zd-log-panel::-webkit-scrollbar-thumb:hover,
+.zd-theme-dark .zd-schedule-panel::-webkit-scrollbar-thumb:hover,
+.zd-theme-dark .zd-linear-results-container::-webkit-scrollbar-thumb:hover,
+.zd-theme-dark .zd-notes-display::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.35);
+    background-clip: padding-box;
+}
+
+/* Firefox scrollbar support */
+.zd-settings-panel,
+.zd-log-panel,
+.zd-schedule-panel,
+.zd-linear-results-container,
+.zd-notes-display {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.03);
+}
+
+.zd-theme-dark .zd-settings-panel,
+.zd-theme-dark .zd-log-panel,
+.zd-theme-dark .zd-schedule-panel,
+.zd-theme-dark .zd-linear-results-container,
+.zd-theme-dark .zd-notes-display {
+    scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
 }
 

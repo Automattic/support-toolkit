@@ -147,6 +147,19 @@
                 <button class="zd-linear-close-btn" title="Close panel">×</button>
             </div>
 
+            <!-- Tab Navigation -->
+            <div class="zd-linear-tabs">
+                <button class="zd-linear-tab zd-linear-tab-active" data-tab="search">
+                    Search
+                </button>
+                <button class="zd-linear-tab" data-tab="assigned">
+                    Assigned to Me
+                </button>
+                <button class="zd-linear-tab" data-tab="created">
+                    Created by Me
+                </button>
+            </div>
+
             <div class="zd-linear-filters">
                 <!-- Keyword Suggestions -->
                 <div class="zd-linear-keyword-section">
@@ -191,6 +204,59 @@
                     />
                 </div>
 
+                <!-- Advanced Filters (Collapsible) -->
+                <div class="zd-linear-advanced-filters">
+                    <button id="zd-linear-advanced-toggle" class="zd-linear-advanced-toggle">
+                        <span class="zd-linear-advanced-arrow">▶</span>
+                        Advanced Filters
+                    </button>
+                    <div id="zd-linear-advanced-content" class="zd-linear-advanced-content" style="display: none;">
+                        <!-- Date Filter -->
+                        <div class="zd-linear-filter-group">
+                            <label class="zd-linear-filter-label">Created</label>
+                            <div class="zd-linear-date-presets">
+                                <button class="zd-linear-date-btn" data-days="0">Today</button>
+                                <button class="zd-linear-date-btn" data-days="7">This Week</button>
+                                <button class="zd-linear-date-btn" data-days="30">This Month</button>
+                                <button class="zd-linear-date-btn" data-days="90">Last 90 Days</button>
+                                <button class="zd-linear-date-btn zd-linear-date-clear" data-days="">Any Time</button>
+                            </div>
+                        </div>
+
+                        <!-- Priority Filter -->
+                        <div class="zd-linear-filter-group">
+                            <label class="zd-linear-filter-label">Priority</label>
+                            <div class="zd-linear-priority-checks">
+                                <label class="zd-linear-checkbox zd-priority-urgent">
+                                    <input type="checkbox" class="zd-linear-priority-check" value="1" />
+                                    <span class="zd-priority-indicator"></span>
+                                    <span>Urgent</span>
+                                </label>
+                                <label class="zd-linear-checkbox zd-priority-high">
+                                    <input type="checkbox" class="zd-linear-priority-check" value="2" />
+                                    <span class="zd-priority-indicator"></span>
+                                    <span>High</span>
+                                </label>
+                                <label class="zd-linear-checkbox zd-priority-medium">
+                                    <input type="checkbox" class="zd-linear-priority-check" value="3" />
+                                    <span class="zd-priority-indicator"></span>
+                                    <span>Medium</span>
+                                </label>
+                                <label class="zd-linear-checkbox zd-priority-low">
+                                    <input type="checkbox" class="zd-linear-priority-check" value="4" />
+                                    <span class="zd-priority-indicator"></span>
+                                    <span>Low</span>
+                                </label>
+                                <label class="zd-linear-checkbox zd-priority-none">
+                                    <input type="checkbox" class="zd-linear-priority-check" value="0" />
+                                    <span class="zd-priority-indicator"></span>
+                                    <span>None</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Search Button -->
                 <div class="zd-linear-filter-group">
                     <button id="zd-linear-search-btn" class="zd-linear-search-btn" disabled>Search</button>
@@ -228,6 +294,33 @@
         const searchInput = linearPanelEl.querySelector('#zd-linear-search-input');
         const searchBtn = linearPanelEl.querySelector('#zd-linear-search-btn');
         const closeBtn = linearPanelEl.querySelector('.zd-linear-close-btn');
+
+        // Tab navigation
+        linearPanelEl.querySelectorAll('.zd-linear-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabType = tab.dataset.tab;
+                switchTab(tabType);
+            });
+        });
+
+        // Advanced filters toggle
+        const advancedToggle = linearPanelEl.querySelector('#zd-linear-advanced-toggle');
+        const advancedContent = linearPanelEl.querySelector('#zd-linear-advanced-content');
+        const advancedArrow = linearPanelEl.querySelector('.zd-linear-advanced-arrow');
+
+        advancedToggle.addEventListener('click', () => {
+            const isExpanded = advancedContent.style.display !== 'none';
+            advancedContent.style.display = isExpanded ? 'none' : 'block';
+            advancedArrow.textContent = isExpanded ? '▶' : '▼';
+        });
+
+        // Date filter buttons
+        linearPanelEl.querySelectorAll('.zd-linear-date-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                linearPanelEl.querySelectorAll('.zd-linear-date-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
 
         // Keyword extraction button
         keywordBtn.addEventListener('click', extractAndShowKeywords);
@@ -417,6 +510,77 @@
     }
 
     /**
+     * Switch between tabs (search, assigned, created)
+     */
+    async function switchTab(tabType) {
+        if (!linearPanelEl) return;
+
+        // Update active tab styling
+        linearPanelEl.querySelectorAll('.zd-linear-tab').forEach(tab => {
+            if (tab.dataset.tab === tabType) {
+                tab.classList.add('zd-linear-tab-active');
+            } else {
+                tab.classList.remove('zd-linear-tab-active');
+            }
+        });
+
+        // Show/hide filters based on tab
+        const filtersEl = linearPanelEl.querySelector('.zd-linear-filters');
+        if (tabType === 'search') {
+            filtersEl.style.display = 'block';
+            showEmptyState('Select a team to get started');
+        } else {
+            filtersEl.style.display = 'none';
+            // Load "My Issues"
+            await loadMyIssues(tabType);
+        }
+    }
+
+    /**
+     * Load "My Issues" (assigned or created)
+     */
+    async function loadMyIssues(type) {
+        if (!linearPanelEl) return;
+
+        // Get advanced filter values
+        const activeDateBtn = linearPanelEl.querySelector('.zd-linear-date-btn.active');
+        const days = activeDateBtn ? activeDateBtn.dataset.days : '';
+        const createdAfter = days && days !== '' ? window.ZDLinear.calculateDateFromDaysAgo(parseInt(days)) : undefined;
+
+        const priorityChecks = linearPanelEl.querySelectorAll('.zd-linear-priority-check:checked');
+        const priority = Array.from(priorityChecks).map(c => parseInt(c.value));
+
+        const filters = {
+            priority: priority.length > 0 ? priority : undefined,
+            createdAfter
+        };
+
+        showLoadingState(type === 'assigned' ? 'Loading assigned issues...' : 'Loading created issues...');
+
+        try {
+            const cfg = await window.ZDStorage.getConfig();
+            const apiKey = cfg.linearApiKey || '';
+
+            if (!apiKey) {
+                showErrorState('Linear API key not configured');
+                return;
+            }
+
+            let results;
+            if (type === 'assigned') {
+                results = await window.ZDLinear.getMyAssignedIssues(apiKey, filters);
+            } else {
+                results = await window.ZDLinear.getMyCreatedIssues(apiKey, filters);
+            }
+
+            displayResults(results);
+        } catch (error) {
+            console.error('[Linear Panel] Load my issues failed:', error);
+            showErrorState(error.message);
+        }
+    }
+
+    /**
      * Perform search
      */
     async function performSearch() {
@@ -425,6 +589,14 @@
 
         const searchTerm = searchInput.value.trim();
         const stateId = statusSelect.value;
+
+        // Get advanced filter values
+        const activeDateBtn = linearPanelEl.querySelector('.zd-linear-date-btn.active');
+        const days = activeDateBtn ? activeDateBtn.dataset.days : '';
+        const createdAfter = days && days !== '' ? window.ZDLinear.calculateDateFromDaysAgo(parseInt(days)) : undefined;
+
+        const priorityChecks = linearPanelEl.querySelectorAll('.zd-linear-priority-check:checked');
+        const priority = Array.from(priorityChecks).map(c => parseInt(c.value));
 
         showLoadingState();
 
@@ -443,13 +615,17 @@
                 results = await window.ZDLinear.searchIssues({
                     teamKey: selectedTeam.key,
                     search: searchTerm || undefined,
-                    stateId: stateId || undefined
+                    stateId: stateId || undefined,
+                    priority: priority.length > 0 ? priority : undefined,
+                    createdAfter
                 }, apiKey);
             } else {
                 // Search all teams
                 results = await window.ZDLinear.searchAllTeams({
                     search: searchTerm || undefined,
-                    stateId: stateId || undefined
+                    stateId: stateId || undefined,
+                    priority: priority.length > 0 ? priority : undefined,
+                    createdAfter
                 }, apiKey);
             }
 
@@ -928,17 +1104,25 @@
             const statusName = issue.state?.name || 'Unknown';
             const priorityLabel = window.ZDLinear?.formatPriority(issue.priority, issue.priorityLabel) || 'No priority';
             const assigneeName = issue.assignee?.name || 'Unassigned';
+            const creatorName = issue.creator?.name || 'Unknown';
             const updatedDate = window.ZDLinear?.formatDate(issue.updatedAt) || '';
+            const createdDate = window.ZDLinear?.formatDate(issue.createdAt) || '';
             const teamName = issue.team?.name || '';
 
+            // Format labels
+            const labelsHTML = issue.labels?.nodes && issue.labels.nodes.length > 0
+                ? issue.labels.nodes.map(label => `<span class="zd-linear-label-chip" style="border-color: ${label.color}">${label.name}</span>`).join('')
+                : '';
+
             return `
-                <div class="zd-linear-issue-card" data-url="${issue.url}">
+                <div class="zd-linear-issue-card" data-url="${issue.url}" data-identifier="${issue.identifier}" data-title="${escapeHtml(issue.title)}">
                     <div class="zd-linear-issue-header">
                         <div class="zd-linear-issue-identifier">${issue.identifier}</div>
                         <div class="zd-linear-issue-team">${teamName}</div>
                     </div>
                     <div class="zd-linear-issue-title">${issue.title}</div>
                     ${issue.description ? `<div class="zd-linear-issue-description">${truncateText(issue.description, 100)}</div>` : ''}
+                    ${labelsHTML ? `<div class="zd-linear-issue-labels">${labelsHTML}</div>` : ''}
                     <div class="zd-linear-issue-footer">
                         <div class="zd-linear-issue-meta">
                             <span class="zd-linear-status-badge">
@@ -951,18 +1135,67 @@
                             <span class="zd-linear-date">${updatedDate}</span>
                         </div>
                     </div>
+                    <div class="zd-linear-issue-creator">
+                        Created ${createdDate} by ${creatorName}
+                    </div>
+                    <div class="zd-linear-issue-actions">
+                        <button class="zd-linear-copy-btn" data-action="key" title="Copy issue key">
+                            ${window.ZDIcons ? window.ZDIcons.getIconHTML('copy', 14) : 'Copy'}
+                        </button>
+                        <button class="zd-linear-copy-btn" data-action="url" title="Copy issue URL">
+                            ${window.ZDIcons ? window.ZDIcons.getIconHTML('link', 14) : 'URL'}
+                        </button>
+                    </div>
                 </div>
             `;
         }).join('');
 
         resultsContainer.innerHTML = resultsHTML;
 
-        // Add click handlers to cards
+        // Add click handlers to cards (open issue in new tab)
         resultsContainer.querySelectorAll('.zd-linear-issue-card').forEach(card => {
-            card.addEventListener('click', () => {
+            card.addEventListener('click', (e) => {
+                // Don't open if clicking on copy buttons
+                if (e.target.closest('.zd-linear-copy-btn')) return;
+
                 const url = card.dataset.url;
                 if (url) {
                     window.open(url, '_blank', 'noopener,noreferrer');
+                }
+            });
+        });
+
+        // Add click handlers to copy buttons
+        resultsContainer.querySelectorAll('.zd-linear-copy-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation(); // Prevent card click
+                const action = btn.dataset.action;
+                const card = btn.closest('.zd-linear-issue-card');
+                const identifier = card.dataset.identifier;
+                const url = card.dataset.url;
+                const title = card.dataset.title;
+
+                let textToCopy = '';
+                let toastMessage = '';
+
+                if (action === 'key') {
+                    textToCopy = identifier;
+                    toastMessage = `Copied ${identifier}`;
+                } else if (action === 'url') {
+                    textToCopy = url;
+                    toastMessage = `Copied URL`;
+                }
+
+                try {
+                    await navigator.clipboard.writeText(textToCopy);
+                    if (window.ZDNotificationUtils && window.ZDNotificationUtils.showToast) {
+                        window.ZDNotificationUtils.showToast(toastMessage, 'success', 1500);
+                    }
+                } catch (error) {
+                    console.error('[Linear Panel] Copy failed:', error);
+                    if (window.ZDNotificationUtils && window.ZDNotificationUtils.showToast) {
+                        window.ZDNotificationUtils.showToast('Failed to copy', 'error', 1500);
+                    }
                 }
             });
         });
@@ -982,6 +1215,16 @@
         }
 
         return cleanText.substring(0, maxLength) + '...';
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     /**

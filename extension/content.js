@@ -941,6 +941,13 @@
             settingsOverlayEl = buildSettingsOverlay();
             document.body.appendChild(settingsOverlayEl);
         }
+
+        // Toggle functionality
+        if (settingsOverlayEl.style.display === 'flex') {
+            settingsOverlayEl.style.display = 'none';
+            return;
+        }
+
         await populateSettingsForm();
         settingsOverlayEl.style.display = 'flex';
     }
@@ -1672,6 +1679,12 @@ async function checkForVersionUpdate() {
             document.body.appendChild(scheduleOverlayEl);
         }
 
+        // Toggle functionality
+        if (scheduleOverlayEl.style.display === 'flex') {
+            scheduleOverlayEl.style.display = 'none';
+            return;
+        }
+
         // paint cached info immediately
         renderScheduleOverlayFromCache();
         scheduleOverlayEl.style.display = 'flex';
@@ -1827,6 +1840,12 @@ async function checkForVersionUpdate() {
         if (!statsOverlayEl) {
             statsOverlayEl = buildStatsOverlay();
             document.body.appendChild(statsOverlayEl);
+        }
+
+        // Toggle functionality
+        if (statsOverlayEl.style.display === 'flex') {
+            statsOverlayEl.style.display = 'none';
+            return;
         }
 
         await renderStatsOverlay();
