@@ -4260,7 +4260,8 @@ select:hover {
 .zd-worked-log-table td {
     padding: 10px 8px;
     text-align: left;
-    border-bottom: 1px solid var(--zd-border-light);
+    border-bottom: 1px solid var(--zd-border-light, #e5e7eb);
+    color: var(--zd-text-light, #1a1a1a);
 }
 
 .zd-worked-log-table th {
@@ -4268,14 +4269,18 @@ select:hover {
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--zd-text-secondary, #6b7280);
-    background: var(--zd-section-bg, rgba(245, 247, 250, 0.7));
+    color: var(--zd-primary, #5a6d9e);
+    background: #f5f7fa;
     position: sticky;
     top: 0;
 }
 
+.zd-worked-log-table tbody tr {
+    background: #fff;
+}
+
 .zd-worked-log-table tr:hover {
-    background: var(--zd-section-bg, rgba(245, 247, 250, 0.5));
+    background: #f5f7fa;
 }
 
 .zd-summary-cell {
@@ -4496,16 +4501,21 @@ select:hover {
 
 .zd-theme-dark .zd-worked-log-table th,
 .zd-theme-dark .zd-worked-log-table td {
-    border-color: var(--zd-border);
+    border-color: var(--zd-border, #2a2a2a);
+    color: var(--zd-text-dark, #e8e8e8);
 }
 
 .zd-theme-dark .zd-worked-log-table th {
-    background: var(--zd-section-bg, rgba(35, 40, 48, 0.5));
-    color: var(--zd-text-secondary);
+    background: rgba(35, 40, 48, 0.8);
+    color: var(--zd-primary, #4fb1ff);
+}
+
+.zd-theme-dark .zd-worked-log-table tbody tr {
+    background: var(--zd-bg-dark, #1a1a1a);
 }
 
 .zd-theme-dark .zd-worked-log-table tr:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .zd-theme-dark .zd-action-btn:hover {
