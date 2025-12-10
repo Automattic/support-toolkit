@@ -4276,10 +4276,15 @@ select:hover {
 }
 
 .zd-worked-log-table tbody tr {
-    background: #fff;
+    background: #fff !important;
 }
 
-.zd-worked-log-table tr:hover {
+.zd-worked-log-table tbody td {
+    background: #fff;
+    color: #1a1a1a !important;
+}
+
+.zd-worked-log-table tr:hover td {
     background: #f5f7fa;
 }
 
@@ -4511,10 +4516,15 @@ select:hover {
 }
 
 .zd-theme-dark .zd-worked-log-table tbody tr {
-    background: var(--zd-bg-dark, #1a1a1a);
+    background: var(--zd-bg-dark, #1a1a1a) !important;
 }
 
-.zd-theme-dark .zd-worked-log-table tr:hover {
+.zd-theme-dark .zd-worked-log-table tbody td {
+    background: var(--zd-bg-dark, #1a1a1a);
+    color: var(--zd-text-dark, #e8e8e8) !important;
+}
+
+.zd-theme-dark .zd-worked-log-table tr:hover td {
     background: rgba(255, 255, 255, 0.05);
 }
 
