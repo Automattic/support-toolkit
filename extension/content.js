@@ -1146,6 +1146,11 @@ async function checkForVersionUpdate() {
                                 <input type="checkbox" class="cfg-showShiftTimer" />
                                 <span>Shift timer</span>
                             </label>
+
+                            <label class="zd-setting-check">
+                                <input type="checkbox" class="cfg-enableSummaryPopup" />
+                                <span>Summary popup on resolution</span>
+                            </label>
                         </div>
                     </section>
 
@@ -1550,6 +1555,9 @@ async function checkForVersionUpdate() {
         panel.querySelector('.cfg-showShiftTimer').checked =
             cfg.showShiftTimer === false ? false : true;
 
+        panel.querySelector('.cfg-enableSummaryPopup').checked =
+            cfg.enableSummaryPopup === true ? true : false;  // Off by default
+
         panel.querySelector('.cfg-devMode').checked = !!cfg.devMode;
 
         // Show/hide dev tools based on devMode
@@ -1631,6 +1639,7 @@ async function checkForVersionUpdate() {
             showShiftReminders: panel.querySelector('.cfg-showShiftReminders').checked,
             playReminderSound: panel.querySelector('.cfg-playReminderSound').checked,
             showShiftTimer: panel.querySelector('.cfg-showShiftTimer').checked,
+            enableSummaryPopup: panel.querySelector('.cfg-enableSummaryPopup').checked,
             devMode: panel.querySelector('.cfg-devMode').checked,
 
             goalChatsPerHour:
@@ -1910,6 +1919,7 @@ async function checkForVersionUpdate() {
         //   delta: +1,
         //   newValue: 5,
         //   ticketId: "10397713",
+        //   url: "https://...",
         //   ts: 1698525900000
         // }
 
@@ -1939,8 +1949,13 @@ async function checkForVersionUpdate() {
             actionText += ` (${entry.source})`;
         }
 
+        // Make ticket ID clickable if URL is available
         if (entry.ticketId) {
-            actionText += ` — Ticket ${entry.ticketId}`;
+            if (entry.url) {
+                actionText += ` — Ticket <a href="${entry.url}" target="_blank" class="zd-activity-ticket-link">${entry.ticketId}</a>`;
+            } else {
+                actionText += ` — Ticket ${entry.ticketId}`;
+            }
         }
 
         if (typeof entry.newValue === 'number') {
@@ -2179,6 +2194,7 @@ async function checkForVersionUpdate() {
                 ? 'zd-week-row zd-week-row-today'
                 : 'zd-week-row';
 
+            const downloadIcon = window.ZDIcons ? window.ZDIcons.getIconHTML('download', 16) : '↓';
             return `
                 <div class="${highlightClass}">
                     <div>${r.dayLabel}</div>
@@ -2187,7 +2203,7 @@ async function checkForVersionUpdate() {
                     <div><strong>${total}</strong></div>
                     <div>
                         <button class="zd-week-download-btn" data-date="${r.key}" title="Download notes for ${r.dayLabel}">
-                            📥
+                            ${downloadIcon}
                         </button>
                     </div>
                 </div>
@@ -2342,7 +2358,10 @@ async function checkForVersionUpdate() {
                 <div class="zd-stats-week-wrapper">
                     ${headerHtml}${rowsHtml}
                 </div>
-                <button class="zd-week-notes-btn">📥 Download Week Notes</button>
+                <div class="zd-stats-btn-row">
+                    <button class="zd-week-notes-btn">${window.ZDIcons ? window.ZDIcons.getIconHTML('download', 14) : ''}Download Week Notes</button>
+                    <button class="zd-open-worked-log-btn">${window.ZDIcons ? window.ZDIcons.getIconHTML('clipboard', 14) : ''}View Worked Log</button>
+                </div>
             </section>
 
             ${activitySectionHtml}
@@ -2365,6 +2384,16 @@ async function checkForVersionUpdate() {
                 weekNotesBtn.addEventListener('click', async (e) => {
                     e.stopPropagation();
                     await downloadWeekNotes();
+                });
+            }
+
+            // Wire up worked log button
+            const workedLogBtn = statsOverlayEl.querySelector('.zd-open-worked-log-btn');
+            if (workedLogBtn) {
+                workedLogBtn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    closeStatsModal();
+                    await openWorkedLogModal();
                 });
             }
         }, 100);
@@ -2500,6 +2529,7 @@ async function checkForVersionUpdate() {
                         const isToday = dayIndex === currentDay;
                         const rowClass = isToday ? 'zd-week-row zd-week-row-today' : 'zd-week-row';
 
+                        const fallbackDownloadIcon = window.ZDIcons ? window.ZDIcons.getIconHTML('download', 16) : '↓';
                         weekRows += `
                             <div class="${rowClass}">
                                 <div>${dayName}</div>
@@ -2508,7 +2538,7 @@ async function checkForVersionUpdate() {
                                 <div><strong>0</strong></div>
                                 <div>
                                     <button class="zd-week-download-btn" data-date="" title="Download notes">
-                                        📥
+                                        ${fallbackDownloadIcon}
                                     </button>
                                 </div>
                             </div>
@@ -2548,7 +2578,7 @@ async function checkForVersionUpdate() {
                                 </div>
                                 ${weekRows}
                             </div>
-                            <button class="zd-week-notes-btn">📥 Download Week Notes</button>
+                            <button class="zd-week-notes-btn">${window.ZDIcons ? window.ZDIcons.getIconHTML('download', 14) : ''}Download Week Notes</button>
                         </section>
 
                         <section class="zd-stats-section">
@@ -2883,6 +2913,900 @@ async function checkForVersionUpdate() {
     }
 
     // ------------------------------------------------------------
+    // WORKED LOG: Summary Popup + Log Modal
+    // ------------------------------------------------------------
+
+    let workedLogOverlayEl = null;
+
+    // Summary Popup Modal - shows when ticket is resolved (if enabled)
+    function showSummaryPopup(data) {
+        // Prevent multiple instances
+        if (document.querySelector('.zd-summary-popup-modal')) {
+            return;
+        }
+
+        const overlay = document.createElement('div');
+        overlay.className = 'zd-modal-overlay zd-summary-popup-modal';
+
+        const panel = document.createElement('div');
+        panel.className = 'zd-settings-panel zd-modal-animated';
+        panel.style.width = '400px';
+        panel.style.maxWidth = '95vw';
+
+        const modeLabel = data.mode === 'chats' ? 'Chat' : 'Ticket';
+        const ticketDisplay = data.ticketId ? `#${data.ticketId}` : 'Unknown';
+
+        panel.innerHTML = `
+            <h2 class="zd-settings-title" style="margin-bottom:16px;">${modeLabel} Resolved</h2>
+            <div style="font-size:13px;line-height:1.4;margin-bottom:12px;">
+                <strong>${ticketDisplay}</strong>
+            </div>
+            <div class="zd-settings-row">
+                <label style="margin-bottom:6px;display:block;">Quick Summary (optional)</label>
+                <textarea
+                    class="zd-summary-input"
+                    placeholder="What was this about? (e.g., 'Password reset issue')"
+                    style="width:100%;height:80px;resize:vertical;padding:10px;border:1px solid var(--zd-border-light);border-radius:6px;font-family:inherit;font-size:13px;"
+                ></textarea>
+            </div>
+            <div class="zd-settings-footer" style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;">
+                <button class="zd-summary-skip zd-btn-secondary">Skip</button>
+                <button class="zd-summary-save zd-btn-primary">Save</button>
+            </div>
+        `;
+
+        overlay.appendChild(panel);
+        document.body.appendChild(overlay);
+
+        const textareaEl = panel.querySelector('.zd-summary-input');
+
+        // Focus textarea
+        setTimeout(() => textareaEl.focus(), 100);
+
+        function close() {
+            overlay.remove();
+        }
+
+        async function saveEntry(summary) {
+            await ZDStorage.appendWorkedLog({
+                timestamp: new Date().toISOString(),
+                mode: data.mode,
+                ticketId: data.ticketId,
+                url: data.url,
+                summary: summary || '',
+                source: data.source || 'auto-resolution'
+            });
+
+            if (window.ZDEvents) {
+                ZDEvents.emit(ZDEvents.EVENTS.WORKEDLOG_ENTRY_ADDED);
+            }
+        }
+
+        panel.querySelector('.zd-summary-skip').addEventListener('click', async () => {
+            await saveEntry('');
+            close();
+        });
+
+        panel.querySelector('.zd-summary-save').addEventListener('click', async () => {
+            const summary = textareaEl.value.trim();
+            await saveEntry(summary);
+            close();
+        });
+
+        // Enter key to save
+        textareaEl.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const summary = textareaEl.value.trim();
+                await saveEntry(summary);
+                close();
+            }
+        });
+
+        // Escape to skip
+        panel.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                saveEntry('');
+                close();
+            }
+        });
+
+        // Click backdrop to skip
+        overlay.addEventListener('click', async (evt) => {
+            if (evt.target === overlay) {
+                await saveEntry('');
+                close();
+            }
+        });
+    }
+
+    // Listen for summary popup event from auto-count.js
+    if (window.ZDEvents) {
+        ZDEvents.on(ZDEvents.EVENTS.WORKEDLOG_SHOW_POPUP, showSummaryPopup);
+    }
+
+    // Worked Log Modal - view all worked items
+    let workedLogWeekOffset = 0; // 0 = current week, -1 = last week, etc.
+
+    function buildWorkedLogOverlay() {
+        const overlay = document.createElement('div');
+        overlay.className = 'zd-modal-overlay zd-worked-log-modal';
+        overlay.style.display = 'none';
+
+        const panel = document.createElement('div');
+        panel.className = 'zd-stats-panel zd-worked-log-panel';
+
+        const collapseIcon = window.ZDIcons ? window.ZDIcons.getIconHTML('collapse', 14) : '‹';
+        const expandIcon = window.ZDIcons ? window.ZDIcons.getIconHTML('expand', 14) : '›';
+
+        panel.innerHTML = `
+            <div class="zd-worked-log-header">
+                <h2 class="zd-stats-title">${window.ZDIcons ? window.ZDIcons.getIconHTML('clipboard', 18) : ''}Worked Log</h2>
+                <button class="zd-worked-log-close" title="Close">×</button>
+            </div>
+
+            <div class="zd-week-nav">
+                <button class="zd-week-nav-btn zd-week-prev" title="Previous week">${collapseIcon}</button>
+                <span class="zd-week-range">This Week</span>
+                <button class="zd-week-nav-btn zd-week-next" title="Next week">${expandIcon}</button>
+            </div>
+
+            <div class="zd-worked-log-tabs">
+                <div class="zd-worked-log-day-tabs">
+                    <!-- Day tabs dynamically inserted -->
+                </div>
+                <div class="zd-worked-log-type-tabs">
+                    <button class="zd-type-tab active" data-type="all">All</button>
+                    <button class="zd-type-tab" data-type="chats">Chats</button>
+                    <button class="zd-type-tab" data-type="tickets">Tickets</button>
+                </div>
+            </div>
+
+            <div class="zd-worked-log-content">
+                <table class="zd-worked-log-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Type</th>
+                            <th>ID</th>
+                            <th>Summary</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="zd-worked-log-tbody">
+                        <!-- Rows dynamically inserted -->
+                    </tbody>
+                </table>
+                <div class="zd-worked-log-empty" style="display:none;">
+                    <p>No entries for this day.</p>
+                </div>
+            </div>
+
+            <div class="zd-worked-log-footer">
+                <div class="zd-worked-log-actions-left">
+                    <button class="zd-worked-log-btn zd-btn-secondary" data-action="today" title="Export today's log as text">
+                        ${window.ZDIcons ? window.ZDIcons.getIconHTML('download', 14) : ''}Today (.txt)
+                    </button>
+                    <button class="zd-worked-log-btn zd-btn-secondary" data-action="week" title="Export week's log as text">
+                        ${window.ZDIcons ? window.ZDIcons.getIconHTML('download', 14) : ''}Week (.txt)
+                    </button>
+                    <button class="zd-worked-log-btn zd-btn-secondary" data-action="csv" title="Export week's log as CSV">
+                        ${window.ZDIcons ? window.ZDIcons.getIconHTML('clipboard', 14) : ''}CSV
+                    </button>
+                </div>
+                <div class="zd-worked-log-actions-right">
+                    <button class="zd-worked-log-btn zd-btn-secondary" data-action="add">
+                        ${window.ZDIcons ? window.ZDIcons.getIconHTML('plus', 14) : '+'}Add Entry
+                    </button>
+                    <button class="zd-worked-log-close-btn">Close</button>
+                </div>
+            </div>
+        `;
+
+        overlay.appendChild(panel);
+
+        // Event handlers
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeWorkedLogModal();
+        });
+
+        panel.querySelector('.zd-worked-log-close').addEventListener('click', closeWorkedLogModal);
+        panel.querySelector('.zd-worked-log-close-btn').addEventListener('click', closeWorkedLogModal);
+
+        return overlay;
+    }
+
+    async function openWorkedLogModal() {
+        // Reset to current week when opening
+        workedLogWeekOffset = 0;
+
+        if (!workedLogOverlayEl) {
+            workedLogOverlayEl = buildWorkedLogOverlay();
+            document.body.appendChild(workedLogOverlayEl);
+            await wireWorkedLogEvents();
+        }
+        await renderWorkedLogModal();
+        workedLogOverlayEl.style.display = 'flex';
+    }
+
+    function closeWorkedLogModal() {
+        if (workedLogOverlayEl) {
+            workedLogOverlayEl.style.display = 'none';
+        }
+    }
+
+    async function wireWorkedLogEvents() {
+        const panel = workedLogOverlayEl.querySelector('.zd-worked-log-panel');
+
+        // Type tabs
+        panel.querySelectorAll('.zd-type-tab').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                panel.querySelectorAll('.zd-type-tab').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                await renderWorkedLogTable();
+            });
+        });
+
+        // Action buttons
+        panel.querySelectorAll('.zd-worked-log-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const action = btn.dataset.action;
+                const originalText = btn.innerHTML;
+
+                // Add loading state for export actions
+                if (action === 'today' || action === 'week' || action === 'csv') {
+                    btn.classList.add('zd-btn-loading');
+                    btn.disabled = true;
+                }
+
+                try {
+                    switch (action) {
+                        case 'today':
+                            await exportWorkedLogToday();
+                            break;
+                        case 'week':
+                            await exportWorkedLogWeek();
+                            break;
+                        case 'csv':
+                            await exportWorkedLogCSV();
+                            break;
+                        case 'add':
+                            openAddWorkedLogEntry();
+                            break;
+                    }
+                } finally {
+                    // Remove loading state
+                    if (action === 'today' || action === 'week' || action === 'csv') {
+                        btn.classList.remove('zd-btn-loading');
+                        btn.disabled = false;
+                    }
+                }
+            });
+        });
+
+        // Week navigation buttons
+        const prevWeekBtn = panel.querySelector('.zd-week-prev');
+        const nextWeekBtn = panel.querySelector('.zd-week-next');
+
+        if (prevWeekBtn) {
+            prevWeekBtn.addEventListener('click', async () => {
+                workedLogWeekOffset--;
+                await renderDayTabs();
+                await renderWorkedLogTable();
+            });
+        }
+
+        if (nextWeekBtn) {
+            nextWeekBtn.addEventListener('click', async () => {
+                if (workedLogWeekOffset < 0) {
+                    workedLogWeekOffset++;
+                    await renderDayTabs();
+                    await renderWorkedLogTable();
+                }
+            });
+        }
+    }
+
+    async function renderWorkedLogModal() {
+        await renderDayTabs();
+        await renderWorkedLogTable();
+    }
+
+    async function renderDayTabs() {
+        const dayTabsEl = workedLogOverlayEl.querySelector('.zd-worked-log-day-tabs');
+        const weekRangeEl = workedLogOverlayEl.querySelector('.zd-week-range');
+        const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+        // Get week dates based on offset (Monday start)
+        const today = new Date();
+        const currentDayOfWeek = today.getDay();
+        const mondayOffset = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() + mondayOffset + (workedLogWeekOffset * 7));
+
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+
+        // Update week range display
+        const formatDate = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        if (workedLogWeekOffset === 0) {
+            weekRangeEl.textContent = `This Week (${formatDate(monday)} - ${formatDate(sunday)})`;
+        } else if (workedLogWeekOffset === -1) {
+            weekRangeEl.textContent = `Last Week (${formatDate(monday)} - ${formatDate(sunday)})`;
+        } else {
+            weekRangeEl.textContent = `${formatDate(monday)} - ${formatDate(sunday)}`;
+        }
+
+        // Disable next button if already on current week
+        const nextBtn = workedLogOverlayEl.querySelector('.zd-week-next');
+        if (nextBtn) {
+            nextBtn.disabled = workedLogWeekOffset >= 0;
+            nextBtn.classList.toggle('zd-week-nav-disabled', workedLogWeekOffset >= 0);
+        }
+
+        let html = '';
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(monday);
+            date.setDate(monday.getDate() + i);
+            const dayKey = ZDStorage.getLocalDayKey(date);
+            const todayKey = ZDStorage.getLocalDayKey(today);
+            const isToday = dayKey === todayKey;
+
+            // Default selection: today if current week, else Monday
+            const shouldBeActive = workedLogWeekOffset === 0 ? isToday : (i === 0);
+            const activeClass = shouldBeActive ? 'active' : '';
+            const todayClass = isToday ? 'zd-day-today' : '';
+
+            html += `
+                <button class="zd-day-tab ${activeClass} ${todayClass}" data-day="${dayKey}">
+                    ${weekDays[i]}
+                    <span class="zd-day-date">${date.getDate()}</span>
+                </button>
+            `;
+        }
+        dayTabsEl.innerHTML = html;
+
+        // Add click handlers
+        dayTabsEl.querySelectorAll('.zd-day-tab').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                dayTabsEl.querySelectorAll('.zd-day-tab').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                await renderWorkedLogTable();
+            });
+        });
+    }
+
+    async function renderWorkedLogTable() {
+        const tbodyEl = workedLogOverlayEl.querySelector('.zd-worked-log-tbody');
+        const emptyEl = workedLogOverlayEl.querySelector('.zd-worked-log-empty');
+        const tableEl = workedLogOverlayEl.querySelector('.zd-worked-log-table');
+
+        // Get selected day
+        const activeDay = workedLogOverlayEl.querySelector('.zd-day-tab.active');
+        const dayKey = activeDay?.dataset.day || ZDStorage.getLocalDayKey(new Date());
+
+        // Get selected type filter
+        const activeType = workedLogOverlayEl.querySelector('.zd-type-tab.active');
+        const typeFilter = activeType?.dataset.type || 'all';
+
+        // Get ALL entries for the day (for counting)
+        const allEntries = await ZDStorage.getWorkedLogForDay(dayKey);
+
+        // Update type tab counts
+        const allCount = allEntries.length;
+        const chatsCount = allEntries.filter(e => e.mode === 'chats').length;
+        const ticketsCount = allEntries.filter(e => e.mode === 'tickets').length;
+
+        workedLogOverlayEl.querySelectorAll('.zd-type-tab').forEach(tab => {
+            const type = tab.dataset.type;
+            let count = 0;
+            if (type === 'all') count = allCount;
+            else if (type === 'chats') count = chatsCount;
+            else if (type === 'tickets') count = ticketsCount;
+
+            const label = type.charAt(0).toUpperCase() + type.slice(1);
+            tab.innerHTML = `${label} <span class="zd-tab-count">(${count})</span>`;
+
+            // Dim tabs with 0 entries (but keep All always visible)
+            if (count === 0 && type !== 'all') {
+                tab.classList.add('zd-tab-empty');
+            } else {
+                tab.classList.remove('zd-tab-empty');
+            }
+        });
+
+        // Filter entries for display
+        let entries = allEntries;
+        if (typeFilter !== 'all') {
+            entries = entries.filter(e => e.mode === typeFilter);
+        }
+
+        // Sort by timestamp (newest first)
+        entries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        if (entries.length === 0) {
+            tbodyEl.innerHTML = '';
+            tableEl.style.display = 'none';
+            emptyEl.style.display = 'block';
+
+            // Dynamic empty state message
+            const dayDate = new Date(dayKey + 'T12:00:00');
+            const dayName = dayDate.toLocaleDateString('en-US', { weekday: 'long' });
+            const typeLabel = typeFilter === 'all' ? 'entries' : typeFilter;
+            const clipboardIcon = window.ZDIcons ? window.ZDIcons.getIconHTML('clipboard', 32) : '';
+
+            emptyEl.innerHTML = `
+                <div class="zd-empty-icon">${clipboardIcon}</div>
+                <p class="zd-empty-title">No ${typeLabel} for ${dayName}</p>
+                <p class="zd-empty-hint">Entries are added automatically when you resolve tickets, or use "Add Entry" below.</p>
+            `;
+            return;
+        }
+
+        tableEl.style.display = 'table';
+        emptyEl.style.display = 'none';
+
+        tbodyEl.innerHTML = entries.map(entry => {
+            const time = new Date(entry.timestamp).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            const typeIcon = entry.mode === 'chats'
+                ? (window.ZDIcons ? window.ZDIcons.getIconHTML('chat', 16) : 'Chat')
+                : (window.ZDIcons ? window.ZDIcons.getIconHTML('ticket', 16) : 'Ticket');
+            const idDisplay = entry.ticketId || '-';
+            const summaryDisplay = entry.summary || '<span class="zd-no-summary">No summary</span>';
+            const summaryTooltip = entry.summary ? entry.summary.replace(/"/g, '&quot;') : '';
+            const editIcon = window.ZDIcons ? window.ZDIcons.getIconHTML('adjust', 14) : 'Edit';
+            const deleteIcon = window.ZDIcons ? window.ZDIcons.getIconHTML('trash', 14) : 'Del';
+            const sourceBadge = entry.source === 'auto-resolution'
+                ? '<span class="zd-source-badge zd-source-auto">Auto</span>'
+                : '<span class="zd-source-badge zd-source-manual">Manual</span>';
+
+            return `
+                <tr data-id="${entry.id}">
+                    <td>${time} ${sourceBadge}</td>
+                    <td class="zd-type-icon-cell">${typeIcon}</td>
+                    <td>
+                        ${entry.url
+                            ? `<a href="${entry.url}" target="_blank" class="zd-ticket-link">${idDisplay}</a>`
+                            : idDisplay
+                        }
+                    </td>
+                    <td class="zd-summary-cell" title="${summaryTooltip}">${summaryDisplay}</td>
+                    <td class="zd-actions-cell">
+                        <button class="zd-action-btn zd-edit-btn" title="Edit" data-id="${entry.id}">${editIcon}</button>
+                        <button class="zd-action-btn zd-delete-btn" title="Delete" data-id="${entry.id}">${deleteIcon}</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        // Wire up action buttons
+        tbodyEl.querySelectorAll('.zd-edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => openEditWorkedLogEntry(btn.dataset.id));
+        });
+
+        tbodyEl.querySelectorAll('.zd-delete-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const entryId = btn.dataset.id;
+                const row = btn.closest('tr');
+                const entryInfo = row ? row.querySelector('.zd-ticket-link')?.textContent || row.children[2]?.textContent || '' : '';
+                showDeleteConfirmation(entryId, entryInfo);
+            });
+        });
+    }
+
+    // Custom delete confirmation modal
+    function showDeleteConfirmation(entryId, entryInfo) {
+        if (document.querySelector('.zd-delete-confirm-modal')) return;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'zd-modal-overlay zd-delete-confirm-modal';
+
+        const panel = document.createElement('div');
+        panel.className = 'zd-settings-panel zd-delete-confirm-panel';
+
+        panel.innerHTML = `
+            <h2 class="zd-settings-title" style="margin-bottom:12px;">Delete Entry?</h2>
+            <p style="font-size:13px;color:var(--zd-text-secondary);margin-bottom:16px;">
+                ${entryInfo ? `Entry <strong>${entryInfo}</strong> will be permanently deleted.` : 'This entry will be permanently deleted.'}
+            </p>
+            <div class="zd-settings-footer" style="display:flex;gap:8px;justify-content:flex-end;">
+                <button class="zd-delete-cancel zd-btn-secondary">Cancel</button>
+                <button class="zd-delete-confirm zd-btn-danger">Delete</button>
+            </div>
+        `;
+
+        overlay.appendChild(panel);
+        document.body.appendChild(overlay);
+
+        // Focus the cancel button by default
+        setTimeout(() => panel.querySelector('.zd-delete-cancel').focus(), 50);
+
+        function close() {
+            overlay.remove();
+        }
+
+        panel.querySelector('.zd-delete-cancel').addEventListener('click', close);
+
+        panel.querySelector('.zd-delete-confirm').addEventListener('click', async () => {
+            await ZDStorage.deleteWorkedLog(entryId);
+            close();
+            await renderWorkedLogTable();
+
+            if (window.ZDNotifyUtils) {
+                window.ZDNotifyUtils.showToast('Entry deleted', 'info', 2000);
+            }
+        });
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) close();
+        });
+
+        // Escape key to close
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                close();
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+    }
+
+    // Export worked log for today
+    async function exportWorkedLogToday() {
+        const todayKey = ZDStorage.getLocalDayKey(new Date());
+        const entries = await ZDStorage.getWorkedLogForDay(todayKey);
+
+        if (entries.length === 0) {
+            if (window.ZDNotifyUtils) {
+                window.ZDNotifyUtils.showToast('No entries for today', 'warning', 2500);
+            }
+            return;
+        }
+
+        const content = formatWorkedLogForExport([{ day: todayKey, entries }]);
+        const filename = `worked-log-${todayKey}.txt`;
+        downloadTextFile(content, filename);
+
+        if (window.ZDNotifyUtils) {
+            window.ZDNotifyUtils.showToast(`Downloaded ${entries.length} entries`, 'success', 2500);
+        }
+    }
+
+    // Export worked log for current week
+    async function exportWorkedLogWeek() {
+        const weekData = await ZDStorage.getWorkedLogForWeek();
+
+        const daysWithEntries = Object.entries(weekData)
+            .filter(([_, entries]) => entries.length > 0)
+            .map(([day, entries]) => ({ day, entries }));
+
+        if (daysWithEntries.length === 0) {
+            if (window.ZDNotifyUtils) {
+                window.ZDNotifyUtils.showToast('No entries for this week', 'warning', 2500);
+            }
+            return;
+        }
+
+        const totalEntries = daysWithEntries.reduce((sum, d) => sum + d.entries.length, 0);
+        const content = formatWorkedLogForExport(daysWithEntries);
+        const today = ZDStorage.getLocalDayKey(new Date());
+        const filename = `worked-log-week-${today}.txt`;
+        downloadTextFile(content, filename);
+
+        if (window.ZDNotifyUtils) {
+            window.ZDNotifyUtils.showToast(`Downloaded ${totalEntries} entries from ${daysWithEntries.length} days`, 'success', 2500);
+        }
+    }
+
+    // Export worked log as CSV
+    async function exportWorkedLogCSV() {
+        const weekData = await ZDStorage.getWorkedLogForWeek();
+
+        // Flatten all entries with their day info
+        const allEntries = [];
+        for (const [day, entries] of Object.entries(weekData)) {
+            for (const entry of entries) {
+                allEntries.push({ day, ...entry });
+            }
+        }
+
+        if (allEntries.length === 0) {
+            if (window.ZDNotifyUtils) {
+                window.ZDNotifyUtils.showToast('No entries for this week', 'warning', 2500);
+            }
+            return;
+        }
+
+        // Sort by timestamp
+        allEntries.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        // Build CSV content
+        const headers = ['Date', 'Day', 'Time', 'Type', 'ID', 'Summary', 'Source', 'URL'];
+        const escapeCSV = (val) => {
+            if (val == null) return '';
+            const str = String(val);
+            if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                return '"' + str.replace(/"/g, '""') + '"';
+            }
+            return str;
+        };
+
+        let csv = headers.join(',') + '\n';
+
+        for (const entry of allEntries) {
+            const date = new Date(entry.timestamp);
+            const dateStr = entry.day;
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+            const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            const type = entry.mode === 'chats' ? 'Chat' : 'Ticket';
+            const id = entry.ticketId || '';
+            const summary = entry.summary || '';
+            const source = entry.source === 'auto-resolution' ? 'Auto' : 'Manual';
+            const url = entry.url || '';
+
+            const row = [dateStr, dayName, time, type, id, summary, source, url].map(escapeCSV);
+            csv += row.join(',') + '\n';
+        }
+
+        const today = ZDStorage.getLocalDayKey(new Date());
+        const filename = `worked-log-${today}.csv`;
+        downloadCSVFile(csv, filename);
+
+        if (window.ZDNotifyUtils) {
+            window.ZDNotifyUtils.showToast(`Exported ${allEntries.length} entries to CSV`, 'success', 2500);
+        }
+    }
+
+    function downloadCSVFile(content, filename) {
+        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function formatWorkedLogForExport(daysData) {
+        let output = 'WORKED LOG EXPORT\n';
+        output += '================\n\n';
+
+        for (const { day, entries } of daysData) {
+            const date = new Date(day + 'T12:00:00');
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+
+            output += `${dayName} - ${day}\n`;
+            output += '-'.repeat(30) + '\n';
+
+            for (const entry of entries) {
+                const time = new Date(entry.timestamp).toLocaleTimeString('en-US', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                const type = entry.mode === 'chats' ? 'Chat' : 'Ticket';
+                const id = entry.ticketId || 'N/A';
+
+                output += `[${time}] ${type} #${id}\n`;
+                if (entry.summary) {
+                    output += `  Summary: ${entry.summary}\n`;
+                }
+                if (entry.url) {
+                    output += `  URL: ${entry.url}\n`;
+                }
+                output += '\n';
+            }
+
+            output += '\n';
+        }
+
+        return output;
+    }
+
+    function downloadTextFile(content, filename) {
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Open Add Entry Modal
+    function openAddWorkedLogEntry() {
+        if (document.querySelector('.zd-add-entry-modal')) return;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'zd-modal-overlay zd-add-entry-modal';
+
+        const panel = document.createElement('div');
+        panel.className = 'zd-settings-panel zd-modal-animated';
+        panel.style.width = '400px';
+        panel.style.maxWidth = '95vw';
+
+        panel.innerHTML = `
+            <h2 class="zd-settings-title" style="margin-bottom:16px;">Add Entry</h2>
+            <div class="zd-settings-row" style="margin-bottom:12px;">
+                <label style="margin-bottom:6px;display:block;">Type</label>
+                <select class="zd-entry-type zd-form-input">
+                    <option value="tickets">Ticket</option>
+                    <option value="chats">Chat</option>
+                </select>
+            </div>
+            <div class="zd-settings-row" style="margin-bottom:12px;">
+                <label style="margin-bottom:6px;display:block;">Ticket/Chat ID (optional)</label>
+                <input type="text" class="zd-entry-id zd-form-input" placeholder="e.g., 12345" />
+            </div>
+            <div class="zd-settings-row" style="margin-bottom:12px;">
+                <label style="margin-bottom:6px;display:block;">URL (optional)</label>
+                <input type="url" class="zd-entry-url zd-form-input" placeholder="https://..." />
+            </div>
+            <div class="zd-settings-row" style="margin-bottom:12px;">
+                <label style="margin-bottom:6px;display:block;">Summary</label>
+                <textarea class="zd-entry-summary zd-form-textarea" placeholder="What was this about?"></textarea>
+                <div class="zd-char-counter"><span class="zd-char-count">0</span>/500</div>
+            </div>
+            <div class="zd-settings-footer" style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;">
+                <button class="zd-entry-cancel zd-btn-secondary">Cancel</button>
+                <button class="zd-entry-save zd-btn-primary">Add</button>
+            </div>
+        `;
+
+        overlay.appendChild(panel);
+        document.body.appendChild(overlay);
+
+        // Focus first input
+        setTimeout(() => panel.querySelector('.zd-entry-type').focus(), 50);
+
+        // Character counter
+        const summaryEl = panel.querySelector('.zd-entry-summary');
+        const charCountEl = panel.querySelector('.zd-char-count');
+        summaryEl.addEventListener('input', () => {
+            charCountEl.textContent = summaryEl.value.length;
+        });
+
+        function close() {
+            overlay.remove();
+        }
+
+        panel.querySelector('.zd-entry-cancel').addEventListener('click', close);
+
+        async function saveEntry() {
+            const type = panel.querySelector('.zd-entry-type').value;
+            const ticketId = panel.querySelector('.zd-entry-id').value.trim();
+            const url = panel.querySelector('.zd-entry-url').value.trim();
+            const summary = panel.querySelector('.zd-entry-summary').value.trim();
+
+            await ZDStorage.appendWorkedLog({
+                timestamp: new Date().toISOString(),
+                mode: type,
+                ticketId: ticketId || null,
+                url: url || null,
+                summary: summary,
+                source: 'manual'
+            });
+
+            close();
+            await renderWorkedLogTable();
+
+            if (window.ZDNotifyUtils) {
+                window.ZDNotifyUtils.showToast('Entry added', 'success', 2000);
+            }
+        }
+
+        panel.querySelector('.zd-entry-save').addEventListener('click', saveEntry);
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) close();
+        });
+
+        // Keyboard shortcuts
+        const keyHandler = (e) => {
+            if (e.key === 'Escape') {
+                close();
+                document.removeEventListener('keydown', keyHandler);
+            } else if (e.key === 'Enter' && e.ctrlKey) {
+                saveEntry();
+                document.removeEventListener('keydown', keyHandler);
+            }
+        };
+        document.addEventListener('keydown', keyHandler);
+    }
+
+    // Open Edit Entry Modal
+    async function openEditWorkedLogEntry(entryId) {
+        // Find the entry
+        const allLogs = await ZDStorage.getWorkedLogAll();
+        let entry = null;
+
+        for (const dayKey in allLogs) {
+            const found = allLogs[dayKey].find(e => e.id === entryId);
+            if (found) {
+                entry = found;
+                break;
+            }
+        }
+
+        if (!entry) return;
+
+        if (document.querySelector('.zd-edit-entry-modal')) return;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'zd-modal-overlay zd-edit-entry-modal';
+
+        const panel = document.createElement('div');
+        panel.className = 'zd-settings-panel zd-modal-animated';
+        panel.style.width = '400px';
+        panel.style.maxWidth = '95vw';
+
+        const currentLen = (entry.summary || '').length;
+        panel.innerHTML = `
+            <h2 class="zd-settings-title" style="margin-bottom:16px;">Edit Entry</h2>
+            <div class="zd-settings-row" style="margin-bottom:12px;">
+                <label style="margin-bottom:6px;display:block;">Summary</label>
+                <textarea class="zd-entry-summary zd-form-textarea">${entry.summary || ''}</textarea>
+                <div class="zd-char-counter"><span class="zd-char-count">${currentLen}</span>/500</div>
+            </div>
+            <div class="zd-settings-footer" style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;">
+                <button class="zd-entry-cancel zd-btn-secondary">Cancel</button>
+                <button class="zd-entry-save zd-btn-primary">Save</button>
+            </div>
+        `;
+
+        overlay.appendChild(panel);
+        document.body.appendChild(overlay);
+
+        // Focus textarea
+        const summaryEl = panel.querySelector('.zd-entry-summary');
+        const charCountEl = panel.querySelector('.zd-char-count');
+        setTimeout(() => summaryEl.focus(), 50);
+
+        // Character counter
+        summaryEl.addEventListener('input', () => {
+            charCountEl.textContent = summaryEl.value.length;
+        });
+
+        function close() {
+            overlay.remove();
+        }
+
+        async function saveEntry() {
+            const summary = summaryEl.value.trim();
+            await ZDStorage.updateWorkedLog(entryId, { summary });
+            close();
+            await renderWorkedLogTable();
+
+            if (window.ZDNotifyUtils) {
+                window.ZDNotifyUtils.showToast('Entry updated', 'success', 2000);
+            }
+        }
+
+        panel.querySelector('.zd-entry-cancel').addEventListener('click', close);
+        panel.querySelector('.zd-entry-save').addEventListener('click', saveEntry);
+
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) close();
+        });
+
+        // Keyboard shortcuts
+        const keyHandler = (e) => {
+            if (e.key === 'Escape') {
+                close();
+                document.removeEventListener('keydown', keyHandler);
+            } else if (e.key === 'Enter' && e.ctrlKey) {
+                saveEntry();
+                document.removeEventListener('keydown', keyHandler);
+            }
+        };
+        document.addEventListener('keydown', keyHandler);
+    }
 
     // ------------------------------------------------------------
     // 15. MODE SWITCH (Chats <> Tickets pill)
@@ -3091,14 +4015,42 @@ async function checkForVersionUpdate() {
         lastIncrementTime = now;
 
         const which = currentMode === 'chats' ? 'chats' : 'tickets';
+        const ticketId = getTicketIdFromURL() || null;
+        const currentUrl = window.location.href;
 
-        // increment visible counter
+        // increment visible counter (now includes URL for clickable activity)
         await ZDStorage.incCount(which, 1, {
             source: 'auto-resolution',
-            ticketId: getTicketIdFromURL() || null
+            ticketId: ticketId,
+            url: currentUrl
         });
 
         fastRefreshToolbarNoNetwork();
+
+        // Handle worked log: show popup or auto-create entry
+        const cfg = await ZDStorage.getConfig();
+
+        if (cfg.enableSummaryPopup) {
+            // Emit event to show summary popup
+            if (window.ZDEvents) {
+                window.ZDEvents.emit(window.ZDEvents.EVENTS.WORKEDLOG_SHOW_POPUP, {
+                    mode: which,
+                    ticketId: ticketId,
+                    url: currentUrl,
+                    source: 'auto-resolution'
+                });
+            }
+        } else {
+            // Auto-create worked log entry without summary
+            await ZDStorage.appendWorkedLog({
+                timestamp: new Date().toISOString(),
+                mode: which,
+                ticketId: ticketId,
+                url: currentUrl,
+                summary: '',
+                source: 'auto-resolution'
+            });
+        }
     }
 
     // Store the old status right BEFORE submit click

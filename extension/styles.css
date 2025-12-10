@@ -497,7 +497,7 @@ button:focus-visible {
 
 .zd-setting-check {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   font-size: 13px;
   margin: 4px 0;
@@ -1911,10 +1911,55 @@ button:focus-visible {
   background: rgba(255, 255, 255, 0.05);
 }
 
+/* Custom Checkbox Styling */
 .zd-setting-check input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
   width: 18px;
   height: 18px;
+  border: 2px solid var(--zd-border-light, #d0d0d0);
+  border-radius: 4px;
+  background: var(--zd-bg-light, #fff);
   cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.zd-setting-check input[type="checkbox"]:hover {
+  border-color: var(--zd-primary, #1f73b7);
+}
+
+.zd-setting-check input[type="checkbox"]:checked {
+  background: var(--zd-primary, #1f73b7);
+  border-color: var(--zd-primary, #1f73b7);
+}
+
+.zd-setting-check input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Checkbox - Dark mode */
+.zd-theme-dark .zd-setting-check input[type="checkbox"] {
+  border-color: var(--zd-border, #3a3a3a);
+  background: var(--zd-bg-dark, #1a1a1a);
+}
+
+.zd-theme-dark .zd-setting-check input[type="checkbox"]:hover {
+  border-color: var(--zd-primary, #4fb1ff);
+}
+
+.zd-theme-dark .zd-setting-check input[type="checkbox"]:checked {
+  background: var(--zd-primary, #4fb1ff);
+  border-color: var(--zd-primary, #4fb1ff);
 }
 
 /* Improved Input Fields */
@@ -2798,18 +2843,24 @@ button:focus {
   background: var(--zd-accent);
   color: white;
   border: none;
-  border-radius: 2px;
-  padding: 6px 12px;
+  border-radius: var(--zd-radius-md, 6px);
+  padding: 8px 16px;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .zd-week-notes-btn:hover {
   background: #8b0000;
   transform: translateY(-1px);
+}
+
+.zd-week-notes-btn .zd-svg-icon {
+  opacity: 0.9;
 }
 
 /* ---------------- Linear Integration Panel ---------------- */
@@ -4063,5 +4114,838 @@ select:hover {
 .zd-theme-dark .zd-linear-results-container,
 .zd-theme-dark .zd-notes-display {
     scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+}
+
+/* ================= WORKED LOG MODAL ================= */
+
+/* Stats button row for multiple buttons */
+.zd-stats-btn-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+/* Worked Log Panel */
+.zd-worked-log-panel {
+    width: 850px;
+    max-width: 95vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.zd-worked-log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--zd-border-light);
+}
+
+.zd-worked-log-close {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--zd-text-light);
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.zd-worked-log-close:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Day and Type Tabs */
+.zd-worked-log-tabs {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    gap: 12px;
+}
+
+.zd-worked-log-day-tabs {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.zd-day-tab {
+    background: var(--zd-button-secondary-bg, #e8ebef);
+    border: 1px solid var(--zd-border-light);
+    border-radius: var(--zd-radius-md, 6px);
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    color: var(--zd-text-light);
+    white-space: nowrap;
+    height: 32px;
+    box-sizing: border-box;
+}
+
+.zd-day-tab:hover {
+    background: var(--zd-primary);
+    color: #fff;
+    border-color: var(--zd-primary);
+}
+
+.zd-day-tab.active {
+    background: var(--zd-primary);
+    color: #fff;
+    border-color: var(--zd-primary);
+}
+
+.zd-day-date {
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+.zd-worked-log-type-tabs {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.zd-type-tab {
+    background: var(--zd-button-secondary-bg, #e8ebef);
+    border: 1px solid var(--zd-border-light);
+    border-radius: var(--zd-radius-md, 6px);
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    color: var(--zd-text-light);
+    height: 32px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+}
+
+.zd-type-tab:hover {
+    background: var(--zd-primary);
+    color: #fff;
+}
+
+.zd-type-tab.active {
+    background: var(--zd-primary);
+    color: #fff;
+    border-color: var(--zd-primary);
+}
+
+/* Worked Log Table */
+.zd-worked-log-content {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 200px;
+    max-height: 400px;
+}
+
+.zd-worked-log-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.zd-worked-log-table th,
+.zd-worked-log-table td {
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--zd-border-light);
+}
+
+.zd-worked-log-table th {
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--zd-text-secondary, #6b7280);
+    background: var(--zd-section-bg, rgba(245, 247, 250, 0.7));
+    position: sticky;
+    top: 0;
+}
+
+.zd-worked-log-table tr:hover {
+    background: var(--zd-section-bg, rgba(245, 247, 250, 0.5));
+}
+
+.zd-summary-cell {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.zd-no-summary {
+    color: var(--zd-text-secondary);
+    font-style: italic;
+    opacity: 0.6;
+}
+
+.zd-ticket-link {
+    color: var(--zd-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.zd-ticket-link:hover {
+    text-decoration: underline;
+}
+
+.zd-actions-cell {
+    display: flex;
+    gap: 4px;
+}
+
+.zd-action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--zd-radius-sm, 4px);
+    opacity: 0.6;
+    transition: opacity 0.2s ease, background 0.2s ease;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zd-action-btn:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.zd-type-icon-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zd-type-icon-cell .zd-svg-icon {
+    opacity: 0.7;
+}
+
+/* Title with icon spacing */
+.zd-worked-log-header .zd-stats-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.zd-worked-log-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--zd-text-secondary);
+}
+
+.zd-empty-icon {
+    margin-bottom: 12px;
+    opacity: 0.4;
+}
+
+.zd-empty-icon .zd-svg-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.zd-empty-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--zd-text-light);
+}
+
+.zd-theme-dark .zd-empty-title {
+    color: var(--zd-text-dark);
+}
+
+.zd-empty-hint {
+    font-size: 12px;
+    opacity: 0.7;
+    max-width: 280px;
+    margin: 0 auto;
+    line-height: 1.4;
+}
+
+/* Footer Actions */
+.zd-worked-log-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--zd-border-light);
+    margin-top: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.zd-worked-log-actions-left,
+.zd-worked-log-actions-right {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.zd-worked-log-btn {
+    padding: 8px 16px;
+    border-radius: var(--zd-radius-md, 6px);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--zd-border-light);
+    background: var(--zd-button-secondary-bg, #e8ebef);
+    color: var(--zd-text-light);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.zd-worked-log-btn .zd-svg-icon {
+    opacity: 0.8;
+}
+
+.zd-worked-log-btn:hover {
+    background: var(--zd-primary);
+    color: #fff;
+    border-color: var(--zd-primary);
+}
+
+.zd-worked-log-close-btn {
+    background: var(--zd-primary);
+    color: #fff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: var(--zd-radius-md, 6px);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: opacity 0.2s ease;
+}
+
+.zd-worked-log-close-btn:hover {
+    opacity: 0.9;
+}
+
+/* Activity Ticket Link (clickable in Today's Activity) */
+.zd-activity-ticket-link {
+    color: var(--zd-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.zd-activity-ticket-link:hover {
+    text-decoration: underline;
+}
+
+/* Open Worked Log Button in Stats */
+.zd-open-worked-log-btn {
+    padding: 8px 16px;
+    border-radius: var(--zd-radius-md, 6px);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--zd-border-light);
+    background: var(--zd-button-secondary-bg, #e8ebef);
+    color: var(--zd-text-light);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.zd-open-worked-log-btn:hover {
+    background: var(--zd-primary);
+    color: #fff;
+    border-color: var(--zd-primary);
+}
+
+.zd-open-worked-log-btn .zd-svg-icon {
+    opacity: 0.8;
+}
+
+/* Dark theme overrides for Worked Log */
+.zd-theme-dark .zd-worked-log-header,
+.zd-theme-dark .zd-worked-log-footer {
+    border-color: var(--zd-border);
+}
+
+.zd-theme-dark .zd-worked-log-close {
+    color: var(--zd-text-dark);
+}
+
+.zd-theme-dark .zd-worked-log-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.zd-theme-dark .zd-day-tab,
+.zd-theme-dark .zd-type-tab {
+    background: var(--zd-button-secondary-bg, #2a2f37);
+    border-color: var(--zd-border);
+    color: var(--zd-text-dark);
+}
+
+.zd-theme-dark .zd-worked-log-table th,
+.zd-theme-dark .zd-worked-log-table td {
+    border-color: var(--zd-border);
+}
+
+.zd-theme-dark .zd-worked-log-table th {
+    background: var(--zd-section-bg, rgba(35, 40, 48, 0.5));
+    color: var(--zd-text-secondary);
+}
+
+.zd-theme-dark .zd-worked-log-table tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.zd-theme-dark .zd-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.zd-theme-dark .zd-worked-log-btn,
+.zd-theme-dark .zd-open-worked-log-btn {
+    background: var(--zd-button-secondary-bg, #2a2f37);
+    border-color: var(--zd-border);
+    color: var(--zd-text-dark);
+}
+
+.zd-theme-dark .zd-worked-log-btn:hover,
+.zd-theme-dark .zd-open-worked-log-btn:hover {
+    background: var(--zd-primary);
+    color: #fff;
+}
+
+/* ================= GLOBAL BUTTON CLASSES ================= */
+
+/* Primary button - main action buttons */
+.zd-btn-primary {
+    padding: 8px 16px;
+    border-radius: var(--zd-radius-md, 6px);
+    border: none;
+    background: var(--zd-primary);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.zd-btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Secondary button - cancel, skip, etc. */
+.zd-btn-secondary {
+    padding: 8px 16px;
+    border-radius: var(--zd-radius-md, 6px);
+    border: 1px solid var(--zd-border-light);
+    background: var(--zd-button-secondary-bg, #e8ebef);
+    color: var(--zd-text-light, #333);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.zd-btn-secondary:hover {
+    background: var(--zd-primary);
+    color: #fff;
+    border-color: var(--zd-primary);
+}
+
+/* Dark theme button overrides */
+.zd-theme-dark .zd-btn-secondary {
+    background: var(--zd-button-secondary-bg, #2a2f37);
+    border-color: var(--zd-border);
+    color: var(--zd-text-dark, #e0e0e0);
+}
+
+.zd-theme-dark .zd-btn-secondary:hover {
+    background: var(--zd-primary);
+    color: #fff;
+    border-color: var(--zd-primary);
+}
+
+/* ================= TAB SELECTION ANIMATIONS ================= */
+
+/* Enhanced day tab styling with selection indicator */
+.zd-day-tab {
+    position: relative;
+    overflow: hidden;
+}
+
+.zd-day-tab::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--zd-primary);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.zd-day-tab.active::after {
+    width: 80%;
+}
+
+.zd-day-tab.active {
+    box-shadow: 0 2px 8px rgba(var(--zd-primary-rgb, 114, 82, 163), 0.3);
+    transform: translateY(-1px);
+}
+
+/* Enhanced type tab styling with selection indicator */
+.zd-type-tab {
+    position: relative;
+    overflow: hidden;
+}
+
+.zd-type-tab::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: #fff;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.zd-type-tab.active::after {
+    width: 70%;
+}
+
+.zd-type-tab.active {
+    box-shadow: 0 2px 8px rgba(var(--zd-primary-rgb, 114, 82, 163), 0.3);
+    transform: translateY(-1px);
+}
+
+/* Danger button - delete actions */
+.zd-btn-danger {
+    padding: 8px 16px;
+    border-radius: var(--zd-radius-md, 6px);
+    border: none;
+    background: var(--zd-accent, #c0392b);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.zd-btn-danger:hover {
+    background: #a93226;
+    transform: translateY(-1px);
+}
+
+/* Delete confirmation panel */
+.zd-delete-confirm-panel {
+    width: 320px;
+    max-width: 90vw;
+    animation: modalSlideIn 0.2s ease-out;
+}
+
+/* Modal animation class */
+.zd-modal-animated {
+    animation: modalSlideIn 0.2s ease-out;
+}
+
+/* Form inputs */
+.zd-form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--zd-border-light);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    background: var(--zd-bg-light);
+    color: var(--zd-text-light);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.zd-form-input:focus {
+    outline: none;
+    border-color: var(--zd-primary);
+    box-shadow: 0 0 0 3px rgba(var(--zd-primary-rgb, 114, 82, 163), 0.15);
+}
+
+.zd-form-textarea {
+    width: 100%;
+    height: 80px;
+    padding: 10px;
+    border: 1px solid var(--zd-border-light);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    resize: vertical;
+    background: var(--zd-bg-light);
+    color: var(--zd-text-light);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.zd-form-textarea:focus {
+    outline: none;
+    border-color: var(--zd-primary);
+    box-shadow: 0 0 0 3px rgba(var(--zd-primary-rgb, 114, 82, 163), 0.15);
+}
+
+/* Character counter */
+.zd-char-counter {
+    text-align: right;
+    font-size: 11px;
+    color: var(--zd-text-secondary, #6b7280);
+    margin-top: 4px;
+    opacity: 0.7;
+}
+
+/* Dark theme form overrides */
+.zd-theme-dark .zd-form-input,
+.zd-theme-dark .zd-form-textarea {
+    background: var(--zd-section-bg, #1e2128);
+    border-color: var(--zd-border);
+    color: var(--zd-text-dark);
+}
+
+.zd-theme-dark .zd-form-input:focus,
+.zd-theme-dark .zd-form-textarea:focus {
+    border-color: var(--zd-primary);
+}
+
+/* Source badges */
+.zd-source-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.zd-source-auto {
+    background: rgba(46, 204, 113, 0.15);
+    color: #27ae60;
+}
+
+.zd-source-manual {
+    background: rgba(149, 165, 166, 0.15);
+    color: #7f8c8d;
+}
+
+.zd-theme-dark .zd-source-auto {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+}
+
+.zd-theme-dark .zd-source-manual {
+    background: rgba(149, 165, 166, 0.2);
+    color: #95a5a6;
+}
+
+/* Tab count badges */
+.zd-tab-count {
+    font-size: 10px;
+    opacity: 0.7;
+    margin-left: 2px;
+}
+
+.zd-tab-empty {
+    opacity: 0.5;
+}
+
+/* Loading state for buttons */
+.zd-btn-loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.zd-btn-loading::after {
+    content: '...';
+    animation: loadingDots 1s steps(4, end) infinite;
+}
+
+@keyframes loadingDots {
+    0%, 20% { content: ''; }
+    40% { content: '.'; }
+    60% { content: '..'; }
+    80%, 100% { content: '...'; }
+}
+
+/* Week Navigation */
+.zd-week-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--zd-border, rgba(0,0,0,0.1));
+    background: var(--zd-bg-secondary, #f8f9fa);
+}
+
+.zd-week-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--zd-border, rgba(0,0,0,0.15));
+    border-radius: var(--zd-radius-md, 6px);
+    background: var(--zd-bg, #fff);
+    color: var(--zd-text, #333);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.zd-week-nav-btn:hover:not(:disabled) {
+    background: var(--zd-bg-hover, #f0f0f0);
+    border-color: var(--zd-primary, #1f73b7);
+}
+
+.zd-week-nav-btn:disabled,
+.zd-week-nav-disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.zd-week-range {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--zd-text, #333);
+    min-width: 180px;
+    text-align: center;
+}
+
+/* Today indicator on day tabs */
+.zd-day-tab.zd-day-today {
+    position: relative;
+}
+
+.zd-day-tab.zd-day-today::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--zd-primary, #1f73b7);
+}
+
+.zd-day-tab.zd-day-today.active::after {
+    background: #fff;
+}
+
+/* Week Navigation - Dark Mode */
+.zd-theme-dark .zd-week-nav {
+    background: var(--zd-bg-dark, #1a1a1a);
+    border-bottom-color: var(--zd-border, #2a2a2a);
+}
+
+.zd-theme-dark .zd-week-nav-btn {
+    background: var(--zd-bg-dark, #0f0f0f);
+    border-color: var(--zd-border, #3a3a3a);
+    color: var(--zd-text-dark, #e8e8e8);
+}
+
+.zd-theme-dark .zd-week-nav-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--zd-primary, #4fb1ff);
+}
+
+.zd-theme-dark .zd-week-range {
+    color: var(--zd-text-dark, #e8e8e8);
+}
+
+/* Toast Notifications */
+.zd-notification-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid var(--zd-border-light, #e0e0e0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 12px 16px;
+    min-width: 280px;
+    max-width: 360px;
+    animation: toastSlideIn 0.3s ease-out;
+    position: relative;
+}
+
+@keyframes toastSlideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.zd-notification-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: relative;
+    padding-right: 20px;
+}
+
+.zd-notification-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1a1a1a;
+}
+
+.zd-notification-message {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+}
+
+.zd-notification-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    font-size: 14px;
+    color: #999;
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+}
+
+.zd-notification-close:hover {
+    opacity: 1;
+}
+
+/* Toast - Dark Mode */
+.zd-theme-dark .zd-notification-card {
+    background: #1a1a1a;
+    border-color: var(--zd-border, #3a3a3a);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.zd-theme-dark .zd-notification-title {
+    color: #e8e8e8;
+}
+
+.zd-theme-dark .zd-notification-message {
+    color: #aaa;
+}
+
+.zd-theme-dark .zd-notification-close {
+    color: #888;
 }
 

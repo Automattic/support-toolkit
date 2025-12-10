@@ -105,7 +105,13 @@
 
         // AI events
         AI_MESSAGE_SENT: 'ai:messageSent',
-        AI_RESPONSE_RECEIVED: 'ai:responseReceived'
+        AI_RESPONSE_RECEIVED: 'ai:responseReceived',
+
+        // Worked Log events
+        WORKEDLOG_SHOW_POPUP: 'workedlog:showSummaryPopup',
+        WORKEDLOG_ENTRY_ADDED: 'workedlog:entryAdded',
+        WORKEDLOG_ENTRY_UPDATED: 'workedlog:entryUpdated',
+        WORKEDLOG_ENTRY_DELETED: 'workedlog:entryDeleted'
     };
 
     // Public API

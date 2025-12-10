@@ -11,7 +11,8 @@
         THEME: 'ZDCounter-theme',
         POSITION: 'ZDCounter-bar-position',
         VERSION: 'ZDCounter-version',
-        ACTIVITY_LOG: 'ZDCounter-activity-log'
+        ACTIVITY_LOG: 'ZDCounter-activity-log',
+        WORKED_LOG: 'ZDCounter-worked-log'
     };
 
     // Default user configuration
@@ -36,6 +37,7 @@
         detectFirstTimer: false,
         gapPreChatAlert: false,
         enableDeduplication: true,
+        enableSummaryPopup: false,  // Summary popup on resolution (off by default)
 
         // Toolbar customization
         showLinear: true,

@@ -75,16 +75,44 @@
             ? window.ZDState.get('currentMode')
             : 'tickets';
         const which = currentMode === 'chats' ? 'chats' : 'tickets';
+        const ticketId = getTicketIdFromURL() || null;
+        const currentUrl = window.location.href;
 
-        // Increment counter
+        // Increment counter (now includes URL for clickable activity)
         await window.ZDStorage.incCount(which, 1, {
             source: 'auto-resolution',
-            ticketId: getTicketIdFromURL() || null
+            ticketId: ticketId,
+            url: currentUrl
         });
 
         // Trigger toolbar refresh
         if (window.ZDEvents) {
             window.ZDEvents.emit(window.ZDEvents.EVENTS.TOOLBAR_REFRESH);
+        }
+
+        // Handle worked log: show popup or auto-create entry
+        const cfg = await window.ZDStorage.getConfig();
+
+        if (cfg.enableSummaryPopup) {
+            // Emit event to show summary popup in content.js
+            if (window.ZDEvents) {
+                window.ZDEvents.emit(window.ZDEvents.EVENTS.WORKEDLOG_SHOW_POPUP, {
+                    mode: which,
+                    ticketId: ticketId,
+                    url: currentUrl,
+                    source: 'auto-resolution'
+                });
+            }
+        } else {
+            // Auto-create worked log entry without summary
+            await window.ZDStorage.appendWorkedLog({
+                timestamp: new Date().toISOString(),
+                mode: which,
+                ticketId: ticketId,
+                url: currentUrl,
+                summary: '',
+                source: 'auto-resolution'
+            });
         }
     }
 

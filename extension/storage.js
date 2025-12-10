@@ -290,7 +290,8 @@
             source: meta.source || "unknown",
             delta: amount,
             newValue: counts[type],
-            ticketId: meta.ticketId || null
+            ticketId: meta.ticketId || null,
+            url: meta.url || null
         });
         await _mirrorCountsAggregate();
 
@@ -652,6 +653,121 @@ async function simulateArchiveOnly() {
     }
     }
 
+    // ========================================
+    // Worked Log: tickets/chats with summaries
+    // ========================================
+
+    async function getWorkedLogAll() {
+        const logObj = await getLocal(STORAGE_KEYS.WORKED_LOG);
+        return logObj || {};
+    }
+
+    async function setWorkedLogAll(newLogObj) {
+        await setLocal(STORAGE_KEYS.WORKED_LOG, newLogObj || {});
+        return newLogObj || {};
+    }
+
+    async function getWorkedLogForDay(dayKey) {
+        const all = await getWorkedLogAll();
+        return all[dayKey] || [];
+    }
+
+    async function getWorkedLogForWeek(weekStartDate = null) {
+        const all = await getWorkedLogAll();
+
+        // Get Monday of current week
+        const today = weekStartDate || new Date();
+        const currentDayOfWeek = today.getDay();
+        const mondayOffset = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() + mondayOffset);
+
+        const result = {};
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(monday);
+            date.setDate(monday.getDate() + i);
+            const dayKey = getLocalDayKey(date);
+            result[dayKey] = all[dayKey] || [];
+        }
+        return result;
+    }
+
+    async function appendWorkedLog(entry) {
+        const all = await getWorkedLogAll();
+        const dayKey = entry.dayKey || getLocalDayKey(new Date());
+
+        if (!all[dayKey]) {
+            all[dayKey] = [];
+        }
+
+        // Generate unique ID
+        const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        const newEntry = {
+            id,
+            timestamp: entry.timestamp || new Date().toISOString(),
+            dayKey,
+            mode: entry.mode || 'tickets',
+            ticketId: entry.ticketId || null,
+            url: entry.url || null,
+            summary: entry.summary || '',
+            source: entry.source || 'manual'
+        };
+
+        // Deduplication: check if same ticketId already exists for this day
+        if (newEntry.ticketId) {
+            const existingIndex = all[dayKey].findIndex(e =>
+                e.ticketId && e.ticketId === newEntry.ticketId
+            );
+            if (existingIndex >= 0) {
+                // Update existing entry (keep summary if new one is empty)
+                const existing = all[dayKey][existingIndex];
+                all[dayKey][existingIndex] = {
+                    ...existing,
+                    ...newEntry,
+                    id: existing.id, // Keep original ID
+                    summary: newEntry.summary || existing.summary // Preserve existing summary if new one is empty
+                };
+                await setWorkedLogAll(all);
+                return all[dayKey][existingIndex];
+            }
+        }
+
+        all[dayKey].push(newEntry);
+        await setWorkedLogAll(all);
+        return newEntry;
+    }
+
+    async function updateWorkedLog(entryId, updates) {
+        const all = await getWorkedLogAll();
+        for (const dayKey in all) {
+            const idx = all[dayKey].findIndex(e => e.id === entryId);
+            if (idx >= 0) {
+                all[dayKey][idx] = { ...all[dayKey][idx], ...updates };
+                await setWorkedLogAll(all);
+                return all[dayKey][idx];
+            }
+        }
+        return null;
+    }
+
+    async function deleteWorkedLog(entryId) {
+        const all = await getWorkedLogAll();
+        for (const dayKey in all) {
+            const idx = all[dayKey].findIndex(e => e.id === entryId);
+            if (idx >= 0) {
+                all[dayKey].splice(idx, 1);
+                await setWorkedLogAll(all);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    async function clearWorkedLogAll() {
+        await setWorkedLogAll({});
+    }
+
     // Initialize storage on first load
     async function initializeStorage() {
         const all = await _readAllSync();
@@ -711,6 +827,14 @@ async function simulateArchiveOnly() {
         simulateArchiveOnly,
         clearActivityLogAll,
         clearActivityLogForToday,
-        initializeStorage
+        initializeStorage,
+        // Worked Log functions
+        getWorkedLogAll,
+        getWorkedLogForDay,
+        getWorkedLogForWeek,
+        appendWorkedLog,
+        updateWorkedLog,
+        deleteWorkedLog,
+        clearWorkedLogAll
     };
 })();
