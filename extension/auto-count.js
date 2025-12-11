@@ -4,8 +4,9 @@
     'use strict';
 
     // State for debouncing and status tracking
-    let lastIncrementTime = 0;
+    let lastIncrementByTicketId = {}; // Per-ticket debounce tracking
     let lastStatusByTicketId = {};
+    const SAME_TICKET_DEBOUNCE_MS = 60000; // 60 seconds - prevents double-count on same ticket
 
     /**
      * Get ticket ID from current URL
@@ -60,22 +61,44 @@
     }
 
     /**
+     * Cleanup old entries from debounce tracking (older than 5 minutes)
+     */
+    function cleanupOldDebounceEntries() {
+        const now = Date.now();
+        const CLEANUP_THRESHOLD = 5 * 60 * 1000; // 5 minutes
+
+        for (const ticketId in lastIncrementByTicketId) {
+            if (now - lastIncrementByTicketId[ticketId] > CLEANUP_THRESHOLD) {
+                delete lastIncrementByTicketId[ticketId];
+            }
+        }
+    }
+
+    /**
      * Increment counter for resolution
      */
     async function incrementForResolution() {
+        const ticketId = getTicketIdFromURL() || 'unknown';
         const now = Date.now();
-        if (now - lastIncrementTime < 800) {
-            // debounce (avoid +2 from dropdown click + status change fallback)
+
+        // Per-ticket debounce: skip if same ticket was counted within 60 seconds
+        const lastForTicket = lastIncrementByTicketId[ticketId] || 0;
+        if (now - lastForTicket < SAME_TICKET_DEBOUNCE_MS) {
+            console.log(`[ZDAutoCount] Skipping duplicate for ticket ${ticketId} (within 60s window)`);
             return;
         }
-        lastIncrementTime = now;
+
+        // Update timestamp for this ticket
+        lastIncrementByTicketId[ticketId] = now;
+
+        // Cleanup old entries to prevent memory bloat
+        cleanupOldDebounceEntries();
 
         // Get current mode from state or default to tickets
         const currentMode = window.ZDState
             ? window.ZDState.get('currentMode')
             : 'tickets';
         const which = currentMode === 'chats' ? 'chats' : 'tickets';
-        const ticketId = getTicketIdFromURL() || null;
         const currentUrl = window.location.href;
 
         // Increment counter (now includes URL for clickable activity)
