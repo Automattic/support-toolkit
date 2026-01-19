@@ -238,10 +238,14 @@
 
     async function maybeFireShiftReminders(activeShift, nextShift) {
         const cfg = await ZDStorage.getConfig();
-        const warnMin = cfg.preShiftWarningMinutes || 5;
+        const { SHIFT_TIMING } = window.ZDConfig || {};
+
+        // Separate timing for start vs end notifications to prevent overlap
+        const startWarnMin = cfg.startShiftWarningMinutes || SHIFT_TIMING?.START_WARNING_MINUTES || 5;
+        const endWarnMin = cfg.endShiftWarningMinutes || SHIFT_TIMING?.END_WARNING_MINUTES || 10;
         const now = new Date();
 
-        // Pre-shift warning
+        // Pre-shift warning (5 min before start by default)
         if (nextShift) {
             const msUntilStart = nextShift.start - now;
             const minsUntil = Math.round(msUntilStart / 60000);
@@ -251,7 +255,7 @@
 
             // Warn X minutes before start
             if (
-                minsUntil === warnMin &&
+                minsUntil === startWarnMin &&
                 lastStartAlertShiftKey !== shiftKey
             ) {
                 if (window.ZDNotifications?.showShiftNotification) {
@@ -274,7 +278,7 @@
             }
         }
 
-        // End-of-shift warning
+        // End-of-shift warning (10 min before end by default - gives time to wrap up)
         if (activeShift) {
             const msLeft = activeShift.end - now;
             const minsLeft = Math.round(msLeft / 60000);
@@ -283,7 +287,7 @@
             const shiftKey = activeShift.title + '|' + activeShift.start.toISOString();
 
             if (
-                minsLeft === warnMin &&
+                minsLeft === endWarnMin &&
                 lastEndAlertShiftKey !== shiftKey
             ) {
                 if (window.ZDNotifications?.showShiftNotification) {

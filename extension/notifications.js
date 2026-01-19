@@ -107,10 +107,10 @@
         const normalized = /chat/i.test(shiftType) ? 'chat' : 'tickets';
 
         const gifs = {
-            chatStart:    'https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZDZ4ZjhybjQ0MTFqMzNkc3htdzExa2xyNzRyN3NpMm5tczczdTE2diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/HBMCmtsPEUShG/giphy.gif',
-            chatEnd:      'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNDc0cHpzN25rZmJxN2RhMTd6cmR0c3h3MXR6Y3JjcDUxaHk2dmYwayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/4ZtzlT61uOzFtN7hBG/giphy.gif',
-            ticketsStart: 'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZzBzdDJtZGFtdjFhdXlvYzZxcnZrMzJ0c2lsenEyY3l2OW9rYWlhZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/SbblchRKdkG7YR6U8L/giphy.gif',
-            ticketsEnd:   'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZzU2bDhsZ2RpZW11YXZzY3ZhOWx2YWdyeDIzc2RvaGdvdzR5N3hiayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/D28t0Rto3daKI/giphy.gif'
+            chatStart:    'https://media.giphy.com/media/mcsPU3SkKrYDdW3aAU/giphy.gif',
+            chatEnd:      'https://media.giphy.com/media/UuebWyG4pts3rboawU/giphy.gif',
+            ticketsStart: 'https://media.giphy.com/media/SwImQhtiNA7io/giphy.gif',
+            ticketsEnd:   'https://media.giphy.com/media/RjVP4ZoxA3xeReLQT0/giphy.gif'
         };
 
         // Show notification if enabled
@@ -126,7 +126,7 @@
         if (type === 'start' && normalized === 'chat') {
             return maybeShowCard({
                 title: 'Chat shift starting',
-                message: 'Your chat shift starts soon.\nLet’s go!',
+                message: 'Your chat shift starts in ~5 min.\nTime to get ready!',
                 imgURL: gifs.chatStart
             });
         }
@@ -134,7 +134,7 @@
         if (type === 'start' && normalized === 'tickets') {
             return maybeShowCard({
                 title: 'Tickets shift starting',
-                message: 'Your tickets shift starts soon.\nGet in the queue mindset.',
+                message: 'Your tickets shift starts in ~5 min.\nGet in the queue mindset.',
                 imgURL: gifs.ticketsStart
             });
         }
@@ -142,7 +142,7 @@
         if (type === 'end' && normalized === 'chat') {
             return maybeShowCard({
                 title: 'Chat shift ending',
-                message: 'Your chat shift ends soon.\nWrap up current convos.',
+                message: 'Your chat shift ends in ~10 min.\nStart wrapping up to go offline.',
                 imgURL: gifs.chatEnd
             });
         }
@@ -150,7 +150,7 @@
         if (type === 'end' && normalized === 'tickets') {
             return maybeShowCard({
                 title: 'Tickets shift ending',
-                message: 'Your tickets shift ends soon.\nFinish any in-progress replies.',
+                message: 'Your tickets shift ends in ~10 min.\nFinish any in-progress replies.',
                 imgURL: gifs.ticketsEnd
             });
         }

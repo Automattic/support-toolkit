@@ -88,10 +88,16 @@
 
     // GIF URLs for notifications
     const NOTIFICATION_GIFS = {
-        CHAT_START: 'https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExZDZ4ZjhybjQ0MTFqMzNkc3htdzExa2xyNzRyN3NpMm5tczczdTE2diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/HBMCmtsPEUShG/giphy.gif',
-        CHAT_END: 'https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNDc0cHpzN25rZmJxN2RhMTd6cmR0c3h3MXR6Y3JjcDUxaHk2dmYwayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/4ZtzlT61uOzFtN7hBG/giphy.gif',
-        TICKETS_START: 'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZzBzdDJtZGFtdjFhdXlvYzZxcnZrMzJ0c2lsenEyY3l2OW9rYWlhZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/SbblchRKdkG7YR6U8L/giphy.gif',
-        TICKETS_END: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZzU2bDhsZ2RpZW11YXZzY3ZhOWx2YWdyeDIzc2RvaGdvdzR5N3hiayZlcD12MV9naWZzX3NlYXJjaCZjdD1n/D28t0Rto3daKI/giphy.gif'
+        CHAT_START: 'https://media.giphy.com/media/mcsPU3SkKrYDdW3aAU/giphy.gif',
+        CHAT_END: 'https://media.giphy.com/media/UuebWyG4pts3rboawU/giphy.gif',
+        TICKETS_START: 'https://media.giphy.com/media/SwImQhtiNA7io/giphy.gif',
+        TICKETS_END: 'https://media.giphy.com/media/RjVP4ZoxA3xeReLQT0/giphy.gif'
+    };
+
+    // Shift notification timing (minutes before shift)
+    const SHIFT_TIMING = {
+        START_WARNING_MINUTES: 5,   // Warn X min before shift starts
+        END_WARNING_MINUTES: 10     // Warn X min before shift ends (wrap up time)
     };
 
     // Validation schemas
@@ -140,6 +146,7 @@
         SELECTORS,
         STATUS_KEYWORDS,
         NOTIFICATION_GIFS,
+        SHIFT_TIMING,
         SCHEMAS
     };
 })();
