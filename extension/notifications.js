@@ -25,9 +25,37 @@
     }
 
     function versionUpdate(newVersion) {
-        const title = 'Toolkit updated';
-        const message = `You're now on <strong>${newVersion}</strong>.<br>Enjoy the latest fixes and features.`;
-        info(title, message, { timeout: 12000 });
+        // Try to show enhanced notification with changelog
+        if (window.ZDChangelog) {
+            showVersionUpdateCard(newVersion);
+        } else {
+            // Fallback to simple notification
+            const title = 'Toolkit updated';
+            const message = `You're now on <strong>${newVersion}</strong>.<br>Enjoy the latest fixes and features.`;
+            info(title, message, { timeout: 12000 });
+        }
+    }
+
+    /**
+     * Show version update notification using the same style as shift notifications
+     */
+    function showVersionUpdateCard(newVersion) {
+        const versionData = window.ZDChangelog.getVersion(newVersion) || window.ZDChangelog.getLatest();
+        const gifUrl = window.ZDChangelog.UPDATE_GIF;
+
+        // Build highlights as bullet points
+        const highlights = versionData?.highlights?.length
+            ? versionData.highlights.map(h => `• ${h}`).join('\n')
+            : '• Bug fixes and improvements';
+
+        const message = `You're now on v${newVersion}!\n${highlights}`;
+
+        // Use the same centered notification as shift reminders
+        showCenteredNotification({
+            title: 'Toolkit updated',
+            message: message,
+            imgURL: gifUrl
+        });
     }
 
 

@@ -13,7 +13,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Data export formats (JSON, CSV, Excel)
 - Unit tests and CI/CD pipeline
 
-## [2.9.0] - 2025-12-11
+## [3.0.0] - 2025-01-19
+
+### Added
+- LibreChat AI panel - embedded chat.a8c.com within Zendesk
+- What's New popup with GIF animation on version updates
+- Changelog viewer in Developer Tools
+- New brain icon for AI features
+
+### Changed
+- Version update notifications now match shift notification style
+- Improved shift notification timing (5 min start, 10 min end warnings)
+- Updated notification GIFs (non-Christmas themed)
+
+### Fixed
+- Prevent duplicate counts on same ticket within 60 seconds
+
+## [2.9.0] - 2025-01-15
 
 ### Fixed
 - Prevent duplicate counts on same ticket within 60 seconds
@@ -291,7 +307,8 @@ Changes are grouped by category:
 
 ---
 
-[Unreleased]: https://github.com/Automattic/support-toolkit/compare/v2.9.0...HEAD
+[Unreleased]: https://github.com/Automattic/support-toolkit/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/Automattic/support-toolkit/compare/v2.9.0...v3.0.0
 [2.9.0]: https://github.com/Automattic/support-toolkit/compare/v2.8.3...v2.9.0
 [2.8.3]: https://github.com/Automattic/support-toolkit/compare/v2.8.2...v2.8.3
 [2.8.2]: https://github.com/Automattic/support-toolkit/compare/v2.8.1...v2.8.2

@@ -233,9 +233,15 @@
                 await window.ZDLinearPanel.toggleLinearPanel();
             }
         });
+        const librechatBtn = await makeIconButton('🤖', 'ai', 'LibreChat AI', async () => {
+            if (window.ZDLibrechatPanel && window.ZDLibrechatPanel.toggle) {
+                await window.ZDLibrechatPanel.toggle();
+            }
+        });
 
         // Store button references for toggling
         linearBtn.dataset.featureId = 'linear';
+        librechatBtn.dataset.featureId = 'librechat';
         notesBtn.dataset.featureId = 'notes';
         statsBtn.dataset.featureId = 'stats';
         scheduleBtn.dataset.featureId = 'schedule';
@@ -248,6 +254,7 @@
         iconGroup.appendChild(statsBtn);
         iconGroup.appendChild(notesBtn);
         iconGroup.appendChild(linearBtn);
+        iconGroup.appendChild(librechatBtn);
 
         // Timer cluster
         const timerWrapper = document.createElement('div');
@@ -1314,6 +1321,8 @@ async function checkForVersionUpdate() {
                                     <button class="zd-dev-test-btn" data-test="sound">Sound</button>
                                     <button class="zd-dev-test-btn" data-test="archive">Archive</button>
                                     <button class="zd-dev-test-btn" data-test="full-reset">Reset</button>
+                                    <button class="zd-dev-test-btn zd-dev-whats-new-btn" data-test="whats-new">What's New</button>
+                                    <button class="zd-dev-test-btn" data-test="version-popup">Version Popup</button>
                                 </div>
                             </div>
                         </div>
@@ -1531,6 +1540,16 @@ async function checkForVersionUpdate() {
                         'Full day reset simulated',
                         'Today\'s data was archived to history and counters were reset to 0. Check the console and F12 → Application → Storage to verify.'
                     );
+                } else if (test === 'whats-new') {
+                    // Show changelog modal
+                    if (window.ZDChangelogModal?.show) {
+                        window.ZDChangelogModal.show();
+                    }
+                } else if (test === 'version-popup') {
+                    // Test version update notification
+                    if (window.ZDNotifications?.versionUpdate) {
+                        window.ZDNotifications.versionUpdate(chrome.runtime.getManifest().version);
+                    }
                 }
             });
         });
@@ -1676,6 +1695,83 @@ async function checkForVersionUpdate() {
             await window.ZDThemePresets.applyTheme(newCfg.currentTheme, isDark, newCfg.currentSize);
         }
     }
+
+    // ------------------------------------------------------------
+    // 9B. CHANGELOG MODAL (What's New)
+    // ------------------------------------------------------------
+
+    let changelogModalEl = null;
+
+    function buildChangelogModal() {
+        const overlay = document.createElement('div');
+        overlay.className = 'zd-changelog-overlay';
+
+        const modal = document.createElement('div');
+        modal.className = 'zd-changelog-modal';
+
+        // Get recent versions from changelog
+        const versions = window.ZDChangelog?.getRecent(3) || [];
+
+        const versionsHtml = versions.map(v => {
+            const changesHtml = v.changes.map(c => {
+                const icon = window.ZDChangelog?.getTypeIcon(c.type) || '•';
+                return `<li class="zd-changelog-change zd-changelog-change-${c.type}">${icon} ${c.text}</li>`;
+            }).join('');
+
+            const dateStr = window.ZDChangelog?.formatDate(v.date) || v.date;
+
+            return `
+                <div class="zd-changelog-version">
+                    <div class="zd-changelog-version-header">
+                        <span class="zd-changelog-version-num">v${v.version}</span>
+                        <span class="zd-changelog-version-date">${dateStr}</span>
+                    </div>
+                    <ul class="zd-changelog-changes">${changesHtml}</ul>
+                </div>
+            `;
+        }).join('');
+
+        modal.innerHTML = `
+            <div class="zd-changelog-header">
+                <span class="zd-changelog-title">📋 Changelog</span>
+                <button class="zd-changelog-close-btn">×</button>
+            </div>
+            <div class="zd-changelog-body">
+                ${versionsHtml || '<p class="zd-changelog-empty">No changelog data available.</p>'}
+            </div>
+        `;
+
+        overlay.appendChild(modal);
+
+        // Close handlers
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) closeChangelogModal();
+        });
+        modal.querySelector('.zd-changelog-close-btn').addEventListener('click', closeChangelogModal);
+
+        return overlay;
+    }
+
+    function showChangelogModal() {
+        if (!changelogModalEl) {
+            changelogModalEl = buildChangelogModal();
+            document.body.appendChild(changelogModalEl);
+        }
+
+        changelogModalEl.style.display = 'flex';
+    }
+
+    function closeChangelogModal() {
+        if (changelogModalEl) {
+            changelogModalEl.style.display = 'none';
+        }
+    }
+
+    // Export changelog modal to global scope for version notifications
+    window.ZDChangelogModal = {
+        show: showChangelogModal,
+        close: closeChangelogModal
+    };
 
     // ------------------------------------------------------------
     // 10. SCHEDULE MODAL (📅 in toolbar)

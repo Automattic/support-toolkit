@@ -4969,3 +4969,341 @@ select:hover {
     color: #888;
 }
 
+/* ============================================
+   LibreChat Panel
+   ============================================ */
+
+/* Main LibreChat panel container */
+.zd-librechat-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 480px;
+    height: 100vh;
+    background: var(--zd-bg-light);
+    border-left: 1px solid var(--zd-border-light);
+    box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
+    z-index: 999999998;
+    display: flex;
+    flex-direction: column;
+    animation: slideInFromRight 0.3s ease-out;
+}
+
+.zd-theme-dark .zd-librechat-panel {
+    background: var(--zd-bg-dark);
+    border-left: 1px solid var(--zd-border);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.6);
+}
+
+/* Panel header */
+.zd-librechat-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--zd-border-light);
+    background: var(--zd-bg-light);
+    flex-shrink: 0;
+}
+
+.zd-theme-dark .zd-librechat-panel-header {
+    border-bottom: 1px solid var(--zd-border);
+    background: var(--zd-bg-dark);
+}
+
+.zd-librechat-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--zd-text-light);
+}
+
+.zd-theme-dark .zd-librechat-panel-title {
+    color: var(--zd-text-dark);
+}
+
+.zd-librechat-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--zd-text-light);
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.zd-librechat-close-btn:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.zd-theme-dark .zd-librechat-close-btn {
+    color: var(--zd-text-dark);
+}
+
+.zd-theme-dark .zd-librechat-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Toolbar */
+.zd-librechat-toolbar {
+    display: flex;
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--zd-border-light);
+    background: var(--zd-bg-secondary);
+    flex-shrink: 0;
+}
+
+.zd-theme-dark .zd-librechat-toolbar {
+    border-bottom: 1px solid var(--zd-border);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.zd-librechat-newtab-btn {
+    background: var(--zd-accent);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.zd-librechat-newtab-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Iframe container */
+.zd-librechat-iframe-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.zd-librechat-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: white;
+}
+
+.zd-theme-dark .zd-librechat-iframe {
+    background: #1a1a1a;
+}
+
+/* Auth overlay (shown when iframe fails) */
+.zd-librechat-iframe-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zd-librechat-auth-message {
+    text-align: center;
+    color: white;
+    padding: 24px;
+}
+
+.zd-librechat-auth-message p {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+}
+
+.zd-librechat-auth-btn {
+    background: var(--zd-accent);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.zd-librechat-auth-btn:hover {
+    opacity: 0.9;
+}
+
+/* =================================================================
+   CHANGELOG MODAL
+   ================================================================= */
+
+/* Changelog Modal */
+.zd-changelog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100001;
+    backdrop-filter: blur(4px);
+}
+
+.zd-changelog-modal {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    animation: zd-changelog-slide-up 0.3s ease-out;
+}
+
+.zd-theme-dark .zd-changelog-modal {
+    background: #1e1e2e;
+}
+
+@keyframes zd-changelog-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.zd-changelog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, var(--zd-accent), #7c3aed);
+    color: white;
+}
+
+.zd-theme-dark .zd-changelog-header {
+    border-bottom-color: #313244;
+}
+
+.zd-changelog-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.zd-changelog-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.zd-changelog-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.zd-changelog-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.zd-changelog-version {
+    margin-bottom: 24px;
+}
+
+.zd-changelog-version:last-child {
+    margin-bottom: 0;
+}
+
+.zd-changelog-version-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--zd-accent);
+}
+
+.zd-changelog-version-num {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--zd-accent);
+}
+
+.zd-changelog-version-date {
+    font-size: 12px;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.zd-theme-dark .zd-changelog-version-date {
+    background: #313244;
+    color: #9ca3af;
+}
+
+.zd-changelog-changes {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.zd-changelog-change {
+    padding: 8px 0;
+    padding-left: 28px;
+    position: relative;
+    font-size: 14px;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.zd-theme-dark .zd-changelog-change {
+    color: #d1d5db;
+    border-bottom-color: #313244;
+}
+
+.zd-changelog-change:last-child {
+    border-bottom: none;
+}
+
+.zd-changelog-empty {
+    text-align: center;
+    color: #6b7280;
+    padding: 40px 20px;
+}
+
+/* Developer Tools - What's New button highlight */
+.zd-dev-whats-new-btn {
+    background: linear-gradient(135deg, var(--zd-accent), #7c3aed) !important;
+    color: white !important;
+    border: none !important;
+}
+
