@@ -13,6 +13,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Data export formats (JSON, CSV, Excel)
 - Unit tests and CI/CD pipeline
 
+## [2.9.0] - 2025-12-11
+
+### Fixed
+- Prevent duplicate counts on same ticket within 60 seconds
+
+## [2.8.3] - 2025-12-10
+
+### Fixed
+- Force light mode on table header row in Worked Log
+
+## [2.8.2] - 2025-12-10
+
+### Fixed
+- Force light mode colors on Worked Log table cells
+
+## [2.8.1] - 2025-12-10
+
+### Fixed
+- Worked Log table not readable in light mode
+
+## [2.8.0] - 2025-12-10
+
+### Added
+- Worked Log feature with comprehensive polish
+- Track daily work with clickable ticket links
+- Automatic date grouping and timestamps
+
+## [2.7.0] - 2025-12-04
+
+### Added
+- Enhanced Linear Integration with design token system
+- Comprehensive micro-interactions (phases 1 & 2)
+- Subtle depth effects (shadows in light mode, glow in dark mode)
+
+### Removed
+- Translator feature completely removed
+- AI Copilot integration removed
+- All Christmas theme references removed
+
+### Fixed
+- Theme presets now apply correctly (CSS variable mismatch)
+- Preserve dark/light mode when saving settings
+- Timer colors on toolbar now use theme variables in dark mode
+- Dark mode now respects theme color selection
+- Percentage and accent colors now use theme variables
+
 ## [2.6.2] - 2025-01-26
 
 ### Changed
@@ -245,12 +291,21 @@ Changes are grouped by category:
 
 ---
 
-[Unreleased]: https://github.com/mauropereiira/support-toolkit/compare/v2.5.0...HEAD
-[2.5.0]: https://github.com/mauropereiira/support-toolkit/compare/v2.4.0...v2.5.0
-[2.4.0]: https://github.com/mauropereiira/support-toolkit/compare/v2.3.0...v2.4.0
-[2.3.0]: https://github.com/mauropereiira/support-toolkit/compare/v2.2.0...v2.3.0
-[2.2.0]: https://github.com/mauropereiira/support-toolkit/compare/v2.1.0...v2.2.0
-[2.1.0]: https://github.com/mauropereiira/support-toolkit/compare/v2.0.0...v2.1.0
-[2.0.0]: https://github.com/mauropereiira/support-toolkit/compare/v1.5.0...v2.0.0
-[1.5.0]: https://github.com/mauropereiira/support-toolkit/compare/v1.0.0...v1.5.0
-[1.0.0]: https://github.com/mauropereiira/support-toolkit/releases/tag/v1.0.0
+[Unreleased]: https://github.com/Automattic/support-toolkit/compare/v2.9.0...HEAD
+[2.9.0]: https://github.com/Automattic/support-toolkit/compare/v2.8.3...v2.9.0
+[2.8.3]: https://github.com/Automattic/support-toolkit/compare/v2.8.2...v2.8.3
+[2.8.2]: https://github.com/Automattic/support-toolkit/compare/v2.8.1...v2.8.2
+[2.8.1]: https://github.com/Automattic/support-toolkit/compare/v2.8.0...v2.8.1
+[2.8.0]: https://github.com/Automattic/support-toolkit/compare/v2.7.0...v2.8.0
+[2.7.0]: https://github.com/Automattic/support-toolkit/compare/v2.6.2...v2.7.0
+[2.6.2]: https://github.com/Automattic/support-toolkit/compare/v2.6.1...v2.6.2
+[2.6.1]: https://github.com/Automattic/support-toolkit/compare/v2.6.0...v2.6.1
+[2.6.0]: https://github.com/Automattic/support-toolkit/compare/v2.5.0...v2.6.0
+[2.5.0]: https://github.com/Automattic/support-toolkit/compare/v2.4.0...v2.5.0
+[2.4.0]: https://github.com/Automattic/support-toolkit/compare/v2.3.0...v2.4.0
+[2.3.0]: https://github.com/Automattic/support-toolkit/compare/v2.2.0...v2.3.0
+[2.2.0]: https://github.com/Automattic/support-toolkit/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.com/Automattic/support-toolkit/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/Automattic/support-toolkit/compare/v1.5.0...v2.0.0
+[1.5.0]: https://github.com/Automattic/support-toolkit/compare/v1.0.0...v1.5.0
+[1.0.0]: https://github.com/Automattic/support-toolkit/releases/tag/v1.0.0
