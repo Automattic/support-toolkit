@@ -17,18 +17,29 @@
         }
     }
 
+    // Validate + normalize a color by round-tripping it through the browser's
+    // CSS parser. The CSSOM setter rejects anything that isn't a single valid
+    // color (embedded ';', '}', comments, extra declarations all make it
+    // invalid), and reading back gives a canonical, injection-free value.
+    // This guards against a crafted --zd-* token becoming CSS injection once
+    // the captured value is persisted and re-interpolated by the applier.
+    function safeColor(v) {
+        if (typeof v !== 'string' || !v || v.length > 64) return null;
+        const probe = document.createElement('span');
+        probe.style.color = v.trim();
+        return probe.style.color || null; // '' when the value was rejected
+    }
+
     // Capture the active theme's resolved colors so the applier can emit
     // literal values (no dependency on the document_idle theme module).
-    // Only accepts well-formed color strings.
     function captureThemeColors() {
         try {
             const cs = getComputedStyle(document.documentElement);
-            const bg = (cs.getPropertyValue('--zd-background') || '').trim();
-            const primary = (cs.getPropertyValue('--zd-primary') || '').trim();
-            const ok = (v) => /^(#|rgb|hsl)/i.test(v);
+            const background = safeColor((cs.getPropertyValue('--zd-background') || '').trim());
+            const primary = safeColor((cs.getPropertyValue('--zd-primary') || '').trim());
             const colors = {};
-            if (ok(bg)) colors.background = bg;
-            if (ok(primary)) colors.primary = primary;
+            if (background) colors.background = background;
+            if (primary) colors.primary = primary;
             return (colors.background || colors.primary) ? colors : null;
         } catch (e) {
             return null;

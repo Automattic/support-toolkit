@@ -103,21 +103,37 @@
 
     // --- Theme bridge (all pages): tint the canvas + header using --zd-* tokens.
     // Panes/cards keep their own backgrounds, so readability is preserved. ---
+    // Defense-in-depth: independently validate any color before interpolating
+    // it into the stylesheet. chrome.storage.sync can carry values written by
+    // another device or an older extension build, so the sink must not trust
+    // the menu-side sanitizer. Reject CSS-breaking characters outright, then
+    // confirm the browser's parser accepts it as a color.
+    function safeCssColor(v) {
+        if (typeof v !== 'string' || !v || v.length > 64) return null;
+        if (/[;{}<>]/.test(v) || v.indexOf('/*') !== -1 || /url\(/i.test(v)) return null;
+        try {
+            if (window.CSS && CSS.supports && !CSS.supports('color', v)) return null;
+        } catch (e) { return null; }
+        return v;
+    }
+
     function buildThemeCSS(theme) {
         // Opt-in only, and only with concrete captured colors — never emit a
         // `transparent` fallback that would expose the browser canvas.
         if (!theme || theme.applyToZendesk !== true) return '';
         const colors = theme.colors || {};
-        if (!colors.background && !colors.primary) return '';
+        const background = safeCssColor(colors.background);
+        const primary = safeCssColor(colors.primary);
+        if (!background && !primary) return '';
         const header = S.header || 'header[data-test-id="header-toolbar"]';
         const main = S.mainContent || 'main[data-garden-id="navigation.main"]';
         const rules = [];
-        if (colors.background) {
-            rules.push(`body { background-color: ${colors.background} !important; }`);
+        if (background) {
+            rules.push(`body { background-color: ${background} !important; }`);
             rules.push(`${main} { background-color: transparent !important; }`);
         }
-        if (colors.primary) {
-            rules.push(`${header} { border-bottom: 2px solid ${colors.primary} !important; }`);
+        if (primary) {
+            rules.push(`${header} { border-bottom: 2px solid ${primary} !important; }`);
         }
         return rules.join('\n');
     }
