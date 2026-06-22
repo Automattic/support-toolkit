@@ -60,6 +60,9 @@ temp/
 # Claude Code (keep private - contains development agents and local settings)
 .claude/
 
+# Superpowers brainstorming companion (mockups/scratch)
+.superpowers/
+
 # Node modules (if ever added)
 node_modules/
 package-lock.json
