@@ -271,13 +271,21 @@
                 }
                 lastStartAlertShiftKey = shiftKey;
             }
+        }
 
-            // Warn if shift started recently (late login)
-            const diffSinceStart = now - nextShift.start;
+        // Active-shift warnings: late login (started recently) + end of shift.
+        if (activeShift) {
+            const shiftType = /chat/i.test(activeShift.title) ? 'chat' : 'tickets';
+            const shiftKey = activeShift.title + '|' + activeShift.start.toISOString();
+
+            // Late login: shift is already active and started within the window,
+            // and the pre-shift warning never fired (e.g. agent logged in late).
+            // Deduped against the pre-shift alert via the shared key.
+            const msSinceStart = now - activeShift.start;
             if (
                 lateEnabled &&
-                diffSinceStart > 0 &&
-                diffSinceStart < lateWindowMin * 60 * 1000 &&
+                msSinceStart >= 0 &&
+                msSinceStart < lateWindowMin * 60 * 1000 &&
                 lastStartAlertShiftKey !== shiftKey
             ) {
                 if (window.ZDNotifications?.showShiftNotification) {
@@ -285,16 +293,10 @@
                 }
                 lastStartAlertShiftKey = shiftKey;
             }
-        }
 
-        // End-of-shift warning (10 min before end by default - gives time to wrap up)
-        if (activeShift) {
+            // End-of-shift warning (default 10 min before end — time to wrap up).
             const msLeft = activeShift.end - now;
             const minsLeft = Math.round(msLeft / 60000);
-
-            const shiftType = /chat/i.test(activeShift.title) ? 'chat' : 'tickets';
-            const shiftKey = activeShift.title + '|' + activeShift.start.toISOString();
-
             if (
                 endEnabled &&
                 minsLeft === endWarnMin &&
