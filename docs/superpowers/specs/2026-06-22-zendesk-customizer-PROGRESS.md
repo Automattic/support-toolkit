@@ -23,8 +23,11 @@
 - [x] **Menu UI** (`customizer.js`): 4 tabs floating panel, matches toolbar styling, no emojis. Visual verified via injected prototype (stacked layout rows).
 - [x] **Applier** (`customizer-apply.js`): pure `buildCustomizerCSS(settings)` + injector + storage.onChanged live-update. NOTE: route observer NOT needed — every rule self-scopes by selector, so one stylesheet works on all pages and re-matches on SPA nav automatically.
 - [x] Storage model `config.customizer = {...}` (default in constants.js; survives getConfig merge).
-- [ ] Code review (agents) + fixes — IN PROGRESS.
-- [x] CHANGELOG updated; H3 fix committed; Customizer commit next.
+- [x] Code review (2 agents) + fixes applied (commit 876e888): fixed an on-by-default theme regression (canvas forced transparent until idle — now opt-in + literal captured colors) and several silent-failure paths (dep guards, save/theme toasts, wrapped async onChange, guarded renderTab, no swallowed rejections).
+- [x] CHANGELOG updated; commits: a69ef8a (shift warnings), 8dec020 (H3 fix), 494a417 (Customizer), 876e888 (review fixes).
+
+## Status: feature-complete, pending reload smoke-test
+All slices built, reviewed, hardened, committed on `feature/zendesk-customizer`. CSS engine + menu visuals + theme-regression fix verified via live page injection. The only thing left is the reload smoke-test below (needs a human to reload the unpacked extension).
 
 ## ⚠️ NEEDS RELOAD SMOKE-TEST (couldn't reload extension while Mauro AFK)
 The CSS-generation engine + menu visuals were verified by injecting into the live page (no reload). Still to confirm after `chrome://extensions` reload:
