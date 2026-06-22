@@ -1202,10 +1202,35 @@ async function checkForVersionUpdate() {
                         </div>
 
                         <div class="zd-setting-group">
-                            <div class="zd-settings-row">
-                                <label>Pre-shift warning</label>
+                            <div class="zd-settings-row zd-warning-row">
+                                <label class="zd-setting-check">
+                                    <input type="checkbox" class="cfg-startShiftWarningEnabled" />
+                                    <span>Before shift starts</span>
+                                </label>
                                 <div class="zd-input-with-unit">
-                                    <input type="number" min="1" class="cfg-preShiftWarningMinutes" placeholder="15" />
+                                    <input type="number" min="1" max="60" class="cfg-startShiftWarningMinutes" placeholder="5" />
+                                    <span class="zd-input-unit">min</span>
+                                </div>
+                            </div>
+
+                            <div class="zd-settings-row zd-warning-row">
+                                <label class="zd-setting-check">
+                                    <input type="checkbox" class="cfg-lateLoginWarningEnabled" />
+                                    <span>Late login</span>
+                                </label>
+                                <div class="zd-input-with-unit">
+                                    <input type="number" min="1" max="60" class="cfg-lateLoginWarningMinutes" placeholder="10" />
+                                    <span class="zd-input-unit">min</span>
+                                </div>
+                            </div>
+
+                            <div class="zd-settings-row zd-warning-row">
+                                <label class="zd-setting-check">
+                                    <input type="checkbox" class="cfg-endShiftWarningEnabled" />
+                                    <span>Before shift ends</span>
+                                </label>
+                                <div class="zd-input-with-unit">
+                                    <input type="number" min="1" max="60" class="cfg-endShiftWarningMinutes" placeholder="10" />
                                     <span class="zd-input-unit">min</span>
                                 </div>
                             </div>
@@ -1591,8 +1616,35 @@ async function checkForVersionUpdate() {
         panel.querySelector('.cfg-goalTicketsPerHour').value =
             (cfg.goalTicketsPerHour != null) ? cfg.goalTicketsPerHour : 5;
 
-        panel.querySelector('.cfg-preShiftWarningMinutes').value =
-            cfg.preShiftWarningMinutes || 5;
+        // Shift warnings — each independently toggleable + adjustable
+        panel.querySelector('.cfg-startShiftWarningEnabled').checked =
+            cfg.startShiftWarningEnabled !== false;
+        panel.querySelector('.cfg-startShiftWarningMinutes').value =
+            cfg.startShiftWarningMinutes || cfg.preShiftWarningMinutes || 5;
+
+        panel.querySelector('.cfg-lateLoginWarningEnabled').checked =
+            cfg.lateLoginWarningEnabled !== false;
+        panel.querySelector('.cfg-lateLoginWarningMinutes').value =
+            cfg.lateLoginWarningMinutes || 10;
+
+        panel.querySelector('.cfg-endShiftWarningEnabled').checked =
+            cfg.endShiftWarningEnabled !== false;
+        panel.querySelector('.cfg-endShiftWarningMinutes').value =
+            cfg.endShiftWarningMinutes || 10;
+
+        // Disable each minutes input while its warning toggle is off
+        [
+            ['.cfg-startShiftWarningEnabled', '.cfg-startShiftWarningMinutes'],
+            ['.cfg-lateLoginWarningEnabled', '.cfg-lateLoginWarningMinutes'],
+            ['.cfg-endShiftWarningEnabled', '.cfg-endShiftWarningMinutes']
+        ].forEach(([toggleSel, inputSel]) => {
+            const toggle = panel.querySelector(toggleSel);
+            const input = panel.querySelector(inputSel);
+            if (!toggle || !input) return;
+            const sync = () => { input.disabled = !toggle.checked; };
+            toggle.addEventListener('change', sync);
+            sync();
+        });
 
         panel.querySelector('.cfg-calendarURL').value =
             cfg.calendarURL || '';
@@ -1666,8 +1718,18 @@ async function checkForVersionUpdate() {
             goalTicketsPerHour:
                 Number(panel.querySelector('.cfg-goalTicketsPerHour').value) || 0,
 
-            preShiftWarningMinutes:
-                Number(panel.querySelector('.cfg-preShiftWarningMinutes').value) || 5,
+            startShiftWarningEnabled:
+                panel.querySelector('.cfg-startShiftWarningEnabled').checked,
+            startShiftWarningMinutes:
+                Number(panel.querySelector('.cfg-startShiftWarningMinutes').value) || 5,
+            lateLoginWarningEnabled:
+                panel.querySelector('.cfg-lateLoginWarningEnabled').checked,
+            lateLoginWarningMinutes:
+                Number(panel.querySelector('.cfg-lateLoginWarningMinutes').value) || 10,
+            endShiftWarningEnabled:
+                panel.querySelector('.cfg-endShiftWarningEnabled').checked,
+            endShiftWarningMinutes:
+                Number(panel.querySelector('.cfg-endShiftWarningMinutes').value) || 10,
 
             weekStartsOn: panel.querySelector('.cfg-weekStartsOn').value || 'Mon',
             calendarURL: calVal,

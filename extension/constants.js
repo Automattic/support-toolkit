@@ -45,8 +45,14 @@
         showStats: true,
         toolbarCompactMode: false,
 
-        // Alert timing
-        preShiftWarningMinutes: 5,
+        // Shift warning timing (minutes) — each independently adjustable and toggleable
+        startShiftWarningEnabled: true,
+        startShiftWarningMinutes: 5,    // warn X min before shift starts
+        lateLoginWarningEnabled: true,
+        lateLoginWarningMinutes: 10,    // warn if logged in within X min after start
+        endShiftWarningEnabled: true,
+        endShiftWarningMinutes: 10,     // warn X min before shift ends (wrap-up time)
+        preShiftWarningMinutes: 5,      // deprecated alias, migrated to startShiftWarningMinutes
 
         // Data backup
         backup: null,

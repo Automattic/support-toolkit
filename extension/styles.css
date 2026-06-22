@@ -520,6 +520,31 @@ button:focus-visible {
   color: var(--zd-text-dark);
 }
 
+/* Shift warning rows: toggle on the left, compact minutes input on the right */
+.zd-warning-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.zd-warning-row .zd-setting-check {
+  flex: 1;
+  margin: 0;
+}
+.zd-warning-row .zd-setting-check span {
+  font-weight: 500;
+}
+.zd-warning-row .zd-input-with-unit {
+  flex: 0 0 auto;
+}
+.zd-warning-row .zd-input-with-unit input[type="number"] {
+  width: 64px;
+}
+/* Dim the minutes input when its warning is toggled off */
+.zd-warning-row .zd-setting-check input:not(:checked) ~ span {
+  opacity: 0.55;
+}
+
 .zd-settings-row label,
 .zd-setting-item label {
   font-weight: 500;

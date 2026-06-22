@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Full control over every shift warning (start, late login, end of shift): each can be independently enabled/disabled and have its timing adjusted, not just the pre-shift warning
+
+### Fixed
+- Pre-shift warning timing now actually applies (settings saved `preShiftWarningMinutes` but the timer read `startShiftWarningMinutes`); existing saved values are migrated automatically
+
 ### Planned
 - Multi-browser support (Firefox, Safari)
 - Customizable keyboard shortcuts
