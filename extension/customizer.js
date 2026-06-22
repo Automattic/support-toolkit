@@ -11,6 +11,30 @@
 
     const { logError } = window.ZDErrorHandler || { logError: console.error };
 
+    function toast(msg, type, ms) {
+        if (window.ZDNotifyUtils && window.ZDNotifyUtils.showToast) {
+            window.ZDNotifyUtils.showToast(msg, type || 'info', ms || 2500);
+        }
+    }
+
+    // Capture the active theme's resolved colors so the applier can emit
+    // literal values (no dependency on the document_idle theme module).
+    // Only accepts well-formed color strings.
+    function captureThemeColors() {
+        try {
+            const cs = getComputedStyle(document.documentElement);
+            const bg = (cs.getPropertyValue('--zd-background') || '').trim();
+            const primary = (cs.getPropertyValue('--zd-primary') || '').trim();
+            const ok = (v) => /^(#|rgb|hsl)/i.test(v);
+            const colors = {};
+            if (ok(bg)) colors.background = bg;
+            if (ok(primary)) colors.primary = primary;
+            return (colors.background || colors.primary) ? colors : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
     const ROLE_LABELS = {
         conversation: 'Conversation',
         apps: 'Notes (a8cnotes)',
@@ -79,9 +103,15 @@
             await window.ZDStorage.setConfig({ customizer: working });
             if (window.ZDCustomizerApply && window.ZDCustomizerApply.refresh) {
                 window.ZDCustomizerApply.refresh();
+            } else {
+                logError(new Error('ZDCustomizerApply.refresh unavailable'),
+                    { category: 'UI', context: 'customizer-apply-missing' });
             }
         } catch (e) {
+            // The control already shows the new value; tell the user it may
+            // not have saved so they aren't surprised by a silent revert.
             logError(e, { category: 'UI', context: 'customizer-persist' });
+            toast('Could not save your customization — it may not persist.', 'error', 3000);
         }
     }
 
@@ -100,7 +130,10 @@
             if (val === value) o.selected = true;
             s.appendChild(o);
         });
-        s.addEventListener('change', () => onChange(s.value));
+        s.addEventListener('change', () => {
+            Promise.resolve(onChange(s.value)).catch((e) =>
+                logError(e, { category: 'UI', context: 'customizer-onchange' }));
+        });
         return s;
     }
     function checkbox(checked, label, onChange) {
@@ -108,7 +141,10 @@
         const input = el('input');
         input.type = 'checkbox';
         input.checked = !!checked;
-        input.addEventListener('change', () => onChange(input.checked));
+        input.addEventListener('change', () => {
+            Promise.resolve(onChange(input.checked)).catch((e) =>
+                logError(e, { category: 'UI', context: 'customizer-onchange' }));
+        });
         wrap.appendChild(input);
         wrap.appendChild(el('span', null, label));
         return wrap;
@@ -178,9 +214,15 @@
         body.appendChild(tabHint('Theme and size apply across every Zendesk page.'));
 
         body.appendChild(checkbox(
-            working.theme.applyToZendesk !== false,
+            working.theme.applyToZendesk === true,
             'Apply theme colors to Zendesk',
-            (v) => { working.theme.applyToZendesk = v; persistAndApply(); }
+            (v) => {
+                working.theme.applyToZendesk = v;
+                // Snapshot the current theme's colors so the applier emits
+                // literal values (no flash, no idle-module dependency).
+                if (v) working.theme.colors = captureThemeColors();
+                persistAndApply();
+            }
         ));
 
         // Reuse the shared theme presets for theme / dark / size.
@@ -222,14 +264,30 @@
     function isDark() { return cachedCfg.theme === 'dark'; }
     async function applyThemePreset({ theme, size, dark }) {
         const tp = window.ZDThemePresets;
-        if (!tp || !tp.applyTheme) return;
+        if (!tp || !tp.applyTheme) {
+            logError(new Error('ZDThemePresets.applyTheme unavailable'),
+                { category: 'UI', context: 'customizer-theme' });
+            toast('Theme could not be applied.', 'error', 2500);
+            return;
+        }
         const themeId = theme != null ? theme : currentThemeId();
         const sizeId = size != null ? size : currentSizeId();
         const darkOn = dark != null ? dark : isDark();
-        await tp.applyTheme(themeId, darkOn, sizeId);
+        try {
+            await tp.applyTheme(themeId, darkOn, sizeId);
+        } catch (e) {
+            logError(e, { category: 'UI', context: 'customizer-theme-apply' });
+            toast('Theme could not be applied.', 'error', 2500);
+            return;
+        }
         cachedCfg.currentTheme = themeId;
         cachedCfg.currentSize = sizeId;
         cachedCfg.theme = darkOn ? 'dark' : 'light';
+        // Re-snapshot colors so Zendesk tinting tracks the new theme.
+        if (working.theme.applyToZendesk) {
+            working.theme.colors = captureThemeColors();
+            await persistAndApply();
+        }
     }
 
     function buildTextTab() {
@@ -280,8 +338,13 @@
     ];
 
     function renderTab() {
-        const bodyHost = panelEl.querySelector('.zd-customizer-body');
-        const tabsHost = panelEl.querySelector('.zd-customizer-tabs');
+        const bodyHost = panelEl && panelEl.querySelector('.zd-customizer-body');
+        const tabsHost = panelEl && panelEl.querySelector('.zd-customizer-tabs');
+        if (!bodyHost || !tabsHost) {
+            logError(new Error('Customizer panel DOM missing'),
+                { category: 'UI', context: 'customizer-render' });
+            return;
+        }
         bodyHost.innerHTML = '';
         tabsHost.querySelectorAll('.zd-customizer-tab').forEach((t) => {
             t.classList.toggle('zd-customizer-tab-active', t.dataset.tab === activeTab);
@@ -334,9 +397,20 @@
     }
 
     async function open() {
+        if (!window.ZDStorage || !window.ZDCustomizerApply) {
+            logError(new Error('Customizer dependencies not loaded'),
+                { category: 'UI', context: 'customizer-open-deps' });
+            toast('Customize Zendesk is still loading — try again in a moment.', 'error', 3000);
+            return;
+        }
         try {
             cachedCfg = (await window.ZDStorage.getConfig()) || {};
             working = mergeDefaults(cachedCfg.customizer);
+            // Keep captured theme colors fresh in case the theme changed
+            // elsewhere (e.g. the Settings modal) since last open.
+            if (working.theme.applyToZendesk) {
+                working.theme.colors = captureThemeColors() || working.theme.colors;
+            }
 
             if (!panelEl) {
                 panelEl = buildPanel();
@@ -361,6 +435,7 @@
             }, 0);
         } catch (e) {
             logError(e, { category: 'UI', context: 'customizer-open' });
+            toast('Could not open Customize Zendesk.', 'error', 3000);
         }
     }
 

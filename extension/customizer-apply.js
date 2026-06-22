@@ -16,14 +16,22 @@
     const CONFIG_KEY = 'ZDCounter-config'; // STORAGE_KEYS.CONFIG
     const S = window.ZDZendeskSelectors || {};
 
+    function warn(msg, e) {
+        if (window.console) console.warn('[Customizer] ' + msg, e || '');
+    }
+
     const DEFAULT_CUSTOMIZER = {
         enabled: true,
         layout: {
-            apps: { position: 1, width: 'default', hidden: false },
-            conversation: { position: 2, width: 'default', hidden: false },
-            context: { position: 3, width: 'default', hidden: false }
+            apps: { position: 1, width: 'default' },
+            conversation: { position: 2, width: 'default' },
+            context: { position: 3, width: 'default' }
         },
-        theme: { applyToZendesk: true },
+        // Theme tinting is OFF by default so a fresh install never alters
+        // Zendesk's canvas. When enabled, the menu captures the active theme's
+        // colors into `colors` so we emit literal values (no dependency on the
+        // document_idle theme module, no flash).
+        theme: { applyToZendesk: false, colors: null },
         text: { convSize: 'normal', font: 'system', density: 'comfortable' },
         hidden: {} // keys: macroMenu, slaDivider, conversationSubject, searchButton, notificationsButton
     };
@@ -58,8 +66,7 @@
         return ROLE_ORDER.every((role, i) => {
             const r = layout[role] || {};
             return (r.position == null || r.position === i + 1) &&
-                (!r.width || r.width === 'default') &&
-                !r.hidden;
+                (!r.width || r.width === 'default');
         });
     }
 
@@ -82,35 +89,37 @@
         );
 
         const tracks = sorted.map((r) => {
-            if (r.hidden) return '0px';
             const fr = (!r.width || r.width === 'default')
                 ? ROLE_DEFAULT_FR[r.role]
                 : (WIDTH_FR[r.width] || 1);
             return fr + 'fr';
         }).join(' ');
 
-        const hideRules = sorted
-            .filter((r) => r.hidden)
-            .map((r) => `${S.ticketGrid} ${paneSel(r.role)} { display: none !important; }`);
-
         return [
             `${S.ticketGrid} { grid-template-columns: ${tracks} !important; }`,
-            ...orderRules,
-            ...hideRules
+            ...orderRules
         ].join('\n');
     }
 
     // --- Theme bridge (all pages): tint the canvas + header using --zd-* tokens.
     // Panes/cards keep their own backgrounds, so readability is preserved. ---
     function buildThemeCSS(theme) {
-        if (!theme || theme.applyToZendesk === false) return '';
+        // Opt-in only, and only with concrete captured colors — never emit a
+        // `transparent` fallback that would expose the browser canvas.
+        if (!theme || theme.applyToZendesk !== true) return '';
+        const colors = theme.colors || {};
+        if (!colors.background && !colors.primary) return '';
         const header = S.header || 'header[data-test-id="header-toolbar"]';
         const main = S.mainContent || 'main[data-garden-id="navigation.main"]';
-        return [
-            `body { background-color: var(--zd-background, transparent) !important; }`,
-            `${main} { background-color: transparent !important; }`,
-            `${header} { border-bottom: 2px solid var(--zd-primary, transparent) !important; }`
-        ].join('\n');
+        const rules = [];
+        if (colors.background) {
+            rules.push(`body { background-color: ${colors.background} !important; }`);
+            rules.push(`${main} { background-color: transparent !important; }`);
+        }
+        if (colors.primary) {
+            rules.push(`${header} { border-bottom: 2px solid ${colors.primary} !important; }`);
+        }
+        return rules.join('\n');
     }
 
     // --- Text & density (conversation area — the most-read surface) ---
@@ -158,7 +167,7 @@
             ].filter(Boolean).join('\n\n');
         } catch (e) {
             // Never let a styling error break the page.
-            if (window.console) console.warn('[Customizer] buildCSS failed:', e);
+            warn('buildCSS failed', e);
             return '';
         }
     }
@@ -195,9 +204,15 @@
     // Live-update when settings are saved (menu writes config → storage change).
     try {
         chrome.storage.onChanged.addListener((changes, area) => {
-            if (area === 'sync' && changes[CONFIG_KEY]) refresh();
+            if (area === 'sync' && changes[CONFIG_KEY]) {
+                refresh().catch((e) => warn('live refresh failed', e));
+            }
         });
-    } catch (e) { /* storage events unavailable — manual refresh still works */ }
+    } catch (e) {
+        // Live preview won't auto-update, but the menu also calls refresh()
+        // directly. Leave a breadcrumb rather than failing silently.
+        warn('storage.onChanged unavailable', e);
+    }
 
     window.ZDCustomizerApply = {
         refresh,
@@ -208,5 +223,5 @@
     };
 
     // Initial application (runs at document_start).
-    refresh();
+    refresh().catch((e) => warn('initial apply failed', e));
 })();

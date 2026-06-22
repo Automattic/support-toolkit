@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Customize Zendesk** menu (new toolbar button): reshape the Agent Workspace to your taste
   - Layout: assign any ticket pane (Conversation, Notes, User Info) to any position and width, with quick presets (Swap sidebars, Both sidebars right)
-  - Theme: apply the toolbar's themes/colors to Zendesk itself, across every page
+  - Theme: optionally apply the toolbar's themes/colors to Zendesk itself, across every page (opt-in; off by default so a fresh install never alters Zendesk's canvas)
   - Text & Density: conversation font, text size, and spacing
   - Hide / Show: declutter safe elements (macro bar, SLA badge, subject header, search, notifications) — never functional controls
   - Applied via a single injected stylesheet at document_start; settings sync per user and persist across pages and reloads
