@@ -8,9 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Customize Zendesk** menu (new toolbar button): reshape the Agent Workspace to your taste
+  - Layout: assign any ticket pane (Conversation, Notes, User Info) to any position and width, with quick presets (Swap sidebars, Both sidebars right)
+  - Theme: apply the toolbar's themes/colors to Zendesk itself, across every page
+  - Text & Density: conversation font, text size, and spacing
+  - Hide / Show: declutter safe elements (macro bar, SLA badge, subject header, search, notifications) — never functional controls
+  - Applied via a single injected stylesheet at document_start; settings sync per user and persist across pages and reloads
 - Full control over every shift warning (start, late login, end of shift): each can be independently enabled/disabled and have its timing adjusted, not just the pre-shift warning
 
 ### Fixed
+- Late-login shift warning could never fire (was evaluated against a not-yet-started shift); now correctly checks the active shift
 - Pre-shift warning timing now actually applies (settings saved `preShiftWarningMinutes` but the timer read `startShiftWarningMinutes`); existing saved values are migrated automatically
 
 ### Planned

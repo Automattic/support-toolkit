@@ -26,6 +26,18 @@
         "https://*.zendesk-staging.com/*"
       ],
       "js": [
+        "zendesk-selectors.js",
+        "customizer-apply.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://*.zendesk.com/*",
+        "https://*.zopim.com/*",
+        "https://*.zendesk-staging.com/*"
+      ],
+      "js": [
         "error-handler.js",
         "config.js",
         "utils.js",
@@ -50,6 +62,7 @@
         "auto-count.js",
         "export.js",
         "timer-manager.js",
+        "customizer.js",
         "content.js"
       ],
       "css": [

@@ -54,6 +54,21 @@
         endShiftWarningMinutes: 10,     // warn X min before shift ends (wrap-up time)
         preShiftWarningMinutes: 5,      // deprecated alias, migrated to startShiftWarningMinutes
 
+        // Zendesk Customizer (layout / theme / text / hide).
+        // NOTE: keep in sync with DEFAULT_CUSTOMIZER in customizer-apply.js,
+        // which is the document_start fallback before this default is persisted.
+        customizer: {
+            enabled: true,
+            layout: {
+                apps: { position: 1, width: 'default', hidden: false },
+                conversation: { position: 2, width: 'default', hidden: false },
+                context: { position: 3, width: 'default', hidden: false }
+            },
+            theme: { applyToZendesk: true },
+            text: { convSize: 'normal', font: 'system', density: 'comfortable' },
+            hidden: {}
+        },
+
         // Data backup
         backup: null,
 

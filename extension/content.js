@@ -208,6 +208,11 @@
 
         const adjustBtn = await makeIconButton('✏️', 'adjust', 'Set exact count', openManualAdjustModal);
         const settingsBtn = await makeIconButton('⚙️', 'settings', 'Settings', openSettings);
+        const customizeBtn = await makeIconButton('🎛️', 'customize', 'Customize Zendesk', async () => {
+            if (window.ZDCustomizer && window.ZDCustomizer.open) {
+                await window.ZDCustomizer.open();
+            }
+        });
         const scheduleBtn = await makeIconButton('📅', 'schedule', 'Today\'s Schedule', async () => {
             await openScheduleFast();
         });
@@ -249,6 +254,7 @@
 
         iconGroup.appendChild(adjustBtn);
         iconGroup.appendChild(settingsBtn);
+        iconGroup.appendChild(customizeBtn);
         iconGroup.appendChild(scheduleBtn);
         iconGroup.appendChild(themeBtn);
         iconGroup.appendChild(statsBtn);
