@@ -25,7 +25,8 @@ const elStub = () => ({
     remove: noop, contains: () => false
 });
 
-global.window = {};
+global.window = { addEventListener: noop, requestAnimationFrame: noop };
+global.requestAnimationFrame = noop;
 global.document = Object.assign(elStub(), {
     documentElement: elStub(), head: elStub(), body: elStub(),
     createElement: elStub, getElementById: () => null, addEventListener: noop

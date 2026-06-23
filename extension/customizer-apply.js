@@ -43,12 +43,10 @@
     function buildStackCSS(mode) {
         try {
             if (mode !== 'right' && mode !== 'left') return '';
-            // Zendesk's User Info panel fills its space and scrolls internally;
-            // it never shrinks to its content. A large row therefore leaves a
-            // dead gap under the content, while `auto` collapses and clips it.
-            // So we size the top (User Info) row to roughly fit typical content
-            // — minimal gap, the rest scrolls — and give Notes the remainder.
-            const rows = `${GRID} { grid-template-rows: clamp(300px, 34vh, 420px) minmax(0, 1fr) !important; }`;
+            // The top (User Info) row height is driven by --zd-stack-top, which
+            // the draggable divider (see row-resizer below) updates and
+            // persists. Default 420px until the user drags it.
+            const rows = `${GRID} { grid-template-rows: var(--zd-stack-top, 420px) minmax(0, 1fr) !important; }`;
             if (mode === 'left') {
                 // Sidebars in track 1; conversation spans tracks 2–3.
                 return [
@@ -95,9 +93,113 @@
         });
     }
 
+    // --- Draggable divider between the two stacked sidebar panes ---------
+    // Zendesk has no native handle for stacked panes, so we overlay our own.
+    // It drives --zd-stack-top (the User Info row height) live and persists the
+    // chosen height so the User Info / Notes split is the agent's to decide.
+    const HANDLE_ID = 'zd-stack-row-resizer';
+    const MIN_ROW = 140; // px floor for each stacked pane
+    const DEFAULT_TOP = 420;
+
+    let stackingActive = false;
+    let storedTop = DEFAULT_TOP;
+    let dragging = false;
+    let rafQueued = false;
+
+    function getHandle() {
+        let h = document.getElementById(HANDLE_ID);
+        if (!h) {
+            h = document.createElement('div');
+            h.id = HANDLE_ID;
+            Object.assign(h.style, {
+                position: 'fixed', display: 'none', zIndex: 999999998,
+                cursor: 'row-resize', alignItems: 'center', justifyContent: 'center'
+            });
+            const grip = document.createElement('div');
+            grip.style.cssText = 'width:44px;height:4px;border-radius:3px;background:rgba(140,150,170,0.5);transition:background .12s ease;';
+            h.appendChild(grip);
+            h.addEventListener('mouseenter', () => { grip.style.background = 'var(--zd-primary, rgba(140,150,170,0.9))'; });
+            h.addEventListener('mouseleave', () => { if (!dragging) grip.style.background = 'rgba(140,150,170,0.5)'; });
+            h.addEventListener('mousedown', onDragStart);
+            (document.body || document.documentElement).appendChild(h);
+        }
+        return h;
+    }
+
+    function positionHandle() {
+        const h = document.getElementById(HANDLE_ID);
+        if (!stackingActive) { if (h) h.style.display = 'none'; return; }
+        const grid = document.querySelector(GRID);
+        const info = document.querySelector(INFO);
+        if (!grid || !info) { if (h) h.style.display = 'none'; return; }
+        // Set the stored height once when the grid first appears.
+        if (!dragging && !grid.style.getPropertyValue('--zd-stack-top')) {
+            grid.style.setProperty('--zd-stack-top', storedTop + 'px');
+        }
+        const handle = getHandle();
+        const r = info.getBoundingClientRect();
+        handle.style.left = r.left + 'px';
+        handle.style.width = r.width + 'px';
+        handle.style.top = (r.bottom - 5) + 'px';
+        handle.style.height = '10px';
+        handle.style.display = 'flex';
+    }
+
+    function loop() {
+        rafQueued = false;
+        if (!stackingActive) return;
+        if (!dragging) positionHandle();
+        scheduleLoop();
+    }
+    function scheduleLoop() {
+        if (rafQueued || !stackingActive) return;
+        rafQueued = true;
+        requestAnimationFrame(loop);
+    }
+
+    function onDragStart(e) {
+        const grid = document.querySelector(GRID);
+        if (!grid) return;
+        e.preventDefault();
+        dragging = true;
+        document.body.style.userSelect = 'none';
+        document.addEventListener('mousemove', onDragMove, true);
+        document.addEventListener('mouseup', onDragEnd, true);
+    }
+    function onDragMove(e) {
+        const grid = document.querySelector(GRID);
+        if (!grid) return;
+        const gr = grid.getBoundingClientRect();
+        let top = e.clientY - gr.top;
+        top = Math.max(MIN_ROW, Math.min(top, gr.height - MIN_ROW));
+        grid.style.setProperty('--zd-stack-top', Math.round(top) + 'px');
+        positionHandle();
+    }
+    function onDragEnd() {
+        dragging = false;
+        document.body.style.userSelect = '';
+        document.removeEventListener('mousemove', onDragMove, true);
+        document.removeEventListener('mouseup', onDragEnd, true);
+        const grid = document.querySelector(GRID);
+        const top = grid && parseInt(grid.style.getPropertyValue('--zd-stack-top'), 10);
+        if (top) {
+            storedTop = top;
+            // Persist via ZDStorage (loaded by now; merges + updates its cache).
+            if (window.ZDStorage && window.ZDStorage.setConfig) {
+                window.ZDStorage.setConfig({ stackTopPx: top }).catch(() => {});
+            }
+        }
+    }
+
     async function refresh() {
         const cfg = await readConfig();
-        injectCSS(buildStackCSS(cfg && cfg.stackSidebars));
+        const mode = cfg && cfg.stackSidebars;
+        storedTop = (cfg && cfg.stackTopPx) || DEFAULT_TOP;
+        injectCSS(buildStackCSS(mode));
+        stackingActive = (mode === 'right' || mode === 'left');
+        const grid = document.querySelector(GRID);
+        if (grid && !dragging) grid.style.setProperty('--zd-stack-top', storedTop + 'px');
+        if (stackingActive) scheduleLoop(); else positionHandle();
     }
 
     // Re-apply when the setting is saved.
@@ -110,6 +212,8 @@
     } catch (e) {
         warn('storage.onChanged unavailable', e);
     }
+
+    window.addEventListener('resize', () => { if (stackingActive) positionHandle(); });
 
     window.ZDCustomizerApply = { refresh, buildStackCSS };
 

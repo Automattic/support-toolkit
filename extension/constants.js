@@ -56,6 +56,7 @@
 
         // Zendesk sidebar stacking: 'off' | 'right' | 'left' (see customizer-apply.js).
         stackSidebars: 'off',
+        stackTopPx: 420, // height of the User Info pane when stacked (drag-adjustable)
 
         // Data backup
         backup: null,
