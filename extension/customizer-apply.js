@@ -274,7 +274,6 @@
         refresh,
         buildCustomizerCSS,
         DEFAULT_CUSTOMIZER,
-        HIDE_SELECTORS,
         FONT_STACKS
     };
 
