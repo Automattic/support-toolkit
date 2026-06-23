@@ -228,6 +228,7 @@
         const notesBtn = await makeIconButton('📝', 'notes', 'Daily Notes', async () => {
             await openNotesPanel();
         });
+        const copyTranscriptBtn = await makeIconButton('📋', 'copy', 'Copy transcript', copyTranscript);
         const linearBtn = await makeIconButton('⚡', 'linear', 'Search Linear Issues', async () => {
             if (window.ZDLinearPanel && window.ZDLinearPanel.toggleLinearPanel) {
                 await window.ZDLinearPanel.toggleLinearPanel();
@@ -253,6 +254,7 @@
         iconGroup.appendChild(themeBtn);
         iconGroup.appendChild(statsBtn);
         iconGroup.appendChild(notesBtn);
+        iconGroup.appendChild(copyTranscriptBtn);
         iconGroup.appendChild(linearBtn);
         iconGroup.appendChild(librechatBtn);
 
@@ -965,6 +967,40 @@
         }
     }
 
+    // Copy the full ticket/chat transcript to the clipboard with clean
+    // Bot / User / Agent labels (no personal names) for pasting into AI etc.
+    async function copyTranscript() {
+        const notify = window.ZDNotifyUtils;
+        const result = window.ZDTranscript && window.ZDTranscript.getCopyText
+            ? window.ZDTranscript.getCopyText()
+            : { success: false, error: 'Transcript module not available' };
+
+        if (!result.success) {
+            notify?.showToast?.(result.error || 'Could not read the conversation.', 'warning', 2500);
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(result.text);
+            notify?.showToast?.('Transcript copied to clipboard', 'info', 1800);
+        } catch (e) {
+            // Fallback when the async clipboard API is blocked (focus/permission).
+            const ta = document.createElement('textarea');
+            ta.value = result.text;
+            ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            let ok = false;
+            try { ok = document.execCommand('copy'); } catch (_) { /* ignore */ }
+            ta.remove();
+            notify?.showToast?.(
+                ok ? 'Transcript copied to clipboard' : 'Copy failed — please try again',
+                ok ? 'info' : 'warning', 2200
+            );
+        }
+    }
+
     function openCalendarHelp() {
         // This opens Happy Tools integrations page where the agent can grab their ICS URL.
         const helpURL = 'https://schedule.happy.tools/preferences/integrations';
@@ -1159,6 +1195,17 @@ async function checkForVersionUpdate() {
                                 <span>Summary popup on resolution</span>
                             </label>
                         </div>
+
+                        <div class="zd-setting-group">
+                            <div class="zd-settings-row">
+                                <label>Stack sidebars (Zendesk)</label>
+                                <select class="cfg-stackSidebars">
+                                    <option value="off">Off</option>
+                                    <option value="right">Stack on right</option>
+                                    <option value="left">Stack on left</option>
+                                </select>
+                            </div>
+                        </div>
                     </section>
 
                     <section class="zd-settings-section">
@@ -1202,10 +1249,35 @@ async function checkForVersionUpdate() {
                         </div>
 
                         <div class="zd-setting-group">
-                            <div class="zd-settings-row">
-                                <label>Pre-shift warning</label>
+                            <div class="zd-settings-row zd-warning-row">
+                                <label class="zd-setting-check">
+                                    <input type="checkbox" class="cfg-startShiftWarningEnabled" />
+                                    <span>Before shift starts</span>
+                                </label>
                                 <div class="zd-input-with-unit">
-                                    <input type="number" min="1" class="cfg-preShiftWarningMinutes" placeholder="15" />
+                                    <input type="number" min="1" max="60" class="cfg-startShiftWarningMinutes" placeholder="5" />
+                                    <span class="zd-input-unit">min</span>
+                                </div>
+                            </div>
+
+                            <div class="zd-settings-row zd-warning-row">
+                                <label class="zd-setting-check">
+                                    <input type="checkbox" class="cfg-lateLoginWarningEnabled" />
+                                    <span>Late login</span>
+                                </label>
+                                <div class="zd-input-with-unit">
+                                    <input type="number" min="1" max="60" class="cfg-lateLoginWarningMinutes" placeholder="10" />
+                                    <span class="zd-input-unit">min</span>
+                                </div>
+                            </div>
+
+                            <div class="zd-settings-row zd-warning-row">
+                                <label class="zd-setting-check">
+                                    <input type="checkbox" class="cfg-endShiftWarningEnabled" />
+                                    <span>Before shift ends</span>
+                                </label>
+                                <div class="zd-input-with-unit">
+                                    <input type="number" min="1" max="60" class="cfg-endShiftWarningMinutes" placeholder="10" />
                                     <span class="zd-input-unit">min</span>
                                 </div>
                             </div>
@@ -1591,8 +1663,38 @@ async function checkForVersionUpdate() {
         panel.querySelector('.cfg-goalTicketsPerHour').value =
             (cfg.goalTicketsPerHour != null) ? cfg.goalTicketsPerHour : 5;
 
-        panel.querySelector('.cfg-preShiftWarningMinutes').value =
-            cfg.preShiftWarningMinutes || 5;
+        // Shift warnings — each independently toggleable + adjustable
+        panel.querySelector('.cfg-startShiftWarningEnabled').checked =
+            cfg.startShiftWarningEnabled !== false;
+        panel.querySelector('.cfg-startShiftWarningMinutes').value =
+            cfg.startShiftWarningMinutes || cfg.preShiftWarningMinutes || 5;
+
+        panel.querySelector('.cfg-lateLoginWarningEnabled').checked =
+            cfg.lateLoginWarningEnabled !== false;
+        panel.querySelector('.cfg-lateLoginWarningMinutes').value =
+            cfg.lateLoginWarningMinutes || 10;
+
+        panel.querySelector('.cfg-endShiftWarningEnabled').checked =
+            cfg.endShiftWarningEnabled !== false;
+        panel.querySelector('.cfg-endShiftWarningMinutes').value =
+            cfg.endShiftWarningMinutes || 10;
+
+        // Disable each minutes input while its warning toggle is off
+        [
+            ['.cfg-startShiftWarningEnabled', '.cfg-startShiftWarningMinutes'],
+            ['.cfg-lateLoginWarningEnabled', '.cfg-lateLoginWarningMinutes'],
+            ['.cfg-endShiftWarningEnabled', '.cfg-endShiftWarningMinutes']
+        ].forEach(([toggleSel, inputSel]) => {
+            const toggle = panel.querySelector(toggleSel);
+            const input = panel.querySelector(inputSel);
+            if (!toggle || !input) return;
+            const sync = () => { input.disabled = !toggle.checked; };
+            toggle.addEventListener('change', sync);
+            sync();
+        });
+
+        panel.querySelector('.cfg-stackSidebars').value =
+            cfg.stackSidebars || 'off';
 
         panel.querySelector('.cfg-calendarURL').value =
             cfg.calendarURL || '';
@@ -1666,10 +1768,21 @@ async function checkForVersionUpdate() {
             goalTicketsPerHour:
                 Number(panel.querySelector('.cfg-goalTicketsPerHour').value) || 0,
 
-            preShiftWarningMinutes:
-                Number(panel.querySelector('.cfg-preShiftWarningMinutes').value) || 5,
+            startShiftWarningEnabled:
+                panel.querySelector('.cfg-startShiftWarningEnabled').checked,
+            startShiftWarningMinutes:
+                Number(panel.querySelector('.cfg-startShiftWarningMinutes').value) || 5,
+            lateLoginWarningEnabled:
+                panel.querySelector('.cfg-lateLoginWarningEnabled').checked,
+            lateLoginWarningMinutes:
+                Number(panel.querySelector('.cfg-lateLoginWarningMinutes').value) || 10,
+            endShiftWarningEnabled:
+                panel.querySelector('.cfg-endShiftWarningEnabled').checked,
+            endShiftWarningMinutes:
+                Number(panel.querySelector('.cfg-endShiftWarningMinutes').value) || 10,
 
             weekStartsOn: panel.querySelector('.cfg-weekStartsOn').value || 'Mon',
+            stackSidebars: panel.querySelector('.cfg-stackSidebars').value || 'off',
             calendarURL: calVal,
             linearApiKey: panel.querySelector('.cfg-linearApiKey').value.trim(),
 
@@ -1693,6 +1806,11 @@ async function checkForVersionUpdate() {
         if (window.ZDThemePresets) {
             const isDark = newCfg.theme === 'dark';
             await window.ZDThemePresets.applyTheme(newCfg.currentTheme, isDark, newCfg.currentSize);
+        }
+
+        // Apply sidebar stacking immediately (also picked up via storage event).
+        if (window.ZDCustomizerApply && window.ZDCustomizerApply.refresh) {
+            window.ZDCustomizerApply.refresh();
         }
     }
 

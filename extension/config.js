@@ -96,8 +96,9 @@
 
     // Shift notification timing (minutes before shift)
     const SHIFT_TIMING = {
-        START_WARNING_MINUTES: 5,   // Warn X min before shift starts
-        END_WARNING_MINUTES: 10     // Warn X min before shift ends (wrap up time)
+        START_WARNING_MINUTES: 5,        // Warn X min before shift starts
+        END_WARNING_MINUTES: 10,         // Warn X min before shift ends (wrap up time)
+        LATE_LOGIN_WINDOW_MINUTES: 10    // Warn if logged in within X min after start
     };
 
     // Validation schemas

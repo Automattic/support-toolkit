@@ -241,8 +241,15 @@
         const { SHIFT_TIMING } = window.ZDConfig || {};
 
         // Separate timing for start vs end notifications to prevent overlap
-        const startWarnMin = cfg.startShiftWarningMinutes || SHIFT_TIMING?.START_WARNING_MINUTES || 5;
+        const startWarnMin = cfg.startShiftWarningMinutes || cfg.preShiftWarningMinutes || SHIFT_TIMING?.START_WARNING_MINUTES || 5;
         const endWarnMin = cfg.endShiftWarningMinutes || SHIFT_TIMING?.END_WARNING_MINUTES || 10;
+        const lateWindowMin = cfg.lateLoginWarningMinutes || SHIFT_TIMING?.LATE_LOGIN_WINDOW_MINUTES || 10;
+
+        // Per-warning enable toggles (default on). The master switch
+        // (showShiftReminders) is enforced inside showShiftNotification().
+        const startEnabled = cfg.startShiftWarningEnabled !== false;
+        const lateEnabled = cfg.lateLoginWarningEnabled !== false;
+        const endEnabled = cfg.endShiftWarningEnabled !== false;
         const now = new Date();
 
         // Pre-shift warning (5 min before start by default)
@@ -255,20 +262,8 @@
 
             // Warn X minutes before start
             if (
+                startEnabled &&
                 minsUntil === startWarnMin &&
-                lastStartAlertShiftKey !== shiftKey
-            ) {
-                if (window.ZDNotifications?.showShiftNotification) {
-                    window.ZDNotifications.showShiftNotification('start', shiftType);
-                }
-                lastStartAlertShiftKey = shiftKey;
-            }
-
-            // Warn if shift started recently (late login)
-            const diffSinceStart = now - nextShift.start;
-            if (
-                diffSinceStart > 0 &&
-                diffSinceStart < 10 * 60 * 1000 &&
                 lastStartAlertShiftKey !== shiftKey
             ) {
                 if (window.ZDNotifications?.showShiftNotification) {
@@ -278,15 +273,32 @@
             }
         }
 
-        // End-of-shift warning (10 min before end by default - gives time to wrap up)
+        // Active-shift warnings: late login (started recently) + end of shift.
         if (activeShift) {
-            const msLeft = activeShift.end - now;
-            const minsLeft = Math.round(msLeft / 60000);
-
             const shiftType = /chat/i.test(activeShift.title) ? 'chat' : 'tickets';
             const shiftKey = activeShift.title + '|' + activeShift.start.toISOString();
 
+            // Late login: shift is already active and started within the window,
+            // and the pre-shift warning never fired (e.g. agent logged in late).
+            // Deduped against the pre-shift alert via the shared key.
+            const msSinceStart = now - activeShift.start;
             if (
+                lateEnabled &&
+                msSinceStart >= 0 &&
+                msSinceStart < lateWindowMin * 60 * 1000 &&
+                lastStartAlertShiftKey !== shiftKey
+            ) {
+                if (window.ZDNotifications?.showShiftNotification) {
+                    window.ZDNotifications.showShiftNotification('start', shiftType);
+                }
+                lastStartAlertShiftKey = shiftKey;
+            }
+
+            // End-of-shift warning (default 10 min before end — time to wrap up).
+            const msLeft = activeShift.end - now;
+            const minsLeft = Math.round(msLeft / 60000);
+            if (
+                endEnabled &&
                 minsLeft === endWarnMin &&
                 lastEndAlertShiftKey !== shiftKey
             ) {

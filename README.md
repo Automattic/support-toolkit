@@ -7,7 +7,7 @@
 *Quality-of-life improvements for customer support workflows on Zendesk*
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Web%20Store-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/support-toolkit/gnjghfobmfiilldpoedmjfdfehkohefk)
-[![Version](https://img.shields.io/badge/version-2.6.2-blue.svg)](https://github.com/Automattic/support-toolkit)
+[![Version](https://img.shields.io/badge/version-3.1.0-blue.svg)](https://github.com/Automattic/support-toolkit)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Manifest](https://img.shields.io/badge/manifest-v3-orange.svg)](https://developer.chrome.com/docs/extensions/mv3/intro/)
 
@@ -602,7 +602,7 @@ The extension requires these Chrome permissions:
 
 See [CHANGELOG.md](CHANGELOG.md) for a detailed version history.
 
-**Current Version: 2.5.1**
+**Current Version: 3.1.0**
 - Architecture refactoring with modular design (9 new modules)
 - Event bus pattern for decoupled communication
 - Centralized state management

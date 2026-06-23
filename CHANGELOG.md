@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-06-23
+
+### Added
+- **Copy transcript** toolbar button: copies the full ticket/chat conversation to the clipboard with clean role labels (Bot / User / Agent, internal notes as "Agent (note)") and no personal names — ready to paste into an AI tool or anywhere. Processed entirely locally.
+- **Stack sidebars** (Settings → Display & Behavior): stack the two sidebar panes (User Info + Notes) vertically into one tall column beside the conversation, reclaiming wasted horizontal space. Options: Off / Stack on right / Stack on left. A draggable divider between the stacked panes lets you set the height split (persists across reloads). Applied via a single stylesheet at document_start; works across reloads and SPA navigation.
+- Full control over every shift warning (start, late login, end of shift): each can be independently enabled/disabled and have its timing adjusted, not just the pre-shift warning
+
+### Fixed
+- Late-login shift warning could never fire (was evaluated against a not-yet-started shift); now correctly checks the active shift
+- Pre-shift warning timing now actually applies (settings saved `preShiftWarningMinutes` but the timer read `startShiftWarningMinutes`); existing saved values are migrated automatically
+
 ### Planned
 - Multi-browser support (Firefox, Safari)
 - Customizable keyboard shortcuts
@@ -307,7 +318,8 @@ Changes are grouped by category:
 
 ---
 
-[Unreleased]: https://github.com/Automattic/support-toolkit/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/Automattic/support-toolkit/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/Automattic/support-toolkit/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/Automattic/support-toolkit/compare/v2.9.0...v3.0.0
 [2.9.0]: https://github.com/Automattic/support-toolkit/compare/v2.8.3...v2.9.0
 [2.8.3]: https://github.com/Automattic/support-toolkit/compare/v2.8.2...v2.8.3

@@ -135,11 +135,26 @@
                     default: DEFAULT_CONFIG.goalTicketsPerHour
                 });
 
-                merged.preShiftWarningMinutes = sanitizeInput(merged.preShiftWarningMinutes, 'number', {
-                    min: LIMITS?.MIN_WARNING_MINUTES || 1,
-                    max: LIMITS?.MAX_WARNING_MINUTES || 60,
-                    default: DEFAULT_CONFIG.preShiftWarningMinutes
+                // Shift warning timing — migrate legacy preShiftWarningMinutes → start warning
+                if (merged.startShiftWarningMinutes == null && merged.preShiftWarningMinutes != null) {
+                    merged.startShiftWarningMinutes = merged.preShiftWarningMinutes;
+                }
+
+                const warnMin = LIMITS?.MIN_WARNING_MINUTES || 1;
+                const warnMax = LIMITS?.MAX_WARNING_MINUTES || 60;
+
+                merged.startShiftWarningMinutes = sanitizeInput(merged.startShiftWarningMinutes, 'number', {
+                    min: warnMin, max: warnMax, default: DEFAULT_CONFIG.startShiftWarningMinutes
                 });
+                merged.lateLoginWarningMinutes = sanitizeInput(merged.lateLoginWarningMinutes, 'number', {
+                    min: warnMin, max: warnMax, default: DEFAULT_CONFIG.lateLoginWarningMinutes
+                });
+                merged.endShiftWarningMinutes = sanitizeInput(merged.endShiftWarningMinutes, 'number', {
+                    min: warnMin, max: warnMax, default: DEFAULT_CONFIG.endShiftWarningMinutes
+                });
+
+                // Keep legacy alias in sync for any old readers
+                merged.preShiftWarningMinutes = merged.startShiftWarningMinutes;
             }
 
             // Update cache
