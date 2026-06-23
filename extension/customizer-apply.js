@@ -31,19 +31,34 @@
         if (window.console) console.warn('[ZD Layout] ' + msg, e || '');
     }
 
-    // Pure: stacking mode -> CSS string. Conversation takes one tall column
-    // (full height); User Info sits above Notes in the other column.
+    // Pure: stacking mode -> CSS string.
+    //
+    // We deliberately do NOT override grid-template-columns: Zendesk stores its
+    // column widths as inline fr values and its drag-to-resize updates them, so
+    // leaving them alone keeps native resize working. Instead we stack the two
+    // sidebars into one of Zendesk's existing side tracks and let the
+    // conversation span the other two tracks. User Info sits on top with the
+    // larger share (its content is scrollable, so more height = more info);
+    // Notes sits beneath it.
     function buildStackCSS(mode) {
         try {
             if (mode !== 'right' && mode !== 'left') return '';
-            const convCol = mode === 'right' ? 1 : 2;
-            const sideCol = mode === 'right' ? 2 : 1;
-            const tracks = mode === 'right' ? '2.4fr 1fr' : '1fr 2.4fr';
+            const rows = `${GRID} { grid-template-rows: minmax(0, 1.6fr) minmax(0, 1fr) !important; }`;
+            if (mode === 'left') {
+                // Sidebars in track 1; conversation spans tracks 2–3.
+                return [
+                    rows,
+                    `${GRID} ${INFO} { grid-column: 1 !important; grid-row: 1 !important; order: 0 !important; }`,
+                    `${GRID} ${NOTES} { grid-column: 1 !important; grid-row: 2 !important; order: 0 !important; }`,
+                    `${GRID} ${CONV} { grid-column: 2 / -1 !important; grid-row: 1 / -1 !important; order: 0 !important; }`
+                ].join('\n');
+            }
+            // Right: conversation spans tracks 1–2; sidebars in track 3.
             return [
-                `${GRID} { grid-template-columns: ${tracks} !important; grid-template-rows: repeat(2, minmax(0, 1fr)) !important; }`,
-                `${GRID} ${CONV} { grid-column: ${convCol} !important; grid-row: 1 / -1 !important; order: 0 !important; }`,
-                `${GRID} ${INFO} { grid-column: ${sideCol} !important; grid-row: 1 !important; order: 0 !important; }`,
-                `${GRID} ${NOTES} { grid-column: ${sideCol} !important; grid-row: 2 !important; order: 0 !important; }`
+                rows,
+                `${GRID} ${CONV} { grid-column: 1 / 3 !important; grid-row: 1 / -1 !important; order: 0 !important; }`,
+                `${GRID} ${INFO} { grid-column: 3 !important; grid-row: 1 !important; order: 0 !important; }`,
+                `${GRID} ${NOTES} { grid-column: 3 !important; grid-row: 2 !important; order: 0 !important; }`
             ].join('\n');
         } catch (e) {
             warn('buildStackCSS failed', e);
