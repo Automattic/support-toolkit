@@ -6,6 +6,21 @@
 
     const VERSIONS = [
         {
+            version: '3.1.0',
+            date: '2026-06-23',
+            highlights: [
+                'Copy transcript button',
+                'Stack sidebars vertically',
+                'Independent shift warnings'
+            ],
+            changes: [
+                { type: 'feat', text: 'Copy transcript button (Bot / User / Agent labels, no names)' },
+                { type: 'feat', text: 'Stack sidebars vertically with a draggable height divider' },
+                { type: 'feat', text: 'Adjust & toggle every shift warning independently' },
+                { type: 'fix', text: 'Late-login shift warning now fires correctly' }
+            ]
+        },
+        {
             version: '3.0.0',
             date: '2025-01-19',
             highlights: [
