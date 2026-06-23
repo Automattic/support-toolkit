@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Stack sidebars** (Settings → Display & Behavior): stack the two sidebar panes (User Info + Notes) vertically into one tall column beside the conversation, reclaiming wasted horizontal space. Options: Off / Stack on right / Stack on left. Applied via a single stylesheet at document_start; works across reloads and SPA navigation.
+- **Copy transcript** toolbar button: copies the full ticket/chat conversation to the clipboard with clean role labels (Bot / User / Agent, internal notes as "Agent (note)") and no personal names — ready to paste into an AI tool or anywhere. Processed entirely locally.
+- **Stack sidebars** (Settings → Display & Behavior): stack the two sidebar panes (User Info + Notes) vertically into one tall column beside the conversation, reclaiming wasted horizontal space. Options: Off / Stack on right / Stack on left. A draggable divider between the stacked panes lets you set the height split (persists across reloads). Applied via a single stylesheet at document_start; works across reloads and SPA navigation.
 - Full control over every shift warning (start, late login, end of shift): each can be independently enabled/disabled and have its timing adjusted, not just the pre-shift warning
 
 ### Fixed

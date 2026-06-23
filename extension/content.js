@@ -228,6 +228,7 @@
         const notesBtn = await makeIconButton('📝', 'notes', 'Daily Notes', async () => {
             await openNotesPanel();
         });
+        const copyTranscriptBtn = await makeIconButton('📋', 'copy', 'Copy transcript', copyTranscript);
         const linearBtn = await makeIconButton('⚡', 'linear', 'Search Linear Issues', async () => {
             if (window.ZDLinearPanel && window.ZDLinearPanel.toggleLinearPanel) {
                 await window.ZDLinearPanel.toggleLinearPanel();
@@ -253,6 +254,7 @@
         iconGroup.appendChild(themeBtn);
         iconGroup.appendChild(statsBtn);
         iconGroup.appendChild(notesBtn);
+        iconGroup.appendChild(copyTranscriptBtn);
         iconGroup.appendChild(linearBtn);
         iconGroup.appendChild(librechatBtn);
 
@@ -962,6 +964,40 @@
     function closeSettings() {
         if (settingsOverlayEl) {
             settingsOverlayEl.style.display = 'none';
+        }
+    }
+
+    // Copy the full ticket/chat transcript to the clipboard with clean
+    // Bot / User / Agent labels (no personal names) for pasting into AI etc.
+    async function copyTranscript() {
+        const notify = window.ZDNotifyUtils;
+        const result = window.ZDTranscript && window.ZDTranscript.getCopyText
+            ? window.ZDTranscript.getCopyText()
+            : { success: false, error: 'Transcript module not available' };
+
+        if (!result.success) {
+            notify?.showToast?.(result.error || 'Could not read the conversation.', 'warning', 2500);
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(result.text);
+            notify?.showToast?.('Transcript copied to clipboard', 'info', 1800);
+        } catch (e) {
+            // Fallback when the async clipboard API is blocked (focus/permission).
+            const ta = document.createElement('textarea');
+            ta.value = result.text;
+            ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            let ok = false;
+            try { ok = document.execCommand('copy'); } catch (_) { /* ignore */ }
+            ta.remove();
+            notify?.showToast?.(
+                ok ? 'Transcript copied to clipboard' : 'Copy failed — please try again',
+                ok ? 'info' : 'warning', 2200
+            );
         }
     }
 
