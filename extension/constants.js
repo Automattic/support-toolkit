@@ -60,13 +60,12 @@
         customizer: {
             enabled: true,
             layout: {
-                apps: { position: 1, width: 'default' },
-                conversation: { position: 2, width: 'default' },
-                context: { position: 3, width: 'default' }
+                apps: { position: 1, width: 'default', hidden: false },
+                conversation: { position: 2, width: 'default', hidden: false },
+                context: { position: 3, width: 'default', hidden: false }
             },
             theme: { applyToZendesk: false, colors: null },
-            text: { convSize: 'normal', font: 'system', density: 'comfortable' },
-            hidden: {}
+            text: { convSize: 'normal', font: 'system', density: 'comfortable' }
         },
 
         // Data backup

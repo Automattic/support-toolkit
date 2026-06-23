@@ -66,17 +66,13 @@
         ['small', 'Small'], ['normal', 'Normal'],
         ['large', 'Large'], ['xlarge', 'Extra large']
     ];
-    const HIDE_OPTIONS = [
-        ['macroMenu', 'Apply-macro bar'],
-        ['slaDivider', 'SLA badge'],
-        ['conversationSubject', 'Conversation subject header'],
-        ['searchButton', 'Global search button'],
-        ['notificationsButton', 'Notifications bell']
-    ];
+    const COLUMN_OPTIONS = [['1', 'Column 1'], ['2', 'Column 2'], ['3', 'Column 3']];
     const PRESETS = [
         ['default', 'Default'],
         ['swap', 'Swap sidebars'],
-        ['both-right', 'Both sidebars right']
+        ['both-right', 'Both sidebars right'],
+        ['stack-right', 'Stack sidebars right'],
+        ['stack-left', 'Stack sidebars left']
     ];
 
     let panelEl = null;
@@ -97,8 +93,7 @@
             enabled: c.enabled !== false,
             layout: Object.assign({}, base.layout, deepLayout(base.layout, c.layout)),
             theme: Object.assign({}, base.theme, c.theme),
-            text: Object.assign({}, base.text, c.text),
-            hidden: Object.assign({}, base.hidden, c.hidden)
+            text: Object.assign({}, base.text, c.text)
         };
     }
     function deepLayout(baseLayout, layout) {
@@ -164,18 +159,26 @@
     // --- tab bodies ---
     function buildLayoutTab() {
         const body = el('div', 'zd-customizer-tabbody');
-        body.appendChild(tabHint('Assign any pane to any position and width. Applies to ticket pages.'));
+        body.appendChild(tabHint('Put each pane in a column. Panes sharing a column stack vertically (one tall bar). Default widths keep Zendesk’s drag-to-resize working.'));
 
         ROLE_ROWS.forEach((role) => {
             const row = el('div', 'zd-customizer-lrow');
-            row.appendChild(el('div', 'zd-customizer-lrow-label', ROLE_LABELS[role]));
+
+            const head = el('div', 'zd-customizer-lrow-head');
+            head.appendChild(el('div', 'zd-customizer-lrow-label', ROLE_LABELS[role]));
+            // Per-pane hide toggle (replaces the old element-hide tab).
+            head.appendChild(checkbox(
+                !working.layout[role].hidden, 'Show',
+                (v) => { working.layout[role].hidden = !v; persistAndApply(); renderTab(); }
+            ));
+            row.appendChild(head);
 
             const controls = el('div', 'zd-customizer-lrow-controls');
 
             const posWrap = el('span', 'zd-customizer-control');
-            posWrap.appendChild(el('span', 'zd-customizer-control-label', 'Position'));
+            posWrap.appendChild(el('span', 'zd-customizer-control-label', 'Column'));
             posWrap.appendChild(select(
-                [['1', '1'], ['2', '2'], ['3', '3']],
+                COLUMN_OPTIONS,
                 String(working.layout[role].position || ''),
                 (v) => { working.layout[role].position = Number(v); persistAndApply(); }
             ));
@@ -191,6 +194,8 @@
             controls.appendChild(widthWrap);
 
             row.appendChild(controls);
+            // Dim controls when the pane is hidden.
+            if (working.layout[role].hidden) controls.classList.add('zd-customizer-dim');
             body.appendChild(row);
         });
 
@@ -206,15 +211,22 @@
 
     function applyPreset(id) {
         const layout = working.layout;
-        // role → default column position: apps=1, conversation=2, context=3
+        // All presets un-hide every pane and reset widths to default first.
+        ROLE_ROWS.forEach((r) => { layout[r].hidden = false; layout[r].width = 'default'; });
+        // role → column. Panes sharing a column stack vertically (User Info above Notes).
         if (id === 'default') {
             layout.apps.position = 1; layout.conversation.position = 2; layout.context.position = 3;
-            ROLE_ROWS.forEach((r) => { layout[r].width = 'default'; });
         } else if (id === 'swap') {
-            // context to the left, notes to the right
             layout.context.position = 1; layout.conversation.position = 2; layout.apps.position = 3;
         } else if (id === 'both-right') {
-            layout.conversation.position = 1; layout.apps.position = 2; layout.context.position = 3;
+            // Conversation left; both sidebars to its right, side by side.
+            layout.conversation.position = 1; layout.context.position = 2; layout.apps.position = 3;
+        } else if (id === 'stack-right') {
+            // Conversation left (wide); User Info over Notes stacked on the right.
+            layout.conversation.position = 1; layout.context.position = 2; layout.apps.position = 2;
+        } else if (id === 'stack-left') {
+            // User Info over Notes stacked on the left; Conversation right (wide).
+            layout.context.position = 1; layout.apps.position = 1; layout.conversation.position = 2;
         }
         persistAndApply();
         renderTab(); // reflect new select values
@@ -327,25 +339,12 @@
         return body;
     }
 
-    function buildHideTab() {
-        const body = el('div', 'zd-customizer-tabbody');
-        body.appendChild(tabHint('Hide elements you never use. Functional controls are never offered.'));
-        HIDE_OPTIONS.forEach(([key, label]) => {
-            body.appendChild(checkbox(
-                !!working.hidden[key], label,
-                (v) => { working.hidden[key] = v; persistAndApply(); }
-            ));
-        });
-        return body;
-    }
-
     function tabHint(text) { return el('p', 'zd-customizer-hint', text); }
 
     const TABS = [
         ['layout', 'Layout', buildLayoutTab],
         ['theme', 'Theme', buildThemeTab],
-        ['text', 'Text & Density', buildTextTab],
-        ['hide', 'Hide & Show', buildHideTab]
+        ['text', 'Text & Density', buildTextTab]
     ];
 
     function renderTab() {

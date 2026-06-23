@@ -5450,19 +5450,28 @@ select:hover {
 }
 .zd-theme-dark .zd-customizer-row-label { color: var(--zd-text-dark); }
 
-/* Layout-tab rows: pane name on top, Position + Width controls beneath. */
+/* Layout-tab rows: pane name + Show toggle on top, Column + Width beneath. */
 .zd-customizer-lrow {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin: 10px 0;
+    margin: 12px 0;
 }
+.zd-customizer-lrow-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.zd-customizer-lrow-head .zd-setting-check { margin: 0; font-size: 12px; }
 .zd-customizer-lrow-label {
     font-size: 13px;
     font-weight: 600;
     color: var(--zd-text-light);
 }
 .zd-theme-dark .zd-customizer-lrow-label { color: var(--zd-text-dark); }
+/* Dim a pane's column/width controls when it's hidden. */
+.zd-customizer-dim { opacity: 0.4; pointer-events: none; }
 .zd-customizer-lrow-controls {
     display: flex;
     gap: 12px;

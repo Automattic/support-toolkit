@@ -31,7 +31,11 @@
         mainContent: 'main[data-garden-id="navigation.main"]',
 
         // --- Ticket sub-elements (for theming / density / hide) ---
-        conversationLog: '[data-test-id="omni-log"]',
+        // The conversation log container is `omni-log-container`; individual
+        // messages are `omni-log-comment-item` with body `omni-log-item-message`.
+        conversationLog: '[data-test-id="omni-log-container"]',
+        conversationItem: '[data-test-id="omni-log-comment-item"]',
+        conversationMessage: '[data-test-id="omni-log-item-message"]',
         conversationSubject: '[data-test-id="omni-header-subject"]',
         slaDivider: '[data-test-id="sla-divider-wrapper"]',
         ticketFooter: '[data-test-id="ticket-footer"]',
