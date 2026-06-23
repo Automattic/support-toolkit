@@ -43,7 +43,12 @@
     function buildStackCSS(mode) {
         try {
             if (mode !== 'right' && mode !== 'left') return '';
-            const rows = `${GRID} { grid-template-rows: minmax(0, 1.6fr) minmax(0, 1fr) !important; }`;
+            // Zendesk's User Info panel fills its space and scrolls internally;
+            // it never shrinks to its content. A large row therefore leaves a
+            // dead gap under the content, while `auto` collapses and clips it.
+            // So we size the top (User Info) row to roughly fit typical content
+            // — minimal gap, the rest scrolls — and give Notes the remainder.
+            const rows = `${GRID} { grid-template-rows: clamp(300px, 34vh, 420px) minmax(0, 1fr) !important; }`;
             if (mode === 'left') {
                 // Sidebars in track 1; conversation spans tracks 2–3.
                 return [
