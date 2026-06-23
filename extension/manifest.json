@@ -62,7 +62,6 @@
         "auto-count.js",
         "export.js",
         "timer-manager.js",
-        "customizer.js",
         "content.js"
       ],
       "css": [

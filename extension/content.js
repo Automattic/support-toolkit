@@ -208,11 +208,6 @@
 
         const adjustBtn = await makeIconButton('✏️', 'adjust', 'Set exact count', openManualAdjustModal);
         const settingsBtn = await makeIconButton('⚙️', 'settings', 'Settings', openSettings);
-        const customizeBtn = await makeIconButton('🎛️', 'customize', 'Customize Zendesk', async () => {
-            if (window.ZDCustomizer && window.ZDCustomizer.open) {
-                await window.ZDCustomizer.open();
-            }
-        });
         const scheduleBtn = await makeIconButton('📅', 'schedule', 'Today\'s Schedule', async () => {
             await openScheduleFast();
         });
@@ -254,7 +249,6 @@
 
         iconGroup.appendChild(adjustBtn);
         iconGroup.appendChild(settingsBtn);
-        iconGroup.appendChild(customizeBtn);
         iconGroup.appendChild(scheduleBtn);
         iconGroup.appendChild(themeBtn);
         iconGroup.appendChild(statsBtn);
@@ -1165,6 +1159,17 @@ async function checkForVersionUpdate() {
                                 <span>Summary popup on resolution</span>
                             </label>
                         </div>
+
+                        <div class="zd-setting-group">
+                            <div class="zd-settings-row">
+                                <label>Stack sidebars (Zendesk)</label>
+                                <select class="cfg-stackSidebars">
+                                    <option value="off">Off</option>
+                                    <option value="right">Stack on right</option>
+                                    <option value="left">Stack on left</option>
+                                </select>
+                            </div>
+                        </div>
                     </section>
 
                     <section class="zd-settings-section">
@@ -1652,6 +1657,9 @@ async function checkForVersionUpdate() {
             sync();
         });
 
+        panel.querySelector('.cfg-stackSidebars').value =
+            cfg.stackSidebars || 'off';
+
         panel.querySelector('.cfg-calendarURL').value =
             cfg.calendarURL || '';
 
@@ -1738,6 +1746,7 @@ async function checkForVersionUpdate() {
                 Number(panel.querySelector('.cfg-endShiftWarningMinutes').value) || 10,
 
             weekStartsOn: panel.querySelector('.cfg-weekStartsOn').value || 'Mon',
+            stackSidebars: panel.querySelector('.cfg-stackSidebars').value || 'off',
             calendarURL: calVal,
             linearApiKey: panel.querySelector('.cfg-linearApiKey').value.trim(),
 
@@ -1761,6 +1770,11 @@ async function checkForVersionUpdate() {
         if (window.ZDThemePresets) {
             const isDark = newCfg.theme === 'dark';
             await window.ZDThemePresets.applyTheme(newCfg.currentTheme, isDark, newCfg.currentSize);
+        }
+
+        // Apply sidebar stacking immediately (also picked up via storage event).
+        if (window.ZDCustomizerApply && window.ZDCustomizerApply.refresh) {
+            window.ZDCustomizerApply.refresh();
         }
     }
 

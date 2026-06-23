@@ -8,17 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Customize Zendesk** menu (new toolbar button): reshape the Agent Workspace to your taste
-  - Layout: put each ticket pane (Conversation, Notes, User Info) in any column; panes sharing a column **stack vertically** into one tall bar (e.g. Notes under User Info) to use unused vertical space. Presets: Swap sidebars, Both sidebars right, Stack sidebars left/right. Per-pane **Show/Hide**.
-  - Plain reorder keeps Zendesk's native drag-to-resize working (only restructured/stacked layouts use fixed widths).
-  - Theme: optionally apply the toolbar's themes/colors across Zendesk — now covering the top bar, left nav rail, conversation pane and composer bar, not just the header (opt-in; off by default so a fresh install never alters Zendesk's canvas)
-  - Text & Density: conversation font, text size, and spacing
-  - Applied via a single injected stylesheet at document_start; settings sync per user and persist across pages and reloads
+- **Stack sidebars** (Settings → Display & Behavior): stack the two sidebar panes (User Info + Notes) vertically into one tall column beside the conversation, reclaiming wasted horizontal space. Options: Off / Stack on right / Stack on left. Applied via a single stylesheet at document_start; works across reloads and SPA navigation.
 - Full control over every shift warning (start, late login, end of shift): each can be independently enabled/disabled and have its timing adjusted, not just the pre-shift warning
 
 ### Fixed
-- Customizer: font / text-size / density now actually apply (the conversation selector was wrong — `omni-log` instead of `omni-log-container`/`omni-log-comment-item`, so the rules matched nothing)
-- Customizer: swapping/placing both sidebars on one side no longer breaks Zendesk's native column resize (plain reorder emits only CSS `order`, leaving Zendesk's inline track sizing intact)
 - Late-login shift warning could never fire (was evaluated against a not-yet-started shift); now correctly checks the active shift
 - Pre-shift warning timing now actually applies (settings saved `preShiftWarningMinutes` but the timer read `startShiftWarningMinutes`); existing saved values are migrated automatically
 
