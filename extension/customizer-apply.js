@@ -39,8 +39,9 @@
     const CONTEXT_PANEL = '[data-test-id="component-type-ContextPanel"]';
     const LAYOUT_COLUMN = '[data-test-id^="column-"]';
     const GRID_ANY = '[data-test-id$="-custom-layout"]';
-    // Notes is the TOP stacked pane; the divider anchors to its bottom edge.
-    const TOP_PANE_SEL = `[${PANE_ATTR}="notes"]`;
+    // Cap for an unusually long note so User Info is never squeezed away; the
+    // note scrolls past this. Normal notes stay under it and show in full.
+    const NOTES_MAX = '60vh';
 
     function findNotesColumn(cols) {
         for (const col of cols) {
@@ -115,16 +116,18 @@
     function buildStackCSS(mode) {
         try {
             if (mode !== 'right' && mode !== 'left') return '';
-            // Notes sits on TOP; its row height is driven by --zd-stack-top, which
-            // the draggable divider (see row-resizer below) updates and persists
-            // (default 420px). User Info fills the remaining height below. Both
-            // panes scroll internally so long content never overflows the grid.
-            const rows = `${GRID} { grid-template-rows: var(--zd-stack-top, 420px) minmax(0, 1fr) !important; }`;
-            const scroll = `${P_NOTES}, ${P_INFO} { min-height: 0 !important; overflow-y: auto !important; }`;
+            // Notes sits on TOP, sized to its own content (grid-row auto): a short
+            // note takes little height, a long one takes more. User Info fills all
+            // the remaining height below and scrolls internally. No manual resize
+            // — the split follows the note. NOTES_MAX caps an unusually long note
+            // (it scrolls past that) so User Info can never be squeezed away.
+            const rows = `${GRID} { grid-template-rows: auto minmax(0, 1fr) !important; }`;
+            const notesCap = `${P_NOTES} { min-height: 0 !important; max-height: ${NOTES_MAX} !important; overflow-y: auto !important; }`;
+            const infoScroll = `${P_INFO} { min-height: 0 !important; overflow-y: auto !important; }`;
             if (mode === 'left') {
                 // Sidebars in track 1; conversation spans tracks 2–3.
                 return [
-                    rows, scroll,
+                    rows, notesCap, infoScroll,
                     `${P_NOTES} { grid-column: 1 !important; grid-row: 1 !important; order: 0 !important; }`,
                     `${P_INFO} { grid-column: 1 !important; grid-row: 2 !important; order: 0 !important; }`,
                     `${P_CONV} { grid-column: 2 / -1 !important; grid-row: 1 / -1 !important; order: 0 !important; }`
@@ -132,7 +135,7 @@
             }
             // Right: conversation spans tracks 1–2; sidebars in track 3.
             return [
-                rows, scroll,
+                rows, notesCap, infoScroll,
                 `${P_CONV} { grid-column: 1 / 3 !important; grid-row: 1 / -1 !important; order: 0 !important; }`,
                 `${P_NOTES} { grid-column: 3 !important; grid-row: 1 !important; order: 0 !important; }`,
                 `${P_INFO} { grid-column: 3 !important; grid-row: 2 !important; order: 0 !important; }`
@@ -167,116 +170,13 @@
         });
     }
 
-    // --- Draggable divider between the two stacked sidebar panes ---------
-    // Zendesk has no native handle for stacked panes, so we overlay our own.
-    // It drives --zd-stack-top (the User Info row height) live and persists the
-    // chosen height so the User Info / Notes split is the agent's to decide.
-    const HANDLE_ID = 'zd-stack-row-resizer';
-    const MIN_ROW = 140; // px floor for each stacked pane
-    const DEFAULT_TOP = 420;
-
-    let stackingActive = false;
-    let storedTop = DEFAULT_TOP;
-    let dragging = false;
-    let rafQueued = false;
-
-    function getHandle() {
-        let h = document.getElementById(HANDLE_ID);
-        if (!h) {
-            h = document.createElement('div');
-            h.id = HANDLE_ID;
-            Object.assign(h.style, {
-                position: 'fixed', display: 'none', zIndex: 999999998,
-                cursor: 'row-resize', alignItems: 'center', justifyContent: 'center'
-            });
-            const grip = document.createElement('div');
-            grip.style.cssText = 'width:44px;height:4px;border-radius:3px;background:rgba(140,150,170,0.5);transition:background .12s ease;';
-            h.appendChild(grip);
-            h.addEventListener('mouseenter', () => { grip.style.background = 'var(--zd-primary, rgba(140,150,170,0.9))'; });
-            h.addEventListener('mouseleave', () => { if (!dragging) grip.style.background = 'rgba(140,150,170,0.5)'; });
-            h.addEventListener('mousedown', onDragStart);
-            (document.body || document.documentElement).appendChild(h);
-        }
-        return h;
-    }
-
-    function positionHandle() {
-        const h = document.getElementById(HANDLE_ID);
-        if (!stackingActive) { if (h) h.style.display = 'none'; return; }
-        const grid = document.querySelector(GRID);
-        const topPane = document.querySelector(TOP_PANE_SEL);
-        if (!grid || !topPane) { if (h) h.style.display = 'none'; return; }
-        // Set the stored height once when the grid first appears.
-        if (!dragging && !grid.style.getPropertyValue('--zd-stack-top')) {
-            grid.style.setProperty('--zd-stack-top', storedTop + 'px');
-        }
-        const handle = getHandle();
-        const r = topPane.getBoundingClientRect();
-        handle.style.left = r.left + 'px';
-        handle.style.width = r.width + 'px';
-        handle.style.top = (r.bottom - 5) + 'px';
-        handle.style.height = '10px';
-        handle.style.display = 'flex';
-    }
-
-    function loop() {
-        rafQueued = false;
-        if (!stackingActive) return;
-        if (!dragging) positionHandle();
-        scheduleLoop();
-    }
-    function scheduleLoop() {
-        if (rafQueued || !stackingActive) return;
-        rafQueued = true;
-        requestAnimationFrame(loop);
-    }
-
-    function onDragStart(e) {
-        const grid = document.querySelector(GRID);
-        if (!grid) return;
-        e.preventDefault();
-        dragging = true;
-        document.body.style.userSelect = 'none';
-        document.addEventListener('mousemove', onDragMove, true);
-        document.addEventListener('mouseup', onDragEnd, true);
-    }
-    function onDragMove(e) {
-        const grid = document.querySelector(GRID);
-        if (!grid) return;
-        const gr = grid.getBoundingClientRect();
-        let top = e.clientY - gr.top;
-        top = Math.max(MIN_ROW, Math.min(top, gr.height - MIN_ROW));
-        grid.style.setProperty('--zd-stack-top', Math.round(top) + 'px');
-        positionHandle();
-    }
-    function onDragEnd() {
-        dragging = false;
-        document.body.style.userSelect = '';
-        document.removeEventListener('mousemove', onDragMove, true);
-        document.removeEventListener('mouseup', onDragEnd, true);
-        const grid = document.querySelector(GRID);
-        const top = grid && parseInt(grid.style.getPropertyValue('--zd-stack-top'), 10);
-        if (top) {
-            storedTop = top;
-            // Persist via ZDStorage (loaded by now; merges + updates its cache).
-            if (window.ZDStorage && window.ZDStorage.setConfig) {
-                window.ZDStorage.setConfig({ stackTopPx: top }).catch(() => {});
-            }
-        }
-    }
-
     async function refresh() {
         const cfg = await readConfig();
         const mode = cfg && cfg.stackSidebars;
-        storedTop = (cfg && cfg.stackTopPx) || DEFAULT_TOP;
         injectCSS(buildStackCSS(mode));
-        stackingActive = (mode === 'right' || mode === 'left');
         // The layout CSS matches on data-zd-pane tags — start the tagger so the
-        // panes get tagged (and stay tagged as Zendesk re-renders).
-        if (stackingActive) startTagObserver();
-        const grid = document.querySelector(GRID);
-        if (grid && !dragging) grid.style.setProperty('--zd-stack-top', storedTop + 'px');
-        if (stackingActive) scheduleLoop(); else positionHandle();
+        // panes get tagged (and stay tagged as Zendesk re-renders / tabs switch).
+        if (mode === 'right' || mode === 'left') startTagObserver();
     }
 
     // Re-apply when the setting is saved.
@@ -289,8 +189,6 @@
     } catch (e) {
         warn('storage.onChanged unavailable', e);
     }
-
-    window.addEventListener('resize', () => { if (stackingActive) positionHandle(); });
 
     window.ZDCustomizerApply = { refresh, buildStackCSS };
 
