@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-07-15
+
+### Added
+- **Zendesk Enhancements** (Settings → Zendesk Enhancements): four Tampermonkey userscripts folded into the extension as first-class, individually-toggleable modules.
+  - **Site Tools menu**: a per-site "Tools" dropdown (Blog RC, Domain RC, JP Debugger, Site Profiles, robots.txt, hosting-provider, CLI, Site Health, Rewind DB) added to each site row in the User Info app.
+  - **Styling**: dark-mode completion for app iframes, resizable multiline ticket fields, full-width conversation messages, and chat bubbles (with an agent/bot/end-user/note classifier using Zendesk's own same-origin API) — each independently toggleable.
+  - **Workflow automation**: Draft Mode default (with Ctrl+Enter send-without-draft), auto-uncheck merge visibility, Stay-on-ticket default, and Messaging as the default reply channel — each independently toggleable.
+
+### Changed
+- **Stack sidebars** moved into the new "Zendesk Enhancements" settings section.
+
+### Fixed
+- **Stack sidebars** now identifies panes by content (which column holds Notes / the User Info context panel) instead of by fixed column position, so stacking is correct under custom ticket layouts where the column order differs. Adds a height cap so a long note scrolls instead of squashing the sidebar.
+
 ## [3.1.0] - 2026-06-23
 
 ### Added

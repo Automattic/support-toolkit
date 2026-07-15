@@ -106,6 +106,13 @@ A floating toolbar that lives in your Zendesk workspace, giving you:
 - **Customizable goals** for chats and tickets per hour
 - **Feature toggles** for reminders, sounds, and auto-increment
 
+### 🧩 Zendesk Enhancements
+- **Stack sidebars** - stack User Info + Notes into one column beside the conversation (content-aware, works under custom layouts; draggable height split)
+- **Site Tools menu** - per-site "Tools" dropdown (Blog RC, Domain RC, JP Debugger, Site Profiles, robots.txt, hosting-provider, CLI, Site Health, Rewind DB) in the User Info app
+- **Styling** - dark-mode app-iframe fix, resizable ticket fields, full-width messages, and chat bubbles with sender classification
+- **Workflow automation** - Draft Mode default (Ctrl+Enter to send), merge-visibility uncheck, Stay-on-ticket default, Messaging default channel
+- Every item individually toggleable in Settings → Zendesk Enhancements
+
 ### 🔊 Notifications
 - **Toast notifications** for events
 - **Audio alerts** for shift transitions (shift-alert.mp3)
