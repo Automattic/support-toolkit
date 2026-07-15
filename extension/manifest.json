@@ -69,6 +69,15 @@
         "styles.css"
       ],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://126740.apps.zdusercontent.com/*"
+      ],
+      "js": [
+        "site-tools-menu.js"
+      ],
+      "run_at": "document_idle"
     }
   ],
 
