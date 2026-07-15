@@ -13,8 +13,8 @@
 const path = require('path');
 
 const EXT_DIR = path.join(__dirname, '..', 'extension');
-const FILES = ['zendesk-selectors.js', 'customizer-apply.js', 'zd-styling.js', 'site-tools-menu.js'];
-const EXPECTED_GLOBALS = ['ZDZendeskSelectors', 'ZDCustomizerApply', 'ZDStyling', 'ZDSiteToolsMenu'];
+const FILES = ['zendesk-selectors.js', 'customizer-apply.js', 'zd-styling.js', 'site-tools-menu.js', 'workflow-helper-bridge.js', 'workflow-helper.js'];
+const EXPECTED_GLOBALS = ['ZDZendeskSelectors', 'ZDCustomizerApply', 'ZDStyling', 'ZDSiteToolsMenu', 'ZDWorkflowHelperBridge', 'ZDWorkflowHelper'];
 
 const noop = () => {};
 const elStub = () => ({

@@ -63,6 +63,7 @@
         "export.js",
         "timer-manager.js",
         "zd-styling.js",
+        "workflow-helper-bridge.js",
         "content.js"
       ],
       "css": [
@@ -78,6 +79,18 @@
         "site-tools-menu.js"
       ],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.zendesk.com/*",
+        "https://*.zopim.com/*",
+        "https://*.zendesk-staging.com/*"
+      ],
+      "js": [
+        "workflow-helper.js"
+      ],
+      "run_at": "document_idle",
+      "world": "MAIN"
     }
   ],
 
