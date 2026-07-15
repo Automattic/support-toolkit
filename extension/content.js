@@ -1196,15 +1196,35 @@ async function checkForVersionUpdate() {
                             </label>
                         </div>
 
+                    </section>
+
+                    <section class="zd-settings-section">
+                        <div class="zd-section-header">
+                            <h3>Zendesk Enhancements</h3>
+                            <p class="zd-section-desc">Layout, styling & workflow helpers</p>
+                        </div>
+
                         <div class="zd-setting-group">
                             <div class="zd-settings-row">
-                                <label>Stack sidebars (Zendesk)</label>
+                                <label>Stack sidebars</label>
                                 <select class="cfg-stackSidebars">
                                     <option value="off">Off</option>
                                     <option value="right">Stack on right</option>
                                     <option value="left">Stack on left</option>
                                 </select>
                             </div>
+                            <label class="zd-setting-check"><input type="checkbox" class="cfg-siteToolsMenu" /><span>Site Tools menu</span></label>
+                            <label class="zd-setting-check"><input type="checkbox" class="cfg-stylingDarkMode" /><span>Dark-mode app fix</span></label>
+                            <label class="zd-setting-check"><input type="checkbox" class="cfg-stylingResizeBoxes" /><span>Resizable field boxes</span></label>
+                            <label class="zd-setting-check"><input type="checkbox" class="cfg-stylingWideMessages" /><span>Wide messages</span></label>
+                            <label class="zd-setting-check"><input type="checkbox" class="cfg-stylingChatBubbles" /><span>Chat bubbles</span></label>
+                        </div>
+
+                        <div class="zd-setting-group">
+                            <label class="zd-setting-check"><input type="checkbox" class="cfg-wfDraftMode" /><span>Draft Mode default</span></label>
+                            <label class="zd-setting-check"><input type="checkbox" class="cfg-wfMergeUncheck" /><span>Uncheck merge visibility</span></label>
+                            <label class="zd-setting-check"><input type="checkbox" class="cfg-wfStayOnTicket" /><span>Stay on ticket default</span></label>
+                            <label class="zd-setting-check"><input type="checkbox" class="cfg-wfMessagingDefault" /><span>Messaging as default channel</span></label>
                         </div>
                     </section>
 
@@ -1696,6 +1716,21 @@ async function checkForVersionUpdate() {
         panel.querySelector('.cfg-stackSidebars').value =
             cfg.stackSidebars || 'off';
 
+        // Zendesk Enhancements toggles — all default ON (checked unless === false)
+        const checkByKey = (sel, val) => {
+            const el = panel.querySelector(sel);
+            if (el) el.checked = val !== false;
+        };
+        checkByKey('.cfg-siteToolsMenu', cfg.siteToolsMenu);
+        checkByKey('.cfg-stylingDarkMode', cfg.stylingDarkMode);
+        checkByKey('.cfg-stylingResizeBoxes', cfg.stylingResizeBoxes);
+        checkByKey('.cfg-stylingWideMessages', cfg.stylingWideMessages);
+        checkByKey('.cfg-stylingChatBubbles', cfg.stylingChatBubbles);
+        checkByKey('.cfg-wfDraftMode', cfg.wfDraftMode);
+        checkByKey('.cfg-wfMergeUncheck', cfg.wfMergeUncheck);
+        checkByKey('.cfg-wfStayOnTicket', cfg.wfStayOnTicket);
+        checkByKey('.cfg-wfMessagingDefault', cfg.wfMessagingDefault);
+
         panel.querySelector('.cfg-calendarURL').value =
             cfg.calendarURL || '';
 
@@ -1783,6 +1818,18 @@ async function checkForVersionUpdate() {
 
             weekStartsOn: panel.querySelector('.cfg-weekStartsOn').value || 'Mon',
             stackSidebars: panel.querySelector('.cfg-stackSidebars').value || 'off',
+
+            // Zendesk Enhancements toggles
+            siteToolsMenu: panel.querySelector('.cfg-siteToolsMenu').checked,
+            stylingDarkMode: panel.querySelector('.cfg-stylingDarkMode').checked,
+            stylingResizeBoxes: panel.querySelector('.cfg-stylingResizeBoxes').checked,
+            stylingWideMessages: panel.querySelector('.cfg-stylingWideMessages').checked,
+            stylingChatBubbles: panel.querySelector('.cfg-stylingChatBubbles').checked,
+            wfDraftMode: panel.querySelector('.cfg-wfDraftMode').checked,
+            wfMergeUncheck: panel.querySelector('.cfg-wfMergeUncheck').checked,
+            wfStayOnTicket: panel.querySelector('.cfg-wfStayOnTicket').checked,
+            wfMessagingDefault: panel.querySelector('.cfg-wfMessagingDefault').checked,
+
             calendarURL: calVal,
             linearApiKey: panel.querySelector('.cfg-linearApiKey').value.trim(),
 
