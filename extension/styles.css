@@ -507,6 +507,35 @@ button:focus-visible {
   color: var(--zd-text-dark);
 }
 
+/* Zendesk Enhancements: full-width section with a responsive toggle grid so
+   the ~9 toggles flow into multiple columns instead of one tall list. */
+.zd-ze-stackrow {
+  max-width: 360px;
+  margin-bottom: 12px;
+}
+.zd-ze-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 6px 24px;
+  align-items: center;
+}
+.zd-ze-grid .zd-setting-check {
+  margin: 2px 0;
+}
+.zd-ze-subhead {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.55;
+  margin: 8px 0 2px;
+  color: var(--zd-text-light);
+}
+.zd-theme-dark .zd-ze-subhead {
+  color: var(--zd-text-dark);
+}
+
 .zd-settings-row,
 .zd-setting-item {
   display: flex;

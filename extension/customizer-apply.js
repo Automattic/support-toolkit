@@ -39,7 +39,8 @@
     const CONTEXT_PANEL = '[data-test-id="component-type-ContextPanel"]';
     const LAYOUT_COLUMN = '[data-test-id^="column-"]';
     const GRID_ANY = '[data-test-id$="-custom-layout"]';
-    const INFO_SEL = `[${PANE_ATTR}="info"]`;
+    // Notes is the TOP stacked pane; the divider anchors to its bottom edge.
+    const TOP_PANE_SEL = `[${PANE_ATTR}="notes"]`;
 
     function findNotesColumn(cols) {
         for (const col of cols) {
@@ -110,31 +111,31 @@
     const P_NOTES = `${GRID} [${PANE_ATTR}="notes"]`;
     const P_INFO = `${GRID} [${PANE_ATTR}="info"]`;
     const P_CONV = `${GRID} [${PANE_ATTR}="conversation"]`;
-    const NOTES_MAX = '60vh'; // cap so a long note scrolls instead of squashing the sidebar
 
     function buildStackCSS(mode) {
         try {
             if (mode !== 'right' && mode !== 'left') return '';
-            // The top (User Info) row height is driven by --zd-stack-top, which
-            // the draggable divider (see row-resizer below) updates and
-            // persists. Default 420px until the user drags it.
+            // Notes sits on TOP; its row height is driven by --zd-stack-top, which
+            // the draggable divider (see row-resizer below) updates and persists
+            // (default 420px). User Info fills the remaining height below. Both
+            // panes scroll internally so long content never overflows the grid.
             const rows = `${GRID} { grid-template-rows: var(--zd-stack-top, 420px) minmax(0, 1fr) !important; }`;
-            const notesCap = `${P_NOTES} { min-height: 0 !important; max-height: ${NOTES_MAX} !important; overflow-y: auto !important; }`;
+            const scroll = `${P_NOTES}, ${P_INFO} { min-height: 0 !important; overflow-y: auto !important; }`;
             if (mode === 'left') {
                 // Sidebars in track 1; conversation spans tracks 2–3.
                 return [
-                    rows, notesCap,
-                    `${P_INFO} { grid-column: 1 !important; grid-row: 1 !important; order: 0 !important; }`,
-                    `${P_NOTES} { grid-column: 1 !important; grid-row: 2 !important; order: 0 !important; }`,
+                    rows, scroll,
+                    `${P_NOTES} { grid-column: 1 !important; grid-row: 1 !important; order: 0 !important; }`,
+                    `${P_INFO} { grid-column: 1 !important; grid-row: 2 !important; order: 0 !important; }`,
                     `${P_CONV} { grid-column: 2 / -1 !important; grid-row: 1 / -1 !important; order: 0 !important; }`
                 ].join('\n');
             }
             // Right: conversation spans tracks 1–2; sidebars in track 3.
             return [
-                rows, notesCap,
+                rows, scroll,
                 `${P_CONV} { grid-column: 1 / 3 !important; grid-row: 1 / -1 !important; order: 0 !important; }`,
-                `${P_INFO} { grid-column: 3 !important; grid-row: 1 !important; order: 0 !important; }`,
-                `${P_NOTES} { grid-column: 3 !important; grid-row: 2 !important; order: 0 !important; }`
+                `${P_NOTES} { grid-column: 3 !important; grid-row: 1 !important; order: 0 !important; }`,
+                `${P_INFO} { grid-column: 3 !important; grid-row: 2 !important; order: 0 !important; }`
             ].join('\n');
         } catch (e) {
             warn('buildStackCSS failed', e);
@@ -203,14 +204,14 @@
         const h = document.getElementById(HANDLE_ID);
         if (!stackingActive) { if (h) h.style.display = 'none'; return; }
         const grid = document.querySelector(GRID);
-        const info = document.querySelector(INFO_SEL);
-        if (!grid || !info) { if (h) h.style.display = 'none'; return; }
+        const topPane = document.querySelector(TOP_PANE_SEL);
+        if (!grid || !topPane) { if (h) h.style.display = 'none'; return; }
         // Set the stored height once when the grid first appears.
         if (!dragging && !grid.style.getPropertyValue('--zd-stack-top')) {
             grid.style.setProperty('--zd-stack-top', storedTop + 'px');
         }
         const handle = getHandle();
-        const r = info.getBoundingClientRect();
+        const r = topPane.getBoundingClientRect();
         handle.style.left = r.left + 'px';
         handle.style.width = r.width + 'px';
         handle.style.top = (r.bottom - 5) + 'px';

@@ -1200,36 +1200,6 @@ async function checkForVersionUpdate() {
 
                     <section class="zd-settings-section">
                         <div class="zd-section-header">
-                            <h3>Zendesk Enhancements</h3>
-                            <p class="zd-section-desc">Layout, styling & workflow helpers</p>
-                        </div>
-
-                        <div class="zd-setting-group">
-                            <div class="zd-settings-row">
-                                <label>Stack sidebars</label>
-                                <select class="cfg-stackSidebars">
-                                    <option value="off">Off</option>
-                                    <option value="right">Stack on right</option>
-                                    <option value="left">Stack on left</option>
-                                </select>
-                            </div>
-                            <label class="zd-setting-check"><input type="checkbox" class="cfg-siteToolsMenu" /><span>Site Tools menu</span></label>
-                            <label class="zd-setting-check"><input type="checkbox" class="cfg-stylingDarkMode" /><span>Dark-mode app fix</span></label>
-                            <label class="zd-setting-check"><input type="checkbox" class="cfg-stylingResizeBoxes" /><span>Resizable field boxes</span></label>
-                            <label class="zd-setting-check"><input type="checkbox" class="cfg-stylingWideMessages" /><span>Wide messages</span></label>
-                            <label class="zd-setting-check"><input type="checkbox" class="cfg-stylingChatBubbles" /><span>Chat bubbles</span></label>
-                        </div>
-
-                        <div class="zd-setting-group">
-                            <label class="zd-setting-check"><input type="checkbox" class="cfg-wfDraftMode" /><span>Draft Mode default</span></label>
-                            <label class="zd-setting-check"><input type="checkbox" class="cfg-wfMergeUncheck" /><span>Uncheck merge visibility</span></label>
-                            <label class="zd-setting-check"><input type="checkbox" class="cfg-wfStayOnTicket" /><span>Stay on ticket default</span></label>
-                            <label class="zd-setting-check"><input type="checkbox" class="cfg-wfMessagingDefault" /><span>Messaging as default channel</span></label>
-                        </div>
-                    </section>
-
-                    <section class="zd-settings-section">
-                        <div class="zd-section-header">
                             <h3>Performance Goals</h3>
                             <p class="zd-section-desc">Set hourly targets</p>
                         </div>
@@ -1421,6 +1391,37 @@ async function checkForVersionUpdate() {
                     </section>
                 </div>
             </div>
+
+            <section class="zd-settings-section zd-ze-section">
+                <div class="zd-section-header">
+                    <h3>Zendesk Enhancements</h3>
+                    <p class="zd-section-desc">Layout, styling & workflow helpers — each toggles independently</p>
+                </div>
+
+                <div class="zd-settings-row zd-ze-stackrow">
+                    <label>Stack sidebars</label>
+                    <select class="cfg-stackSidebars">
+                        <option value="off">Off</option>
+                        <option value="right">Stack on right</option>
+                        <option value="left">Stack on left</option>
+                    </select>
+                </div>
+
+                <div class="zd-ze-grid">
+                    <div class="zd-ze-subhead">Styling</div>
+                    <label class="zd-setting-check"><input type="checkbox" class="cfg-siteToolsMenu" /><span>Site Tools menu</span></label>
+                    <label class="zd-setting-check"><input type="checkbox" class="cfg-stylingDarkMode" /><span>Dark-mode app fix</span></label>
+                    <label class="zd-setting-check"><input type="checkbox" class="cfg-stylingResizeBoxes" /><span>Resizable field boxes</span></label>
+                    <label class="zd-setting-check"><input type="checkbox" class="cfg-stylingWideMessages" /><span>Wide messages</span></label>
+                    <label class="zd-setting-check"><input type="checkbox" class="cfg-stylingChatBubbles" /><span>Chat bubbles</span></label>
+
+                    <div class="zd-ze-subhead">Workflow</div>
+                    <label class="zd-setting-check"><input type="checkbox" class="cfg-wfDraftMode" /><span>Draft Mode default</span></label>
+                    <label class="zd-setting-check"><input type="checkbox" class="cfg-wfMergeUncheck" /><span>Uncheck merge visibility</span></label>
+                    <label class="zd-setting-check"><input type="checkbox" class="cfg-wfStayOnTicket" /><span>Stay on ticket default</span></label>
+                    <label class="zd-setting-check"><input type="checkbox" class="cfg-wfMessagingDefault" /><span>Messaging as default channel</span></label>
+                </div>
+            </section>
 
             <section class="zd-settings-footer">
                 <div class="zd-version-badge">
