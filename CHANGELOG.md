@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Stack sidebars** now identifies panes by content (which column holds Notes / the User Info context panel) instead of by fixed column position, so stacking is correct under custom ticket layouts where the column order differs.
+- **Worked Log export** now exports the week/day you're actually viewing. Previously the "Today" and "Week" export buttons always exported the literal current day/week, so navigating to a past week and exporting still downloaded the current week. The day button (relabelled "Day") now exports the selected day tab, and "Week"/"CSV" export the viewed week.
 
 ## [3.1.0] - 2026-06-23
 
