@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.1] - 2026-07-15
+
+### Fixed
+- **Site Tools menu** now actually appears. The module targets the User Info app, which Zendesk renders in an iframe; the content script was missing `all_frames`, so Chrome never injected it (Tampermonkey injects sub-frames by default, which is why the original userscript worked). It now injects into the app frame.
+
+### Changed
+- **Site Tools menu** trigger is now a compact wrench icon button matching the toolkit's toolbar buttons (accent color, rounded, hover-lift), replacing the plain "Tools" text link. The dropdown of links is unchanged.
+
 ## [3.2.0] - 2026-07-15
 
 ### Added
