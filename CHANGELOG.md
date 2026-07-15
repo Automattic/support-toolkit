@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-07-15
+
+### Added
+- **Zendesk Enhancements** (Settings → Zendesk Enhancements): four Tampermonkey userscripts folded into the extension as first-class, individually-toggleable modules.
+  - **Site Tools menu**: a per-site "Tools" dropdown (Blog RC, Domain RC, JP Debugger, Site Profiles, robots.txt, hosting-provider, CLI, Site Health, Rewind DB) added to each site row in the User Info app.
+  - **Styling**: dark-mode completion for app iframes, resizable multiline ticket fields, full-width conversation messages, and chat bubbles (with an agent/bot/end-user/note classifier using Zendesk's own same-origin API) — each independently toggleable.
+  - **Workflow automation**: Draft Mode default (with Ctrl+Enter send-without-draft), auto-uncheck merge visibility, Stay-on-ticket default, and Messaging as the default reply channel — each independently toggleable.
+
+### Changed
+- **Stack sidebars** now lives under Settings → Zendesk Layout & Styling. Notes stacks on top sized to its own content (a longer note takes more space, up to a cap, then scrolls); User Info fills the remaining height below. The previous manual drag-to-resize divider was removed — the split follows the note automatically.
+
+### Fixed
+- **Stack sidebars** now identifies panes by content (which column holds Notes / the User Info context panel) instead of by fixed column position, so stacking is correct under custom ticket layouts where the column order differs.
+- **Worked Log export** now exports the week/day you're actually viewing. Previously the "Today" and "Week" export buttons always exported the literal current day/week, so navigating to a past week and exporting still downloaded the current week. The day button (relabelled "Day") now exports the selected day tab, and "Week"/"CSV" export the viewed week.
+
 ## [3.1.0] - 2026-06-23
 
 ### Added

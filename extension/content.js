@@ -1196,16 +1196,6 @@ async function checkForVersionUpdate() {
                             </label>
                         </div>
 
-                        <div class="zd-setting-group">
-                            <div class="zd-settings-row">
-                                <label>Stack sidebars (Zendesk)</label>
-                                <select class="cfg-stackSidebars">
-                                    <option value="off">Off</option>
-                                    <option value="right">Stack on right</option>
-                                    <option value="left">Stack on left</option>
-                                </select>
-                            </div>
-                        </div>
                     </section>
 
                     <section class="zd-settings-section">
@@ -1329,6 +1319,49 @@ async function checkForVersionUpdate() {
                             </label>
                         </div>
                     </section>
+
+                    <section class="zd-settings-section">
+                        <div class="zd-section-header">
+                            <h3>Zendesk Layout &amp; Styling</h3>
+                            <p class="zd-section-desc">Ticket layout and appearance</p>
+                        </div>
+
+                        <div class="zd-setting-group">
+                            <div class="zd-settings-row">
+                                <label>Stack sidebars</label>
+                                <select class="cfg-stackSidebars">
+                                    <option value="off">Off</option>
+                                    <option value="right">Stack on right</option>
+                                    <option value="left">Stack on left</option>
+                                </select>
+                            </div>
+
+                            <label class="zd-setting-check">
+                                <input type="checkbox" class="cfg-siteToolsMenu" />
+                                <span>Site Tools menu</span>
+                            </label>
+
+                            <label class="zd-setting-check">
+                                <input type="checkbox" class="cfg-stylingDarkMode" />
+                                <span>Dark-mode app fix</span>
+                            </label>
+
+                            <label class="zd-setting-check">
+                                <input type="checkbox" class="cfg-stylingResizeBoxes" />
+                                <span>Resizable field boxes</span>
+                            </label>
+
+                            <label class="zd-setting-check">
+                                <input type="checkbox" class="cfg-stylingWideMessages" />
+                                <span>Wide messages</span>
+                            </label>
+
+                            <label class="zd-setting-check">
+                                <input type="checkbox" class="cfg-stylingChatBubbles" />
+                                <span>Chat bubbles</span>
+                            </label>
+                        </div>
+                    </section>
                 </div>
 
                 <div class="zd-settings-col">
@@ -1397,6 +1430,35 @@ async function checkForVersionUpdate() {
                                     <button class="zd-dev-test-btn" data-test="version-popup">Version Popup</button>
                                 </div>
                             </div>
+                        </div>
+                    </section>
+
+                    <section class="zd-settings-section">
+                        <div class="zd-section-header">
+                            <h3>Zendesk Workflow</h3>
+                            <p class="zd-section-desc">Composer & ticket automation</p>
+                        </div>
+
+                        <div class="zd-setting-group">
+                            <label class="zd-setting-check">
+                                <input type="checkbox" class="cfg-wfDraftMode" />
+                                <span>Draft Mode default</span>
+                            </label>
+
+                            <label class="zd-setting-check">
+                                <input type="checkbox" class="cfg-wfMergeUncheck" />
+                                <span>Uncheck merge visibility</span>
+                            </label>
+
+                            <label class="zd-setting-check">
+                                <input type="checkbox" class="cfg-wfStayOnTicket" />
+                                <span>Stay on ticket default</span>
+                            </label>
+
+                            <label class="zd-setting-check">
+                                <input type="checkbox" class="cfg-wfMessagingDefault" />
+                                <span>Messaging as default channel</span>
+                            </label>
                         </div>
                     </section>
                 </div>
@@ -1696,6 +1758,21 @@ async function checkForVersionUpdate() {
         panel.querySelector('.cfg-stackSidebars').value =
             cfg.stackSidebars || 'off';
 
+        // Zendesk Enhancements toggles — all default ON (checked unless === false)
+        const checkByKey = (sel, val) => {
+            const el = panel.querySelector(sel);
+            if (el) el.checked = val !== false;
+        };
+        checkByKey('.cfg-siteToolsMenu', cfg.siteToolsMenu);
+        checkByKey('.cfg-stylingDarkMode', cfg.stylingDarkMode);
+        checkByKey('.cfg-stylingResizeBoxes', cfg.stylingResizeBoxes);
+        checkByKey('.cfg-stylingWideMessages', cfg.stylingWideMessages);
+        checkByKey('.cfg-stylingChatBubbles', cfg.stylingChatBubbles);
+        checkByKey('.cfg-wfDraftMode', cfg.wfDraftMode);
+        checkByKey('.cfg-wfMergeUncheck', cfg.wfMergeUncheck);
+        checkByKey('.cfg-wfStayOnTicket', cfg.wfStayOnTicket);
+        checkByKey('.cfg-wfMessagingDefault', cfg.wfMessagingDefault);
+
         panel.querySelector('.cfg-calendarURL').value =
             cfg.calendarURL || '';
 
@@ -1783,6 +1860,18 @@ async function checkForVersionUpdate() {
 
             weekStartsOn: panel.querySelector('.cfg-weekStartsOn').value || 'Mon',
             stackSidebars: panel.querySelector('.cfg-stackSidebars').value || 'off',
+
+            // Zendesk Enhancements toggles
+            siteToolsMenu: panel.querySelector('.cfg-siteToolsMenu').checked,
+            stylingDarkMode: panel.querySelector('.cfg-stylingDarkMode').checked,
+            stylingResizeBoxes: panel.querySelector('.cfg-stylingResizeBoxes').checked,
+            stylingWideMessages: panel.querySelector('.cfg-stylingWideMessages').checked,
+            stylingChatBubbles: panel.querySelector('.cfg-stylingChatBubbles').checked,
+            wfDraftMode: panel.querySelector('.cfg-wfDraftMode').checked,
+            wfMergeUncheck: panel.querySelector('.cfg-wfMergeUncheck').checked,
+            wfStayOnTicket: panel.querySelector('.cfg-wfStayOnTicket').checked,
+            wfMessagingDefault: panel.querySelector('.cfg-wfMessagingDefault').checked,
+
             calendarURL: calVal,
             linearApiKey: panel.querySelector('.cfg-linearApiKey').value.trim(),
 
@@ -3242,6 +3331,23 @@ async function checkForVersionUpdate() {
     // Worked Log Modal - view all worked items
     let workedLogWeekOffset = 0; // 0 = current week, -1 = last week, etc.
 
+    // Monday of the week currently being VIEWED (respects workedLogWeekOffset),
+    // so week navigation and the export buttons agree on the same period.
+    function getViewedWeekMonday() {
+        const today = new Date();
+        const currentDayOfWeek = today.getDay();
+        const mondayOffset = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() + mondayOffset + (workedLogWeekOffset * 7));
+        return monday;
+    }
+
+    // The day tab the user has selected (falls back to today's key).
+    function getSelectedWorkedLogDayKey() {
+        const activeDay = workedLogOverlayEl && workedLogOverlayEl.querySelector('.zd-day-tab.active');
+        return (activeDay && activeDay.dataset.day) || ZDStorage.getLocalDayKey(new Date());
+    }
+
     function buildWorkedLogOverlay() {
         const overlay = document.createElement('div');
         overlay.className = 'zd-modal-overlay zd-worked-log-modal';
@@ -3298,10 +3404,10 @@ async function checkForVersionUpdate() {
 
             <div class="zd-worked-log-footer">
                 <div class="zd-worked-log-actions-left">
-                    <button class="zd-worked-log-btn zd-btn-secondary" data-action="today" title="Export today's log as text">
-                        ${window.ZDIcons ? window.ZDIcons.getIconHTML('download', 14) : ''}Today (.txt)
+                    <button class="zd-worked-log-btn zd-btn-secondary" data-action="day" title="Export the selected day's log as text">
+                        ${window.ZDIcons ? window.ZDIcons.getIconHTML('download', 14) : ''}Day (.txt)
                     </button>
-                    <button class="zd-worked-log-btn zd-btn-secondary" data-action="week" title="Export week's log as text">
+                    <button class="zd-worked-log-btn zd-btn-secondary" data-action="week" title="Export the viewed week's log as text">
                         ${window.ZDIcons ? window.ZDIcons.getIconHTML('download', 14) : ''}Week (.txt)
                     </button>
                     <button class="zd-worked-log-btn zd-btn-secondary" data-action="csv" title="Export week's log as CSV">
@@ -3368,15 +3474,15 @@ async function checkForVersionUpdate() {
                 const originalText = btn.innerHTML;
 
                 // Add loading state for export actions
-                if (action === 'today' || action === 'week' || action === 'csv') {
+                if (action === 'day' || action === 'week' || action === 'csv') {
                     btn.classList.add('zd-btn-loading');
                     btn.disabled = true;
                 }
 
                 try {
                     switch (action) {
-                        case 'today':
-                            await exportWorkedLogToday();
+                        case 'day':
+                            await exportWorkedLogDay();
                             break;
                         case 'week':
                             await exportWorkedLogWeek();
@@ -3390,7 +3496,7 @@ async function checkForVersionUpdate() {
                     }
                 } finally {
                     // Remove loading state
-                    if (action === 'today' || action === 'week' || action === 'csv') {
+                    if (action === 'day' || action === 'week' || action === 'csv') {
                         btn.classList.remove('zd-btn-loading');
                         btn.disabled = false;
                     }
@@ -3433,10 +3539,7 @@ async function checkForVersionUpdate() {
 
         // Get week dates based on offset (Monday start)
         const today = new Date();
-        const currentDayOfWeek = today.getDay();
-        const mondayOffset = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
-        const monday = new Date(today);
-        monday.setDate(today.getDate() + mondayOffset + (workedLogWeekOffset * 7));
+        const monday = getViewedWeekMonday();
 
         const sunday = new Date(monday);
         sunday.setDate(monday.getDate() + 6);
@@ -3496,8 +3599,7 @@ async function checkForVersionUpdate() {
         const tableEl = workedLogOverlayEl.querySelector('.zd-worked-log-table');
 
         // Get selected day
-        const activeDay = workedLogOverlayEl.querySelector('.zd-day-tab.active');
-        const dayKey = activeDay?.dataset.day || ZDStorage.getLocalDayKey(new Date());
+        const dayKey = getSelectedWorkedLogDayKey();
 
         // Get selected type filter
         const activeType = workedLogOverlayEl.querySelector('.zd-type-tab.active');
@@ -3669,19 +3771,21 @@ async function checkForVersionUpdate() {
     }
 
     // Export worked log for today
-    async function exportWorkedLogToday() {
-        const todayKey = ZDStorage.getLocalDayKey(new Date());
-        const entries = await ZDStorage.getWorkedLogForDay(todayKey);
+    // Export the SELECTED day (the active day tab), not necessarily today —
+    // so viewing a past week and exporting gives that day's log.
+    async function exportWorkedLogDay() {
+        const dayKey = getSelectedWorkedLogDayKey();
+        const entries = await ZDStorage.getWorkedLogForDay(dayKey);
 
         if (entries.length === 0) {
             if (window.ZDNotifyUtils) {
-                window.ZDNotifyUtils.showToast('No entries for today', 'warning', 2500);
+                window.ZDNotifyUtils.showToast('No entries for this day', 'warning', 2500);
             }
             return;
         }
 
-        const content = formatWorkedLogForExport([{ day: todayKey, entries }]);
-        const filename = `worked-log-${todayKey}.txt`;
+        const content = formatWorkedLogForExport([{ day: dayKey, entries }]);
+        const filename = `worked-log-${dayKey}.txt`;
         downloadTextFile(content, filename);
 
         if (window.ZDNotifyUtils) {
@@ -3689,9 +3793,9 @@ async function checkForVersionUpdate() {
         }
     }
 
-    // Export worked log for current week
+    // Export worked log for the VIEWED week (respects week navigation).
     async function exportWorkedLogWeek() {
-        const weekData = await ZDStorage.getWorkedLogForWeek();
+        const weekData = await ZDStorage.getWorkedLogForWeek(getViewedWeekMonday());
 
         const daysWithEntries = Object.entries(weekData)
             .filter(([_, entries]) => entries.length > 0)
@@ -3706,8 +3810,8 @@ async function checkForVersionUpdate() {
 
         const totalEntries = daysWithEntries.reduce((sum, d) => sum + d.entries.length, 0);
         const content = formatWorkedLogForExport(daysWithEntries);
-        const today = ZDStorage.getLocalDayKey(new Date());
-        const filename = `worked-log-week-${today}.txt`;
+        const weekKey = ZDStorage.getLocalDayKey(getViewedWeekMonday());
+        const filename = `worked-log-week-${weekKey}.txt`;
         downloadTextFile(content, filename);
 
         if (window.ZDNotifyUtils) {
@@ -3715,9 +3819,9 @@ async function checkForVersionUpdate() {
         }
     }
 
-    // Export worked log as CSV
+    // Export the VIEWED week as CSV (respects week navigation).
     async function exportWorkedLogCSV() {
-        const weekData = await ZDStorage.getWorkedLogForWeek();
+        const weekData = await ZDStorage.getWorkedLogForWeek(getViewedWeekMonday());
 
         // Flatten all entries with their day info
         const allEntries = [];
@@ -3765,8 +3869,8 @@ async function checkForVersionUpdate() {
             csv += row.join(',') + '\n';
         }
 
-        const today = ZDStorage.getLocalDayKey(new Date());
-        const filename = `worked-log-${today}.csv`;
+        const weekKey = ZDStorage.getLocalDayKey(getViewedWeekMonday());
+        const filename = `worked-log-week-${weekKey}.csv`;
         downloadCSVFile(csv, filename);
 
         if (window.ZDNotifyUtils) {

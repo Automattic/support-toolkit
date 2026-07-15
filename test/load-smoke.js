@@ -13,8 +13,8 @@
 const path = require('path');
 
 const EXT_DIR = path.join(__dirname, '..', 'extension');
-const FILES = ['zendesk-selectors.js', 'customizer-apply.js'];
-const EXPECTED_GLOBALS = ['ZDZendeskSelectors', 'ZDCustomizerApply'];
+const FILES = ['zendesk-selectors.js', 'customizer-apply.js', 'zd-styling.js', 'site-tools-menu.js', 'workflow-helper-bridge.js', 'workflow-helper.js'];
+const EXPECTED_GLOBALS = ['ZDZendeskSelectors', 'ZDCustomizerApply', 'ZDStyling', 'ZDSiteToolsMenu', 'ZDWorkflowHelperBridge', 'ZDWorkflowHelper'];
 
 const noop = () => {};
 const elStub = () => ({
@@ -33,6 +33,9 @@ global.document = Object.assign(elStub(), {
 });
 global.getComputedStyle = () => ({ getPropertyValue: () => '', fontFamily: '', fontSize: '' });
 global.CSS = { supports: () => true };
+global.MutationObserver = class { observe() {} disconnect() {} };
+global.Event = class { constructor(type) { this.type = type; } };
+global.Node = { ELEMENT_NODE: 1 };
 global.chrome = {
     storage: { sync: { get: noop, set: noop }, local: { get: noop, set: noop }, onChanged: { addListener: noop } },
     runtime: { getManifest: () => ({ version: 'test' }) }
