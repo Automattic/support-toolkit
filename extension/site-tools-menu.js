@@ -33,13 +33,34 @@
 
     const TOGGLE_CLASS = 'zdstm-toggle';
     const MENU_CLASS = 'zdstm-menu';
+    const ACCENT = '#3858e9'; // Support Toolkit accent
+
+    // Line-icon wrench in the extension's icon style (stroke=currentColor,
+    // 24-grid, round caps) so the trigger reads as an extension control.
+    const WRENCH_SVG =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94' +
+        'l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>';
 
     function injectStyles() {
         if (document.getElementById('zdstm-styles')) return;
         const style = document.createElement('style');
         style.id = 'zdstm-styles';
         style.textContent =
-            '.' + TOGGLE_CLASS + '{cursor:pointer;white-space:nowrap;}' +
+            // Trigger: a compact rounded icon button matching the toolkit's
+            // toolbar buttons (accent color, soft border, hover-lift).
+            '.' + TOGGLE_CLASS + '{display:inline-flex;align-items:center;justify-content:center;' +
+            'vertical-align:middle;width:22px;height:22px;padding:0;margin-left:6px;box-sizing:border-box;' +
+            'border:1px solid rgba(56,88,233,.28);border-radius:6px;background:rgba(56,88,233,.07);' +
+            'color:' + ACCENT + ';cursor:pointer;line-height:0;' +
+            'transition:background .12s ease,border-color .12s ease,transform .12s ease,box-shadow .12s ease;}' +
+            '.' + TOGGLE_CLASS + ' svg{width:14px;height:14px;display:block;}' +
+            '.' + TOGGLE_CLASS + ':hover{background:rgba(56,88,233,.15);border-color:rgba(56,88,233,.55);' +
+            'transform:translateY(-1px);box-shadow:0 2px 6px rgba(56,88,233,.25);}' +
+            '.' + TOGGLE_CLASS + ':active{transform:scale(.92);}' +
+            '.' + TOGGLE_CLASS + ':focus-visible{outline:none;border-color:' + ACCENT + ';' +
+            'box-shadow:0 0 0 2px rgba(56,88,233,.35);}' +
             '.' + MENU_CLASS + '{position:fixed;z-index:99999;background:rgba(255,255,255,.94);' +
             'backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(15,23,42,.08);' +
             'border-radius:12px;box-shadow:0 1px 2px rgba(2,6,23,.06),0 16px 40px rgba(2,6,23,.18);' +
@@ -150,11 +171,12 @@
             const site = siteInfoFor(blogRcLink, row);
             if (!site.blogId && !site.domain) return;
 
-            const toggle = document.createElement('a');
-            // borrow the app's own link styling so it blends in
-            toggle.className = blogRcLink.className + ' ' + TOGGLE_CLASS;
-            toggle.textContent = 'Tools ▾';
-            toggle.href = 'javascript:void(0)';
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = TOGGLE_CLASS;
+            toggle.title = 'Site tools';
+            toggle.setAttribute('aria-label', 'Site tools');
+            toggle.innerHTML = WRENCH_SVG;
             toggle.addEventListener('click', (event) => {
                 event.preventDefault();
                 event.stopPropagation();

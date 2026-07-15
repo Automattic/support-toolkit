@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Support Toolkit",
   "description": "Productivity toolbar for support agents: live counters, shift timing, reminders, and lightweight stats.",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "author": "Mauro Pereira",
 
   "background": {
@@ -78,7 +78,8 @@
       "js": [
         "site-tools-menu.js"
       ],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": true
     },
     {
       "matches": [
