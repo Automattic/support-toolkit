@@ -20,15 +20,79 @@
     const S = window.ZDZendeskSelectors || {};
 
     const GRID = S.ticketGrid || '.ticket-panes-grid-layout';
-    const pane = (n) => (S.pane ? S.pane(n) : `[data-test-id="column-${n}"]`);
-    // Verified column mapping: Notes/apps = column-1, Conversation = column-2,
-    // User Info/context = column-3.
-    const CONV = pane(2);
-    const NOTES = pane(1);
-    const INFO = pane(3);
 
     function warn(msg, e) {
         if (window.console) console.warn('[ZD Layout] ' + msg, e || '');
+    }
+
+    // --- Content-based pane tagging ------------------------------------------
+    // The ticket grid is a CUSTOM layout: pane ORDER is configured per-agent and
+    // is NOT guaranteed (verified live 2026-07-15). So we never assume column-N;
+    // instead we find the column that actually CONTAINS the notes app and the one
+    // holding the ContextPanel, and tag each pane with data-zd-pane. The layout
+    // CSS keys off those tags, so stacking is correct under any column order.
+    // Pure tagging — no DOM is ever moved (that would break Zendesk's cross-tab
+    // app-iframe pool).
+    const PANE_ATTR = 'data-zd-pane';
+    const NOTES_IFRAME = 'iframe[title="a8cnotes"]';
+    const APP_ELEMENT = '[data-test-id="app-element"]';
+    const CONTEXT_PANEL = '[data-test-id="component-type-ContextPanel"]';
+    const LAYOUT_COLUMN = '[data-test-id^="column-"]';
+    const GRID_ANY = '[data-test-id$="-custom-layout"]';
+    const INFO_SEL = `[${PANE_ATTR}="info"]`;
+
+    function findNotesColumn(cols) {
+        for (const col of cols) {
+            if (col.querySelector(NOTES_IFRAME)) return col;
+        }
+        // Apps are lazy: before the iframe loads the column still renders the
+        // app name as text ("a8cnotes"). Verified live 2026-07-15.
+        for (const col of cols) {
+            if (col.querySelector(APP_ELEMENT) && /a8cnotes/i.test(col.textContent || '')) {
+                return col;
+            }
+        }
+        return null;
+    }
+
+    function setPane(col, value) {
+        if (col.getAttribute(PANE_ATTR) !== value) col.setAttribute(PANE_ATTR, value);
+    }
+
+    function tagGrid(grid) {
+        const cols = [...grid.children].filter((c) => c.matches(LAYOUT_COLUMN));
+        if (cols.length !== 3) return; // only the standard 3-pane ticket layout
+        const notes = findNotesColumn(cols);
+        const ctx = grid.querySelector(CONTEXT_PANEL);
+        const info = ctx ? ctx.closest(LAYOUT_COLUMN) : null;
+        // Mid-shuffle Zendesk can momentarily put both in one pane — skip then.
+        if (!notes || !info || notes === info) return;
+        const conv = cols.find((c) => c !== notes && c !== info) || null;
+        setPane(notes, 'notes');
+        setPane(info, 'info');
+        if (conv) setPane(conv, 'conversation');
+    }
+
+    function tagAll() {
+        document.querySelectorAll(GRID_ANY).forEach(tagGrid);
+    }
+
+    let tagScheduled = false;
+    function scheduleTag() {
+        if (tagScheduled) return;
+        tagScheduled = true;
+        Promise.resolve().then(() => { tagScheduled = false; tagAll(); });
+    }
+
+    let tagObserverOn = false;
+    function startTagObserver() {
+        if (tagObserverOn) return;
+        tagObserverOn = true;
+        tagAll();
+        const mo = new MutationObserver(scheduleTag);
+        const root = document.querySelector('main#main_panes') || document.body || document.documentElement;
+        mo.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) scheduleTag(); });
     }
 
     // Pure: stacking mode -> CSS string.
@@ -40,6 +104,14 @@
     // conversation span the other two tracks. User Info sits on top with the
     // larger share (its content is scrollable, so more height = more info);
     // Notes sits beneath it.
+    //
+    // Rules target the data-zd-pane tags (set by tagGrid), never column-N, so
+    // the correct panes are placed regardless of the custom-layout column order.
+    const P_NOTES = `${GRID} [${PANE_ATTR}="notes"]`;
+    const P_INFO = `${GRID} [${PANE_ATTR}="info"]`;
+    const P_CONV = `${GRID} [${PANE_ATTR}="conversation"]`;
+    const NOTES_MAX = '60vh'; // cap so a long note scrolls instead of squashing the sidebar
+
     function buildStackCSS(mode) {
         try {
             if (mode !== 'right' && mode !== 'left') return '';
@@ -47,21 +119,22 @@
             // the draggable divider (see row-resizer below) updates and
             // persists. Default 420px until the user drags it.
             const rows = `${GRID} { grid-template-rows: var(--zd-stack-top, 420px) minmax(0, 1fr) !important; }`;
+            const notesCap = `${P_NOTES} { min-height: 0 !important; max-height: ${NOTES_MAX} !important; overflow-y: auto !important; }`;
             if (mode === 'left') {
                 // Sidebars in track 1; conversation spans tracks 2–3.
                 return [
-                    rows,
-                    `${GRID} ${INFO} { grid-column: 1 !important; grid-row: 1 !important; order: 0 !important; }`,
-                    `${GRID} ${NOTES} { grid-column: 1 !important; grid-row: 2 !important; order: 0 !important; }`,
-                    `${GRID} ${CONV} { grid-column: 2 / -1 !important; grid-row: 1 / -1 !important; order: 0 !important; }`
+                    rows, notesCap,
+                    `${P_INFO} { grid-column: 1 !important; grid-row: 1 !important; order: 0 !important; }`,
+                    `${P_NOTES} { grid-column: 1 !important; grid-row: 2 !important; order: 0 !important; }`,
+                    `${P_CONV} { grid-column: 2 / -1 !important; grid-row: 1 / -1 !important; order: 0 !important; }`
                 ].join('\n');
             }
             // Right: conversation spans tracks 1–2; sidebars in track 3.
             return [
-                rows,
-                `${GRID} ${CONV} { grid-column: 1 / 3 !important; grid-row: 1 / -1 !important; order: 0 !important; }`,
-                `${GRID} ${INFO} { grid-column: 3 !important; grid-row: 1 !important; order: 0 !important; }`,
-                `${GRID} ${NOTES} { grid-column: 3 !important; grid-row: 2 !important; order: 0 !important; }`
+                rows, notesCap,
+                `${P_CONV} { grid-column: 1 / 3 !important; grid-row: 1 / -1 !important; order: 0 !important; }`,
+                `${P_INFO} { grid-column: 3 !important; grid-row: 1 !important; order: 0 !important; }`,
+                `${P_NOTES} { grid-column: 3 !important; grid-row: 2 !important; order: 0 !important; }`
             ].join('\n');
         } catch (e) {
             warn('buildStackCSS failed', e);
@@ -130,7 +203,7 @@
         const h = document.getElementById(HANDLE_ID);
         if (!stackingActive) { if (h) h.style.display = 'none'; return; }
         const grid = document.querySelector(GRID);
-        const info = document.querySelector(INFO);
+        const info = document.querySelector(INFO_SEL);
         if (!grid || !info) { if (h) h.style.display = 'none'; return; }
         // Set the stored height once when the grid first appears.
         if (!dragging && !grid.style.getPropertyValue('--zd-stack-top')) {
@@ -197,6 +270,9 @@
         storedTop = (cfg && cfg.stackTopPx) || DEFAULT_TOP;
         injectCSS(buildStackCSS(mode));
         stackingActive = (mode === 'right' || mode === 'left');
+        // The layout CSS matches on data-zd-pane tags — start the tagger so the
+        // panes get tagged (and stay tagged as Zendesk re-renders).
+        if (stackingActive) startTagObserver();
         const grid = document.querySelector(GRID);
         if (grid && !dragging) grid.style.setProperty('--zd-stack-top', storedTop + 'px');
         if (stackingActive) scheduleLoop(); else positionHandle();
