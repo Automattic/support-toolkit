@@ -58,6 +58,21 @@
         stackSidebars: 'off',
         stackTopPx: 420, // height of the User Info pane when stacked (drag-adjustable)
 
+        // Zendesk Enhancements — Site Tools menu (User Info app iframe)
+        siteToolsMenu: true,
+
+        // Zendesk Enhancements — Styling sub-features
+        stylingDarkMode: true,
+        stylingResizeBoxes: true,
+        stylingWideMessages: true,
+        stylingChatBubbles: true,
+
+        // Zendesk Enhancements — Workflow automation sub-features
+        wfDraftMode: true,
+        wfMergeUncheck: true,
+        wfStayOnTicket: true,
+        wfMessagingDefault: true,
+
         // Data backup
         backup: null,
 
