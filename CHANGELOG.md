@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.2.2] - 2026-07-16
+
+### Fixed
+- **Stack sidebars** no longer breaks the new-ticket page. The row-template rule targeted the shared grid class, which also matches the new-ticket "standard" layout — a grid that never gets pane tags — collapsing its content into a thin top band. The rule is now gated on a tagged notes pane (`:has([data-zd-pane="notes"])`), so it only affects real stacked tickets and leaves the new-ticket page untouched.
+
 ## [3.2.1] - 2026-07-15
 
 ### Fixed

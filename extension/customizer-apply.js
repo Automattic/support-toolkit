@@ -121,7 +121,12 @@
             // the remaining height below and scrolls internally. No manual resize
             // — the split follows the note. NOTES_MAX caps an unusually long note
             // (it scrolls past that) so User Info can never be squeezed away.
-            const rows = `${GRID} { grid-template-rows: auto minmax(0, 1fr) !important; }`;
+            // Gate the row template on a tagged notes pane. The grid class
+            // (.ticket-panes-grid-layout) is shared by the NEW-ticket
+            // "-standard-layout" grid, which never gets tagged (tagging only
+            // runs on "-custom-layout" grids); without this gate the forced
+            // rows collapsed that page. :has() keeps it to real stacked grids.
+            const rows = `${GRID}:has([${PANE_ATTR}="notes"]) { grid-template-rows: auto minmax(0, 1fr) !important; }`;
             const notesCap = `${P_NOTES} { min-height: 0 !important; max-height: ${NOTES_MAX} !important; overflow-y: auto !important; }`;
             const infoScroll = `${P_INFO} { min-height: 0 !important; overflow-y: auto !important; }`;
             if (mode === 'left') {
